@@ -35,12 +35,12 @@ public class UserEntity {
 
     // 빌더 패턴 생성자 사용
     @Builder(toBuilder = true)
-    public UserEntity(String email, String name, String gender, LocalDate birthday, LocalDateTime time, Role role) {
+    public UserEntity(String email, String name, String gender, LocalDate birthday, LocalDateTime time) {
         this.email = email;
         this.name = name;
         this.gender = gender;
         this.birthday = birthday;
         this.time = time;
-        this.role = role;
+        this.role = Role.valueOf("USER");
     }
 }
