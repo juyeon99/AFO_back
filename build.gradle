@@ -19,10 +19,14 @@ repositories {
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter'
+    implementation 'org.springframework.boot:spring-boot-starter-web' // REST API
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa' // spring data jpa
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'// devtools
+    implementation 'org.projectlombok:lombok' // lombok
+    runtimeOnly 'com.mysql:mysql-connector-j' // mysql
+
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
-tasks.named('test') {
-    useJUnitPlatform()
-}
+//tasks.named('test') {useJUnitPlatform()}
