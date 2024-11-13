@@ -1,4 +1,4 @@
-package com.banghyang.user;
+package com.banghyang.user.entity;
 
 public enum Role {
     USER, ADMIN

@@ -1,4 +1,4 @@
-package com.banghyang.user;
+package com.banghyang.user.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -43,4 +43,5 @@ public class UserEntity {
         this.time = time;
         this.role = Role.valueOf("USER");
     }
+
 }
