@@ -1,30 +1,51 @@
-package com.banghyang.user;
+package com.banghyang.auth.service;
 
-import com.banghyang.user.entity.UserEntity;
+import com.banghyang.user.domain.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
 
 @RequiredArgsConstructor
-public class CustomUserDetails implements UserDetails {
+public class CustomOauth2UserDetails implements UserDetails, OAuth2User {
 
-    private final UserEntity user;
+    private final User user;
+    private Map<String, Object> attributes;
 
-    // 현재 사용자의 role 반환
+    @Override
+    public Map<String, Object> getAttributes() {
+        return attributes;
+    }
+
+    @Override
+    public String getName() {
+        return null;
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        Collection<GrantedAuthority> collection = new ArrayList<>();
+        Collection<GrantedAuthority> collection = new ArrayList<GrantedAuthority>();
         collection.add(new GrantedAuthority() {
             @Override
             public String getAuthority() {
-                // 앞에 "ROLE_" 접두사 필수
-                return "ROLE_" + user.getRole().name();
+                return user.getRole().name();
             }
         });
         return collection;
+    }
+
+    @Override
+    public String getPassword() {
+        return user.getPassword();
+    }
+
+    @Override
+    public String getUsername() {
+        return user.getEmail();
     }
 
     @Override
@@ -46,4 +67,5 @@ public class CustomUserDetails implements UserDetails {
     public boolean isEnabled() {
         return true;
     }
+
 }
