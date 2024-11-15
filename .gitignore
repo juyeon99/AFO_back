@@ -37,4 +37,4 @@ out/
 .vscode/
 
 application.yml
-kakao-auth.properties
+application-auth.properties
