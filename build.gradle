@@ -26,11 +26,15 @@ dependencies {
     developmentOnly 'org.springframework.boot:spring-boot-devtools'// devtools
     implementation 'org.springframework.boot:spring-boot-starter-security' // spring security
     testImplementation 'org.springframework.security:spring-security-test' // spring security
-    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client' // OAuth2
-    implementation 'org.projectlombok:lombok' // lombok
-    annotationProcessor 'org.projectlombok:lombok' // 컴파일 시 Lombok 어노테이션 처리
-    testAnnotationProcessor 'org.projectlombok:lombok' // 테스트 시 Lombok 어노테이션 처리
     runtimeOnly 'com.mysql:mysql-connector-j' // mysql
+    compileOnly 'org.projectlombok:lombok' // lombok
+    annotationProcessor 'org.projectlombok:lombok' // 컴파일 시 Lombok 어노테이션 처리
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client' // OAuth2
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf' // thymeleaf
+    implementation 'org.springframework.boot:spring-boot-starter-webflux' // webflux
+//    testImplementation 'io.projectreactor:reactor-test'
+//    implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6' // thymeleaf
+//    testAnnotationProcessor 'org.projectlombok:lombok' // 테스트 시 Lombok 어노테이션 처리
 }
 
 //tasks.named('test') {useJUnitPlatform()}
