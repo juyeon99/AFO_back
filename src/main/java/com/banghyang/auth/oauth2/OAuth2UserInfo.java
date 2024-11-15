@@ -1,4 +1,4 @@
-package com.banghyang.auth;
+package com.banghyang.auth.oauth2;
 
 public interface OAuth2UserInfo {
     String getProvider();

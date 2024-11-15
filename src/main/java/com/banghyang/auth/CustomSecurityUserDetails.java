@@ -1,38 +1,26 @@
-package com.banghyang.auth.service;
+package com.banghyang.auth;
 
-import com.banghyang.user.domain.entity.User;
+import com.banghyang.member.domain.entity.Member;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Map;
 
 @RequiredArgsConstructor
-public class CustomOauth2UserDetails implements UserDetails, OAuth2User {
+public class CustomSecurityUserDetails implements UserDetails {
 
-    private final User user;
-    private Map<String, Object> attributes;
+    private final Member member;
 
-    @Override
-    public Map<String, Object> getAttributes() {
-        return attributes;
-    }
-
-    @Override
-    public String getName() {
-        return null;
-    }
-
+    // 현재 user의 role을 반환
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        Collection<GrantedAuthority> collection = new ArrayList<GrantedAuthority>();
+        Collection<GrantedAuthority> collection = new ArrayList<>();
         collection.add(new GrantedAuthority() {
             @Override
             public String getAuthority() {
-                return user.getRole().name();
+                return "ROLE_" + member.getRole().name(); // "ROLE_" 접두사 필수
             }
         });
         return collection;
@@ -40,12 +28,12 @@ public class CustomOauth2UserDetails implements UserDetails, OAuth2User {
 
     @Override
     public String getPassword() {
-        return user.getPassword();
+        return member.getPassword();
     }
 
     @Override
     public String getUsername() {
-        return user.getEmail();
+        return member.getLoginId();
     }
 
     @Override
@@ -67,5 +55,4 @@ public class CustomOauth2UserDetails implements UserDetails, OAuth2User {
     public boolean isEnabled() {
         return true;
     }
-
 }

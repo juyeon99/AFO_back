@@ -1,10 +1,10 @@
-package com.banghyang.user.controller;
+package com.banghyang.member.controller;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RequestMapping("/users")
 @RestController
-public class UserController {
+public class MemberController {
 
 }

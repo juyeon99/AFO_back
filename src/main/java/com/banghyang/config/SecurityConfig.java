@@ -1,5 +1,7 @@
 package com.banghyang.config;
 
+import com.banghyang.member.domain.entity.MemberRole;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -9,26 +11,41 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configurable
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
 
-    // 시큐리티 필터 메소드
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+
+        // 접근 권한 설정
         http.authorizeHttpRequests((auth) -> auth
-                .requestMatchers("/", "users/login", "/users/signup").permitAll() // 모두에게 허용할 URL
-                .anyRequest().authenticated()
+                .requestMatchers("/oauth-login/admin").hasRole(MemberRole.ADMIN.name())
+                .requestMatchers("/oauth-login/info").authenticated()
+                .anyRequest().permitAll()
         );
 
-        // 로그인 설정
+        // 폼 로그인 설정
         http.formLogin((auth) -> auth
-                .loginPage("/users/login") // 로그인 페이지
-                .loginProcessingUrl("/users/loginProc") // 프론트에서 넘어온 정보 넘길 URL(Spring Security가 자동으로 로그인 진행)
+                .loginPage("/oauth-login/login")
+                .loginProcessingUrl("/oauth-login/loginProc")
+                .usernameParameter("loginId")
+                .passwordParameter("password")
+                .defaultSuccessUrl("/oauth-login")
+                .failureUrl("/oauth-login")
+                .permitAll()
+        );
+
+        // OAuth2 로그인 설정
+        http.oauth2Login((auth) -> auth
+                .loginPage("oauth-login/login")
+                .defaultSuccessUrl("/oauth-login")
+                .failureUrl("/oauth-login/login")
                 .permitAll()
         );
 
         // 로그아웃 URL 설정
         http.logout((auth) -> auth
-                .logoutUrl("/users/logout")
+                .logoutUrl("/logout")
         );
 
         // csrf : 사이트 위변조 방지 설정(스프링 시큐리티에는 자동으로 설정 되어 있음)
