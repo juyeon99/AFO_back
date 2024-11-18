@@ -20,21 +20,15 @@ repositories {
 dependencies {
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher' // 필수
     implementation 'org.springframework.boot:spring-boot-starter' // Spring boot
-    testImplementation 'org.springframework.boot:spring-boot-starter-test' // Spring boot test
     implementation 'org.springframework.boot:spring-boot-starter-web' // REST API
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa' // jpa
-    developmentOnly 'org.springframework.boot:spring-boot-devtools'// devtools
-    implementation 'org.springframework.boot:spring-boot-starter-security' // spring security
-    testImplementation 'org.springframework.security:spring-security-test' // spring security
-    runtimeOnly 'com.mysql:mysql-connector-j' // mysql
-    compileOnly 'org.projectlombok:lombok' // lombok
-    annotationProcessor 'org.projectlombok:lombok' // 컴파일 시 Lombok 어노테이션 처리
-    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client' // OAuth2
-    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf' // thymeleaf
     implementation 'org.springframework.boot:spring-boot-starter-webflux' // webflux
-//    testImplementation 'io.projectreactor:reactor-test'
-//    implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6' // thymeleaf
-//    testAnnotationProcessor 'org.projectlombok:lombok' // 테스트 시 Lombok 어노테이션 처리
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa' // jpa
+    compileOnly 'org.projectlombok:lombok' // lombok
+    annotationProcessor 'org.projectlombok:lombok:1.18.28' // lombok
+    runtimeOnly 'com.mysql:mysql-connector-j' // mysql
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor' // @ConfigurationPropertiesScan
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test' // Spring boot test
 }
 
 //tasks.named('test') {useJUnitPlatform()}
