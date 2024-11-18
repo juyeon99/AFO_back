@@ -7,6 +7,7 @@ import lombok.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Getter
 @Table(name = "oauth_member",
         uniqueConstraints = {
                 @UniqueConstraint(
@@ -26,6 +27,9 @@ public class OauthMember {
     @Embedded
     private OauthId oauthId;
 
+    @Enumerated(EnumType.STRING)
+    private OauthMemberRoleType role;
+
     // 가져올 사용자 정보
     private String name;
     private String email;
@@ -40,19 +44,10 @@ public class OauthMember {
         return oauthId;
     }
 
-    public String name() {
-        return name;
-    }
-
-    public String email() {
-        return email;
-    }
-
-    public String birthyear() {
-        return birthyear;
-    }
-
-    public String gender() {
-        return gender;
+    @PrePersist
+    public void prePersist() {
+        if(this.role == null) {
+            this.role = OauthMemberRoleType.USER;
+        }
     }
 }
