@@ -76,7 +76,7 @@ public class KakaoLoginService {
         KakaoUserInfoDto userInfo = null;
 
         try {
-            userInfo = objectMapper.readValue(response, KakaoTokenResponseDto.class);
+            userInfo = objectMapper.readValue(response, KakaoUserInfoDto.class);
         } catch (JsonProcessingException e) {
             throw new IllegalStateException(e);
         }

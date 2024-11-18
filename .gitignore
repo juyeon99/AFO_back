@@ -38,3 +38,4 @@ out/
 
 application.yml
 application-auth.properties
+application-jwt.properties

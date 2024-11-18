@@ -20,7 +20,7 @@ public class KakaoTokenResponseDto {
     @JsonProperty("refresh_token")
     private String refreshToken; // 리프레시 토큰
 
-    @JsonProperty
+    @JsonProperty("refresh_token_expires_in")
     private Integer refreshTokenExpiresIn; // 리프레시 토큰 만료시간(초)
 
     @JsonProperty("id_token")
