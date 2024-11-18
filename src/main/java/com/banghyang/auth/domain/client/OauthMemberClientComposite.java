@@ -24,8 +24,12 @@ public class OauthMemberClientComposite {
                 ));
     }
 
-    public OauthMember fetch(OauthServerType oauthServerType) {
+    public OauthMember fetch(OauthServerType oauthServerType, String authCode) {
+        return getClient(oauthServerType).fetch(authCode);
+    }
+
+    public OauthMemberClient getClient(OauthServerType oauthServerType) {
         return Optional.ofNullable(mapping.get(oauthServerType))
-                .orElseThrow().fetch(() -> new RuntimeException("지원하지 않는 소셜 로그인 방식입니다."));
+                .orElseThrow(() -> new RuntimeException("지원하지 않는 소셜 로그인 방식입니다."));
     }
 }
