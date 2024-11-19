@@ -2,6 +2,7 @@ package com.banghyang.oauth.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.antlr.v4.runtime.misc.NotNull;
 
 @Entity
 @Builder
@@ -35,17 +36,9 @@ public class OauthMember {
     private String birthyear;
     private String gender;
 
-    public Long id() {
-        return id;
-    }
-
-    public OauthId oauthId() {
-        return oauthId;
-    }
-
     @PrePersist
     public void prePersist() {
-        if(this.role == null) {
+        if (this.role == null) {
             this.role = OauthMemberRoleType.USER;
         }
     }
