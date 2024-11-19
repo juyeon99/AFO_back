@@ -18,15 +18,17 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher' // 필수
+    implementation 'org.springframework.boot:spring-boot-starter' // Spring boot
     implementation 'org.springframework.boot:spring-boot-starter-web' // REST API
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa' // spring data jpa
-    developmentOnly 'org.springframework.boot:spring-boot-devtools'// devtools
-    implementation 'org.projectlombok:lombok' // lombok
+    implementation 'org.springframework.boot:spring-boot-starter-webflux' // webflux
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa' // jpa
+    compileOnly 'org.projectlombok:lombok' // lombok
+    annotationProcessor 'org.projectlombok:lombok:1.18.28' // lombok
     runtimeOnly 'com.mysql:mysql-connector-j' // mysql
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor' // @ConfigurationPropertiesScan
 
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test' // Spring boot test
 }
 
 //tasks.named('test') {useJUnitPlatform()}
