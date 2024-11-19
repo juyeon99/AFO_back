@@ -5,7 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 
 @SpringBootApplication
-@ConfigurationPropertiesScan // @ConfigurationProperties 사용을 위한 의존성 추가
+@ConfigurationPropertiesScan // @ConfigurationProperties 사용을 위해서 추가한 어노테이션
 public class ProjectBanghyangApplication {
 
     public static void main(String[] args) {
