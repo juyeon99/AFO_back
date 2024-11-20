@@ -47,4 +47,10 @@ public class OauthController {
 
         return ResponseEntity.ok(login);
     }
+
+    @PostMapping("/unlink/kakao")
+    public ResponseEntity<Void> unlinkKakao(@RequestParam(name = "Authorization") String accessToken) {
+        oauthService.unlinkKakao(accessToken);
+        return ResponseEntity.noContent().build();
+    }
 }

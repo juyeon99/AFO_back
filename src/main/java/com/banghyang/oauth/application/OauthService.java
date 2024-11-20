@@ -5,6 +5,7 @@ import com.banghyang.oauth.domain.OauthMemberRepository;
 import com.banghyang.oauth.domain.OauthServerType;
 import com.banghyang.oauth.domain.authcode.AuthCodeRequestUrlProviderComposite;
 import com.banghyang.oauth.domain.client.OauthMemberClientComposite;
+import com.banghyang.oauth.infra.oauth.kakao.client.KakaoApiClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +16,7 @@ public class OauthService {
     private final AuthCodeRequestUrlProviderComposite authCodeRequestUrlProviderComposite;
     private final OauthMemberClientComposite oauthMemberClientComposite;
     private final OauthMemberRepository oauthMemberRepository;
+    private final KakaoApiClient kakaoApiClient;
 
     /**
      * AuthCode 발급받기 위한 URL 반환
@@ -36,5 +38,10 @@ public class OauthService {
         OauthMember saved = oauthMemberRepository.findByOauthId(oauthMember.oauthId())
                 .orElseGet(() -> oauthMemberRepository.save(oauthMember));
         return saved.id();
+    }
+
+    public void unlinkKakao(String accessToken) {
+        String token = "Bearer " + accessToken;
+        kakaoApiClient.unlink(token);
     }
 }

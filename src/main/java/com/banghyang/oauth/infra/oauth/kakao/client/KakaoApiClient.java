@@ -15,7 +15,6 @@ import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED_VAL
 public interface KakaoApiClient {
     /**
      * AccessToken 가져오기
-     * @param params
      * @return AccessToken
      */
     @PostExchange(url = "https://kauth.kakao.com/oauth/token", contentType = APPLICATION_FORM_URLENCODED_VALUE)
@@ -28,4 +27,11 @@ public interface KakaoApiClient {
      */
     @GetExchange("https://kapi.kakao.com/v2/user/me")
     KakaoMemberResponse fetchMember(@RequestHeader(name = AUTHORIZATION) String bearerToken);
+
+    /**
+     * 카카오 연동 끊기
+     * @param bearerToken (AccessToken)
+     */
+    @PostExchange(url = "https://kapi.kakao.com/v1/user/unlink")
+    void unlink(@RequestHeader(name = AUTHORIZATION) String bearerToken);
 }
