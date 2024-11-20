@@ -35,9 +35,9 @@ public class OauthService {
      */
     public Long login(OauthServerType oauthServerType, String authCode) {
         OauthMember oauthMember = oauthMemberClientComposite.fetch(oauthServerType, authCode);
-        OauthMember saved = oauthMemberRepository.findByOauthId(oauthMember.oauthId())
+        OauthMember saved = oauthMemberRepository.findByOauthId(oauthMember.getOauthId())
                 .orElseGet(() -> oauthMemberRepository.save(oauthMember));
-        return saved.id();
+        return saved.getId();
     }
 
     public void unlinkKakao(String accessToken) {
