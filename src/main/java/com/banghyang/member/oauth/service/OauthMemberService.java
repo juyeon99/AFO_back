@@ -7,8 +7,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -23,6 +23,16 @@ public class OauthMemberService {
     public List<OauthMemberDTO> findAllOauthMember() {
         // 레파지토리에서 전체 OauthMember 가져와서 List 만들기
         List<OauthMember> oauthMemberList = oauthMemberRepository.findAll();
-        return null;
+
+        // DTO 로 변환하여 List 로 저장하기
+        List<OauthMemberDTO> oauthMemberDTOList = oauthMemberList
+                .stream().map(memberEntity -> new OauthMemberDTO(
+                        memberEntity.getName(),
+                        memberEntity.getEmail(),
+                        memberEntity.getBirthyear(),
+                        memberEntity.getGender()
+                )).toList();
+
+        return oauthMemberDTOList;
     }
 }
