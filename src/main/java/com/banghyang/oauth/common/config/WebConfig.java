@@ -1,42 +1,17 @@
 package com.banghyang.oauth.common.config;
 
-import com.banghyang.oauth.infra.presentation.OauthServerTypeConverter;
-import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.format.FormatterRegistry;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import org.springframework.http.HttpMethod;
 
 @Configuration
-@RequiredArgsConstructor
 public class WebConfig implements WebMvcConfigurer {
-
-    /**
-     * CORS 설정
-     * @param registry
-     */
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOrigins("http://localhost:3000")
-                .allowedMethods(
-                        HttpMethod.GET.name(),
-                        HttpMethod.POST.name(),
-                        HttpMethod.PUT.name(),
-                        HttpMethod.DELETE.name(),
-                        HttpMethod.PATCH.name()
-                )
-                .allowCredentials(true)
-                .exposedHeaders("*");
-    }
-
-    /**
-     * url 을 OauthServerType 으로 반환시키는 converter 호출
-     * @param registry
-     */
-    @Override
-    public void addFormatters(FormatterRegistry registry) {
-        registry.addConverter(new OauthServerTypeConverter());
+                .allowedOrigins("http://localhost:3000") // 허용할 도메인
+                .allowedMethods("GET", "POST", "PUT", "DELETE")
+                .allowCredentials(true) // allowedOrigins("*") 사용불가 주의(추후 확장시 고려)
+                .exposedHeaders("*"); // 헤더에서 필요한 항목만 허용하면 보안 강화에 좋음(지금은 일단 모두 허용 "*")
     }
 }
