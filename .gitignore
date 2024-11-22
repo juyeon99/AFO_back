@@ -37,5 +37,4 @@ out/
 .vscode/
 
 application.yml
-application-auth.properties
-application-jwt.properties
+kakao-API-keys.properties
