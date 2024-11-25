@@ -1,6 +1,5 @@
 package com.banghyang.member.oauth.controller;
 
-import com.banghyang.member.oauth.model.dto.OauthMemberDTO;
 import com.banghyang.member.oauth.service.OauthMemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
