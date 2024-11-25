@@ -1,4 +1,4 @@
-package com.banghyang.model.perfume;
+package com.banghyang.model.perfume.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

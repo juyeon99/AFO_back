@@ -1,6 +1,6 @@
-package com.banghyang.model.note;
+package com.banghyang.model.note.entity;
 
-import com.banghyang.model.perfume.Perfume;
+import com.banghyang.model.perfume.entity.Perfume;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
