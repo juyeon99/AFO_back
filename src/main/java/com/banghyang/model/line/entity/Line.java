@@ -1,4 +1,4 @@
-package com.banghyang.line.entity;
+package com.banghyang.model.line.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
