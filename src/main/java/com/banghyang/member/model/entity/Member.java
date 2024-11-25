@@ -1,7 +1,7 @@
-package com.banghyang.oauth.member.entity;
+package com.banghyang.member.model.entity;
 
-import com.banghyang.oauth.member.dto.OauthId;
-import com.banghyang.oauth.member.type.OauthMemberRoleType;
+import com.banghyang.member.model.type.MemberRoleType;
+import com.banghyang.oauth.kakao.model.dto.OauthId;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -21,7 +21,7 @@ import java.time.LocalDateTime;
                 }
         ),
 })
-public class OauthMember {
+public class Member {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -37,7 +37,7 @@ public class OauthMember {
     private LocalDateTime deletedAt;    // 탈퇴일시
 
     @Enumerated(EnumType.STRING)
-    private OauthMemberRoleType role;   // 권한
+    private MemberRoleType role;   // 권한
 
     /**
      * 권한, 가입일시 초기값 설정 메소드
@@ -45,7 +45,7 @@ public class OauthMember {
     @PrePersist
     public void prePersist() {
         if (this.role == null) {
-            this.role = OauthMemberRoleType.USER;
+            this.role = MemberRoleType.USER;
         }
 
         if (this.createdAt == null) {
@@ -55,18 +55,28 @@ public class OauthMember {
 
     /**
      * 회원정보 조회에 필요한 항목들만 포함한 생성자 메소드
+     *
      * @param name
      * @param email
      * @param birthyear
      * @param gender
      * @param role
+     * @param createdAt
      */
-    @Builder(toBuilder = true)
-    public OauthMember(String name, String email, String birthyear, String gender, OauthMemberRoleType role) {
+    @Builder
+    public Member(
+            String name,
+            String email,
+            String birthyear,
+            String gender,
+            MemberRoleType role,
+            LocalDateTime createdAt
+    ) {
         this.name = name;
         this.email = email;
         this.birthyear = birthyear;
         this.gender = gender;
         this.role = role;
+        this.createdAt = createdAt;
     }
 }
