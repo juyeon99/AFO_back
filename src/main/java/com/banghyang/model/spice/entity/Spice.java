@@ -17,7 +17,7 @@ public class Spice {
 
     private String name;
     private String name_kr;
-    private String content;
+    private String description;
 
     @ManyToOne
     @JoinColumn(name = "line_id")

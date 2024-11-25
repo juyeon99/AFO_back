@@ -1,8 +1,7 @@
 package com.banghyang.member.model.dto;
 
 import com.banghyang.member.model.entity.Member;
-import com.banghyang.member.model.type.MemberRoleType;
-import lombok.Builder;
+import com.banghyang.member.type.MemberRoleType;
 import lombok.Data;
 
 import java.time.LocalDateTime;
