@@ -1,4 +1,4 @@
-package com.banghyang.model.line.entity;
+package com.banghyang.model.perfume;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -9,9 +9,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-public class Line {
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class Perfume {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,5 +19,6 @@ public class Line {
 
     private String name;
     private String description;
-    private String color;
+    private String brand;
+    private String grade;
 }
