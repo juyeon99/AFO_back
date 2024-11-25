@@ -1,7 +1,7 @@
 package com.banghyang.oauth.kakao.controller;
 
 import com.banghyang.oauth.kakao.service.KakaoService;
-import com.banghyang.oauth.member.dto.OauthMemberResponse;
+import com.banghyang.oauth.kakao.model.dto.OauthMemberResponse;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;

@@ -1,13 +1,12 @@
-package com.banghyang.oauth.kakao.member.model.dto;
+package com.banghyang.oauth.kakao.model.dto;
 
-import com.banghyang.oauth.member.dto.OauthId;
-import com.banghyang.oauth.member.entity.OauthMember;
+import com.banghyang.member.model.entity.Member;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 
 import java.time.LocalDateTime;
 
-import static com.banghyang.oauth.member.type.OauthServerType.KAKAO;
+import static com.banghyang.oauth.kakao.type.OauthServerType.KAKAO;
 
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public record KakaoMemberResponse(
@@ -17,8 +16,8 @@ public record KakaoMemberResponse(
         KakaoAccount kakaoAccount
 ) {
 
-    public OauthMember toEntity() {
-        return OauthMember.builder()
+    public Member toEntity() {
+        return Member.builder()
                 .oauthId(new OauthId(String.valueOf(id), KAKAO))
                 .name(kakaoAccount.name)
                 .email(kakaoAccount.email)
