@@ -1,0 +1,77 @@
+[
+	{
+		"name" : "Spicy",
+		"content" : "자극적이며 섹시한 향",
+		"color" : "FF5757"
+	},
+	{
+		"name" : "Fruity",
+		"content" : "달콤하고 귀여운 향",
+		"color" : "FFBD43"
+	},
+	{
+		"name" : "Citrus",
+		"content" : "과일 같은 상큼한 향",
+		"color" : "FFE043"
+	},
+	{
+		"name" : "Green",
+		"content" : "상쾌하고 신선한 향",
+		"color" : "62D66A"
+	},
+	{
+		"name" : "Aldehyde",
+		"content" : "인공 비누향, 모던하고 우아하면 지적인 향",
+		"color" : "98D1FF"
+	},
+	{
+		"name" : "Aquatic",
+		"content" : "들과 바다 시원함이 가득한 향",
+		"color" : "56D2FF"
+	},
+	{
+		"name" : "Fougere",
+		"content" : "부드럽고 감미로우며 편안한 향",
+		"color" : "FFD9A6"
+	},
+	{
+		"name" : "Gourmand",
+		"content" : "달달하고 유혹적인 미각의 즐거움을 느낄 수 있는 향",
+		"color" : "A1522C"
+	},
+	{
+		"name" : "Woody",
+		"content" : "고상하고 증후한 느낌의 따뜻하고 부드러운 향",
+		"color" : "86390F"
+	},
+	{
+		"name" : "Oriental",
+		"content" : "무거우면서 부드럽고 고혹적인 향, 증후하고 달콤하며 센슈얼한 향",
+		"color" : "C061FF"
+	},
+	{
+		"name" : "Floral",
+		"content" : "화려하고 여성스러운 향",
+		"color" : "FF80C1"
+	},
+	{
+		"name" : "Musk",
+		"content" : "이성에게 어필 가능한 아름다운 향",
+		"color" : "F8E4FF"
+	},
+	{
+		"name" : "Powdery",
+		"content" : "포근한 향",
+		"color" : "FFFFFF"
+	},
+	{
+		"name" : "Amber",
+		"content" : "달콤하고 부드러운 향",
+		"color" : "FFA75A"
+	},
+	{
+		"name" : "Tobacco Leather",
+		"content" : "마초적인 남성의 개성이 강한 매력적인 향",
+		"color" : "000000"
+	}
+]
