@@ -17,6 +17,10 @@ public class OauthMemberController {
 
     private final OauthMemberService oauthMemberService;
 
+    /**
+     * 전체 회원 조회 컨트롤러
+     * @return
+     */
     @GetMapping
     public ResponseEntity<List<OauthMemberDTO>> getAllMembers() {
         List<OauthMemberDTO> memberList = oauthMemberService.findAllOauthMember();
