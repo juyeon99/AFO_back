@@ -1,4 +1,4 @@
-package com.banghyang.oauth.domain;
+package com.banghyang.oauth.member.type;
 
 public enum OauthMemberRoleType {
     USER,

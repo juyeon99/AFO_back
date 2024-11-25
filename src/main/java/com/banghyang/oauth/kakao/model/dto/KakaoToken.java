@@ -1,11 +1,10 @@
-package com.banghyang.oauth.infra.oauth.kakao.dto;
+package com.banghyang.oauth.kakao.model.dto;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 
-@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class) // SnakeCase 로 Json Data 이름 매핑시킴
 public record KakaoToken(
-        // https://developers.kakao.com/docs/latest/ko/kakaologin/rest-api#request-token
         String tokenType,
         String accessToken,
         String idToken,

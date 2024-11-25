@@ -1,26 +1,23 @@
-package com.banghyang.oauth.infra.oauth.kakao.dto;
+package com.banghyang.oauth.kakao.member.model.dto;
 
-import com.banghyang.oauth.domain.OauthId;
-import com.banghyang.oauth.domain.OauthMember;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy;
+import com.banghyang.oauth.member.dto.OauthId;
+import com.banghyang.oauth.member.entity.OauthMember;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 
 import java.time.LocalDateTime;
 
-import static com.banghyang.oauth.domain.OauthServerType.KAKAO;
+import static com.banghyang.oauth.member.type.OauthServerType.KAKAO;
 
-@JsonNaming(SnakeCaseStrategy.class)
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public record KakaoMemberResponse(
         Long id,
         boolean hasSignedUp,
         LocalDateTime connectedAt,
         KakaoAccount kakaoAccount
 ) {
-    /**
-     * 받아온 정보를 토대로 OauthMember 객체 반환
-     * @return OauthMember
-     */
-    public OauthMember toDomain() {
+
+    public OauthMember toEntity() {
         return OauthMember.builder()
                 .oauthId(new OauthId(String.valueOf(id), KAKAO))
                 .name(kakaoAccount.name)
@@ -30,7 +27,7 @@ public record KakaoMemberResponse(
                 .build();
     }
 
-    @JsonNaming(SnakeCaseStrategy.class)
+    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
     public record KakaoAccount(
             boolean nameNeedsAgreement,
             String name, // 이름

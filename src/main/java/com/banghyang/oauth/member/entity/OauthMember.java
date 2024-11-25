@@ -1,5 +1,7 @@
-package com.banghyang.oauth.domain;
+package com.banghyang.oauth.member.entity;
 
+import com.banghyang.oauth.member.dto.OauthId;
+import com.banghyang.oauth.member.type.OauthMemberRoleType;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -10,17 +12,15 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-@Table(name = "oauth_member", // 테이블명
-        uniqueConstraints = { // 중복 불가 항복들
-                @UniqueConstraint(
-                        name = "oauth_id_unique",
-                        columnNames = {
-                                "oauth_server_id", // oauthServerId 중복 불가 설정으로 유일함 확보
-                                "oauth_server"
-                        }
-                ),
-        }
-)
+@Table(uniqueConstraints = {
+        @UniqueConstraint(
+                name = "oauth_id_unique",
+                columnNames = {
+                        "oauth_server_id",
+                        "oauth_server"
+                }
+        ),
+})
 public class OauthMember {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,15 +29,15 @@ public class OauthMember {
     @Embedded
     private OauthId oauthId;            // OauthServerId
 
-    @Enumerated(EnumType.STRING)
-    private OauthMemberRoleType role;   // 권한
-
     private String name;                // 사용자명
     private String email;               // 이메일
     private String birthyear;           // 촐생연도
     private String gender;              // 성별
     private LocalDateTime createdAt;    // 가입일시
     private LocalDateTime deletedAt;    // 탈퇴일시
+
+    @Enumerated(EnumType.STRING)
+    private OauthMemberRoleType role;   // 권한
 
     /**
      * 권한, 가입일시 초기값 설정 메소드
@@ -59,12 +59,14 @@ public class OauthMember {
      * @param email
      * @param birthyear
      * @param gender
+     * @param role
      */
     @Builder(toBuilder = true)
-    public OauthMember(String name, String email, String birthyear, String gender) {
+    public OauthMember(String name, String email, String birthyear, String gender, OauthMemberRoleType role) {
         this.name = name;
         this.email = email;
         this.birthyear = birthyear;
         this.gender = gender;
+        this.role = role;
     }
 }
