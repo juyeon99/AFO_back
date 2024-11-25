@@ -2,11 +2,11 @@ package com.banghyang.oauth.kakao.service;
 
 import com.banghyang.oauth.kakao.client.KakaoAPIClient;
 import com.banghyang.oauth.kakao.config.KakaoOauthConfig;
-import com.banghyang.oauth.kakao.member.model.dto.KakaoMemberResponse;
+import com.banghyang.oauth.kakao.model.dto.KakaoMemberResponse;
 import com.banghyang.oauth.kakao.model.dto.KakaoToken;
-import com.banghyang.oauth.member.dto.OauthMemberResponse;
-import com.banghyang.oauth.member.entity.OauthMember;
-import com.banghyang.oauth.member.repository.OauthMemberRepository;
+import com.banghyang.oauth.kakao.model.dto.OauthMemberResponse;
+import com.banghyang.member.model.entity.Member;
+import com.banghyang.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -17,7 +17,7 @@ public class KakaoService {
 
     private final KakaoOauthConfig kakaoOauthConfig;
     private final KakaoAPIClient kakaoAPIClient;
-    private final OauthMemberRepository oauthMemberRepository;
+    private final MemberRepository memberRepository;
 
     public String getKakaoAuthCodeRequestUrl() {
         return UriComponentsBuilder
@@ -46,11 +46,11 @@ public class KakaoService {
         System.out.println("AccessToken값 확인 : " + token.accessToken());
 
         // 사용자 정보를 엔티티로 변환
-        OauthMember oauthMember = kakaoMemberResponse.toEntity();
+        Member member = kakaoMemberResponse.toEntity();
 
         // 기존 사용자인지 확인하고 신규 사용자라면 저장
-        OauthMember saved = oauthMemberRepository.findByOauthId(oauthMember.getOauthId())
-                .orElseGet(() -> oauthMemberRepository.save(oauthMember));
+        Member saved = memberRepository.findByOauthId(member.getOauthId())
+                .orElseGet(() -> memberRepository.save(member));
 
         return OauthMemberResponse.from(saved);
     }

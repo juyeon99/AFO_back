@@ -1,6 +1,6 @@
 package com.banghyang.oauth.kakao.client;
 
-import com.banghyang.oauth.kakao.member.model.dto.KakaoMemberResponse;
+import com.banghyang.oauth.kakao.model.dto.KakaoMemberResponse;
 import com.banghyang.oauth.kakao.model.dto.KakaoToken;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
