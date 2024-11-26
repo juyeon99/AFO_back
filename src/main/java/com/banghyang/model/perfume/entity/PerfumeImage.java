@@ -1,6 +1,5 @@
-package com.banghyang.model.note;
+package com.banghyang.model.perfume.entity;
 
-import com.banghyang.model.perfume.Perfume;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -11,16 +10,16 @@ import org.hibernate.annotations.OnDeleteAction;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class TopNote {
+public class PerfumeImage {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne
-    @JoinColumn(name = "perfume_id", unique = true, nullable = false)
+    private String url;
+
+    @ManyToOne
+    @JoinColumn(name = "perfume_id", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Perfume perfume;
-
-    private String spices;
 }
