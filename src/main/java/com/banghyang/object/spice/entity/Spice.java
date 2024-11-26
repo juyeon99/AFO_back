@@ -1,6 +1,6 @@
-package com.banghyang.model.spice.entity;
+package com.banghyang.object.spice.entity;
 
-import com.banghyang.model.line.entity.Line;
+import com.banghyang.object.line.entity.Line;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;

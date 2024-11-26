@@ -1,7 +1,7 @@
 package com.banghyang.member.service;
 
-import com.banghyang.member.model.dto.MemberResponse;
-import com.banghyang.member.model.entity.Member;
+import com.banghyang.member.dto.MemberResponse;
+import com.banghyang.member.entity.Member;
 import com.banghyang.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

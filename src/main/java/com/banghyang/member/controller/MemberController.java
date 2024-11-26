@@ -1,6 +1,6 @@
 package com.banghyang.member.controller;
 
-import com.banghyang.member.model.dto.MemberResponse;
+import com.banghyang.member.dto.MemberResponse;
 import com.banghyang.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +19,6 @@ public class MemberController {
 
     @GetMapping
     public ResponseEntity<List<MemberResponse>> getAllMembers() {
-        List<MemberResponse> members = memberService.getAllMembers();
-        return ResponseEntity.ok(members);
+        return ResponseEntity.ok(memberService.getAllMembers());
     }
 }
