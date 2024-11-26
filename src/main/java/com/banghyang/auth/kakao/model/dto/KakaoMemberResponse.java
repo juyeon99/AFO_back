@@ -1,4 +1,4 @@
-package com.banghyang.oauth.kakao.model.dto;
+package com.banghyang.auth.kakao.model.dto;
 
 import com.banghyang.member.entity.Member;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 
 import java.time.LocalDateTime;
 
-import static com.banghyang.oauth.kakao.type.OauthServerType.KAKAO;
+import static com.banghyang.auth.kakao.type.OauthServerType.KAKAO;
 
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public record KakaoMemberResponse(

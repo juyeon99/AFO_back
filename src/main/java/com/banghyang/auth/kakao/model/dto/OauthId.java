@@ -1,6 +1,6 @@
-package com.banghyang.oauth.kakao.model.dto;
+package com.banghyang.auth.kakao.model.dto;
 
-import com.banghyang.oauth.kakao.type.OauthServerType;
+import com.banghyang.auth.kakao.type.OauthServerType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.EnumType;

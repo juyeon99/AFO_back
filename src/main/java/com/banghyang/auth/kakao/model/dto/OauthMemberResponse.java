@@ -1,4 +1,4 @@
-package com.banghyang.oauth.kakao.model.dto;
+package com.banghyang.auth.kakao.model.dto;
 
 import com.banghyang.member.entity.Member;
 

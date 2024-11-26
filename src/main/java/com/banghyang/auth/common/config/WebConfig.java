@@ -1,4 +1,4 @@
-package com.banghyang.oauth.common.config;
+package com.banghyang.auth.common.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;

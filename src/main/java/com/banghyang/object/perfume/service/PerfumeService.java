@@ -17,6 +17,7 @@ import com.banghyang.object.perfume.repository.PerfumeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
@@ -62,7 +63,17 @@ public class PerfumeService {
             return null;
 
             // 필터로 null 은 제외하고 리스트로 변환
-        }).filter(Objects::nonNull).toList();
+        }).filter(Objects::nonNull)
+                // 이름을 기준으로 정렬
+                .sorted(Comparator.comparing(perfumeResponse -> {
+                    // single 과 multi 인지 판별하여 각 response 에 맞게 getName
+                    if (perfumeResponse instanceof SinglePerfumeResponse) {
+                        return ((SinglePerfumeResponse) perfumeResponse).getName();
+                    } else {
+                        return ((MultiPerfumeResponse) perfumeResponse).getName();
+                    }
+                }))
+                .toList();
 
         return allPerfumeResponses;
     }

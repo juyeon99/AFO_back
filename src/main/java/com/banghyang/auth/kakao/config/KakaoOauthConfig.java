@@ -1,4 +1,4 @@
-package com.banghyang.oauth.kakao.config;
+package com.banghyang.auth.kakao.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
