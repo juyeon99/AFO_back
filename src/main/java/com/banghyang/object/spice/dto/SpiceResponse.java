@@ -19,7 +19,7 @@ public class SpiceResponse {
             SpiceImage imageEntity,
             Line lineEntity
     ) {
-        this.name = spiceEntity.getName();
+        this.name = spiceEntity.getName_kr();
         this.description = spiceEntity.getDescription();
         this.imageUrl = imageEntity.getUrl();
         this.line = lineEntity.getName();

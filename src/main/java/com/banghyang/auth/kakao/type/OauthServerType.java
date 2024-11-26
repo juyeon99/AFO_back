@@ -1,4 +1,4 @@
-package com.banghyang.oauth.kakao.type;
+package com.banghyang.auth.kakao.type;
 
 import java.util.Locale;
 

@@ -1,6 +1,6 @@
-package com.banghyang.oauth.kakao.config;
+package com.banghyang.auth.kakao.config;
 
-import com.banghyang.oauth.kakao.client.KakaoAPIClient;
+import com.banghyang.auth.kakao.client.KakaoAPIClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.reactive.function.client.WebClient;

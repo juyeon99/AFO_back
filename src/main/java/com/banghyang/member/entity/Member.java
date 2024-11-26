@@ -1,7 +1,7 @@
 package com.banghyang.member.entity;
 
 import com.banghyang.member.type.MemberRoleType;
-import com.banghyang.oauth.kakao.model.dto.OauthId;
+import com.banghyang.auth.kakao.model.dto.OauthId;
 import jakarta.persistence.*;
 import lombok.*;
 

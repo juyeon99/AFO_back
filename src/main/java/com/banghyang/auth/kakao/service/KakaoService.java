@@ -1,10 +1,10 @@
-package com.banghyang.oauth.kakao.service;
+package com.banghyang.auth.kakao.service;
 
-import com.banghyang.oauth.kakao.client.KakaoAPIClient;
-import com.banghyang.oauth.kakao.config.KakaoOauthConfig;
-import com.banghyang.oauth.kakao.model.dto.KakaoMemberResponse;
-import com.banghyang.oauth.kakao.model.dto.KakaoToken;
-import com.banghyang.oauth.kakao.model.dto.OauthMemberResponse;
+import com.banghyang.auth.kakao.client.KakaoAPIClient;
+import com.banghyang.auth.kakao.config.KakaoOauthConfig;
+import com.banghyang.auth.kakao.model.dto.KakaoMemberResponse;
+import com.banghyang.auth.kakao.model.dto.KakaoToken;
+import com.banghyang.auth.kakao.model.dto.OauthMemberResponse;
 import com.banghyang.member.entity.Member;
 import com.banghyang.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
