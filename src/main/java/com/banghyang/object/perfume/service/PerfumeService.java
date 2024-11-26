@@ -31,38 +31,39 @@ public class PerfumeService {
     private final MiddleNoteRepository middleNoteRepository;
     private final BaseNoteRepository baseNoteRepository;
 
-    public List<Object> getAllPerfumes() {
+    public List<Object> getAllPerfumeResponses() {
         // 모든 퍼퓸 엔티티 가져오기
-        List<Perfume> perfumes = perfumeRepository.findAll();
+        List<Perfume> allPerfumeEntityList = perfumeRepository.findAll();
 
         // Response List 만들기
-        List<Object> perfumeResponses = perfumes.stream().map(perfume -> {
+        List<Object> allPerfumeResponses = allPerfumeEntityList.stream().map(perfume -> {
             // 향수 아이디로 향수 이미지 찾아오기
-            PerfumeImage perfumeImage = perfumeImageRepository.findByPerfumeId(perfume.getId());
+            PerfumeImage perfumeImageEntity = perfumeImageRepository.findByPerfumeId(perfume.getId());
 
             // 향수 아이디로 SingleNote 찾아보기
-            SingleNote singleNote = singleNoteRepository.findByPerfumeId(perfume.getId());
+            SingleNote singleNoteEntity = singleNoteRepository.findByPerfumeId(perfume.getId());
 
             // 만약 해당하는 싱글노트 엔티티가 있다면 singlePerfumeResponse 반환
-            if (singleNote != null && perfumeImage != null) {
-                return new SinglePerfumeResponse().from(perfume, perfumeImage, singleNote);
+            if (singleNoteEntity != null && perfumeImageEntity != null) {
+                return new SinglePerfumeResponse().from(perfume, perfumeImageEntity, singleNoteEntity);
             }
 
             // 향수 아이디로 탑, 미들, 베이스 노트 찾아보기
-            TopNote topNote = topNoteRepository.findByPerfumeId(perfume.getId());
-            MiddleNote middleNote = middleNoteRepository.findByPerfumeId(perfume.getId());
-            BaseNote baseNote = baseNoteRepository.findByPerfumeId(perfume.getId());
+            TopNote topNoteEntity = topNoteRepository.findByPerfumeId(perfume.getId());
+            MiddleNote middleNoteEntity = middleNoteRepository.findByPerfumeId(perfume.getId());
+            BaseNote baseNoteEntity = baseNoteRepository.findByPerfumeId(perfume.getId());
 
             // 탑, 미들, 베이스 노트가 모두 존재하면 multiPerfumeResponse 반환
-            if (topNote != null && middleNote != null && baseNote != null && perfumeImage != null) {
-                return new MultiPerfumeResponse().from(perfume, perfumeImage, topNote, middleNote, baseNote);
+            if (topNoteEntity != null && middleNoteEntity != null && baseNoteEntity != null && perfumeImageEntity != null) {
+                return new MultiPerfumeResponse().from(perfume, perfumeImageEntity, topNoteEntity, middleNoteEntity, baseNoteEntity);
             }
 
+            // 위 조건들을 충족하지 못하면 null 반환
             return null;
+
+            // 필터로 null 은 제외하고 리스트로 변환
         }).filter(Objects::nonNull).toList();
 
-        System.out.println(perfumeResponses.size());
-
-        return perfumeResponses;
+        return allPerfumeResponses;
     }
 }

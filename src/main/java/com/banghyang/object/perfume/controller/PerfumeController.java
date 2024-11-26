@@ -1,7 +1,6 @@
 package com.banghyang.object.perfume.controller;
 
 import com.banghyang.object.perfume.service.PerfumeService;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,6 +18,6 @@ public class PerfumeController {
 
     @GetMapping
     public ResponseEntity<List<Object>> getAllPerfumes() {
-        return ResponseEntity.ok(perfumeService.getAllPerfumes());
+        return ResponseEntity.ok(perfumeService.getAllPerfumeResponses());
     }
 }
