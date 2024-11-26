@@ -1,6 +1,6 @@
 package com.banghyang.oauth.kakao.model.dto;
 
-import com.banghyang.member.model.entity.Member;
+import com.banghyang.member.entity.Member;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 

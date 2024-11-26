@@ -1,7 +1,7 @@
 package com.banghyang.member.repository;
 
 import com.banghyang.oauth.kakao.model.dto.OauthId;
-import com.banghyang.member.model.entity.Member;
+import com.banghyang.member.entity.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

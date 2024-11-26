@@ -5,7 +5,7 @@ import com.banghyang.oauth.kakao.config.KakaoOauthConfig;
 import com.banghyang.oauth.kakao.model.dto.KakaoMemberResponse;
 import com.banghyang.oauth.kakao.model.dto.KakaoToken;
 import com.banghyang.oauth.kakao.model.dto.OauthMemberResponse;
-import com.banghyang.member.model.entity.Member;
+import com.banghyang.member.entity.Member;
 import com.banghyang.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
