@@ -16,7 +16,7 @@ public class Spice {
     private Long id;
 
     private String name;
-    private String name_kr;
+    private String nameKr;
     private String description;
 
     @ManyToOne

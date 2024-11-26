@@ -45,7 +45,7 @@ public class SpiceService {
                     // 필터로 null 값은 제외하고 리스트로 변환
                 }).filter(Objects::nonNull)
                 // 이름 기준 정렬
-                .sorted(Comparator.comparing(SpiceResponse::getName))
+                .sorted(Comparator.comparing(SpiceResponse::getNameKr))
                 .toList();
 
         return allSpiceResponseList;
