@@ -9,6 +9,7 @@ import lombok.Data;
 public class SpiceResponse {
 
     private String name;
+    private String nameKr;
     private String description;
     private String imageUrl;
     private String line;
@@ -19,7 +20,8 @@ public class SpiceResponse {
             SpiceImage imageEntity,
             Line lineEntity
     ) {
-        this.name = spiceEntity.getName_kr();
+        this.name = spiceEntity.getName();
+        this.nameKr = spiceEntity.getNameKr();
         this.description = spiceEntity.getDescription();
         this.imageUrl = imageEntity.getUrl();
         this.line = lineEntity.getName();
