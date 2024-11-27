@@ -3,6 +3,7 @@ package com.banghyang.object.note.entity;
 import com.banghyang.object.perfume.entity.Perfume;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.OnDelete;
@@ -23,4 +24,10 @@ public class BaseNote {
     @JoinColumn(name = "perfume_id", unique = true, nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Perfume perfume;
+
+    @Builder(toBuilder = true)
+    public BaseNote(String spices, Perfume perfume) {
+        this.spices = spices;
+        this.perfume = perfume;
+    }
 }
