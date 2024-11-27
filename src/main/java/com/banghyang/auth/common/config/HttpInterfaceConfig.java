@@ -1,4 +1,4 @@
-package com.banghyang.auth.kakao.config;
+package com.banghyang.auth.common.config;
 
 import com.banghyang.auth.kakao.client.KakaoAPIClient;
 import org.springframework.context.annotation.Bean;
@@ -8,7 +8,7 @@ import org.springframework.web.reactive.function.client.support.WebClientAdapter
 import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 
 @Configuration
-public class KakaoHttpInterfaceConfig {
+public class HttpInterfaceConfig {
 
     @Bean // API Client 등록
     public KakaoAPIClient kakaoAPIClient() {

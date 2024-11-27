@@ -1,7 +1,6 @@
 package com.banghyang.object.perfume.controller;
 
 import com.banghyang.object.perfume.dto.PerfumeModifyRequest;
-import com.banghyang.object.perfume.entity.Perfume;
 import com.banghyang.object.perfume.service.PerfumeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
