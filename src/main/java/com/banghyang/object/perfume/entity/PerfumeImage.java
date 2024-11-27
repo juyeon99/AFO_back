@@ -2,6 +2,7 @@ package com.banghyang.object.perfume.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.OnDelete;
@@ -22,4 +23,10 @@ public class PerfumeImage {
     @JoinColumn(name = "perfume_id", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Perfume perfume;
+
+    @Builder(toBuilder = true)
+    public PerfumeImage(String url, Perfume perfume) {
+        this.url = url;
+        this.perfume = perfume;
+    }
 }

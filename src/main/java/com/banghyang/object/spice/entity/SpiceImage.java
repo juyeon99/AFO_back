@@ -2,6 +2,7 @@ package com.banghyang.object.spice.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.OnDelete;
@@ -22,4 +23,10 @@ public class SpiceImage {
     @JoinColumn(name = "spice_id", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Spice spice;
+
+    @Builder(toBuilder = true)
+    public SpiceImage(String url, Spice spice) {
+        this.url = url;
+        this.spice = spice;
+    }
 }

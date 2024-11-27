@@ -7,6 +7,7 @@ import lombok.Data;
 
 @Data
 public class SinglePerfumeResponse {
+    private Long id;
     private String name;
     private String description;
     private String brand;
@@ -19,6 +20,7 @@ public class SinglePerfumeResponse {
             PerfumeImage imageEntity,
             SingleNote singleNoteEntity
     ) {
+        this.id = perfumeEntity.getId();
         this.name = perfumeEntity.getName();
         this.description = perfumeEntity.getDescription();
         this.brand = perfumeEntity.getBrand();
