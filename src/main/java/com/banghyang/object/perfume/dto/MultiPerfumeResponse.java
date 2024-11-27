@@ -9,6 +9,7 @@ import lombok.Data;
 
 @Data
 public class MultiPerfumeResponse {
+    private Long id;
     private String name;
     private String description;
     private String brand;
@@ -25,6 +26,7 @@ public class MultiPerfumeResponse {
             MiddleNote middleNoteEntity,
             BaseNote baseNoteEntity
     ) {
+        this.id = perfumeEntity.getId();
         this.name = perfumeEntity.getName();
         this.description = perfumeEntity.getDescription();
         this.brand = perfumeEntity.getBrand();
