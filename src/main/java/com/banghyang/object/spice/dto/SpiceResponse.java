@@ -8,6 +8,7 @@ import lombok.Data;
 @Data
 public class SpiceResponse {
 
+    private Long id;
     private String name;
     private String nameKr;
     private String description;
@@ -20,6 +21,7 @@ public class SpiceResponse {
             SpiceImage imageEntity,
             Line lineEntity
     ) {
+        this.id = spiceEntity.getId();
         this.name = spiceEntity.getName();
         this.nameKr = spiceEntity.getNameKr();
         this.description = spiceEntity.getDescription();
