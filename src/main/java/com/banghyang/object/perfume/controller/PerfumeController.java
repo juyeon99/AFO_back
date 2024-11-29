@@ -1,5 +1,6 @@
 package com.banghyang.object.perfume.controller;
 
+import com.banghyang.object.perfume.dto.PerfumeCreateRequest;
 import com.banghyang.object.perfume.dto.PerfumeModifyRequest;
 import com.banghyang.object.perfume.service.PerfumeService;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +30,12 @@ public class PerfumeController {
     @DeleteMapping
     public ResponseEntity<?> deletePerfume(@RequestBody Long perfumeId) {
         perfumeService.deletePerfume(perfumeId);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping
+    public ResponseEntity<?> createPerfume(@RequestBody PerfumeCreateRequest perfumeCreateRequest) {
+        perfumeService.createPerfume(perfumeCreateRequest);
         return ResponseEntity.ok().build();
     }
 }
