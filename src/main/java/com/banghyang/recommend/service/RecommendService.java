@@ -48,15 +48,15 @@ public class RecommendService {
             if ("recommendation".equals(mode)) {
                 // 향수 추천 및 공통 감정 처리
                 response.put("recommendedPerfumes", llmResponse.get("recommended_perfumes"));
-                response.put("commonFeeling", llmResponse.get("common_feeling"));
 
-                // 3. 공통 감정에 따라 이미지 생성
+                // 3. 공통 감정 (한글로 반환)
                 String commonFeeling = (String) llmResponse.get("common_feeling");
-                String imagePrompt = (String) llmResponse.get("image_prompt"); // 이미지 프롬프트 받아오기
+                response.put("commonFeeling", commonFeeling);  // 한글로 반환
 
-                // 공통 감정과 이미지 프롬프트 결합
-                String prompt = " " + imagePrompt;
-                System.out.println(prompt);
+                // 4. 이미지 생성 프롬프트 (영어로 처리)
+                String imagePrompt = (String) llmResponse.get("image_prompt"); // 이미지 프롬프트 받아오기
+                String prompt = "Generate an image based on the following feeling: " + imagePrompt;
+                System.out.println(prompt);  // 디버깅용 출력
 
                 // 공통 감정을 프롬프트에 포함시켜 이미지 생성 요청
                 Map<String, Object> generatedImageResult = imageGenerationService.generateImage(prompt);
@@ -71,6 +71,7 @@ public class RecommendService {
 
         } catch (Exception e) {
             response.put("error", "처리 중 오류가 발생했습니다.");
+            e.printStackTrace();  // 예외를 출력하여 디버깅에 도움이 되도록 함
         }
         return response;
     }
