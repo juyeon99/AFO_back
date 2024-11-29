@@ -8,10 +8,7 @@ import com.banghyang.object.note.repository.BaseNoteRepository;
 import com.banghyang.object.note.repository.MiddleNoteRepository;
 import com.banghyang.object.note.repository.SingleNoteRepository;
 import com.banghyang.object.note.repository.TopNoteRepository;
-import com.banghyang.object.perfume.dto.MultiPerfumeResponse;
-import com.banghyang.object.perfume.dto.PerfumeCreateRequest;
-import com.banghyang.object.perfume.dto.PerfumeModifyRequest;
-import com.banghyang.object.perfume.dto.SinglePerfumeResponse;
+import com.banghyang.object.perfume.dto.*;
 import com.banghyang.object.perfume.entity.Perfume;
 import com.banghyang.object.perfume.entity.PerfumeImage;
 import com.banghyang.object.perfume.repository.PerfumeImageRepository;
@@ -21,7 +18,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -35,62 +31,72 @@ public class PerfumeService {
     private final BaseNoteRepository baseNoteRepository;
 
     /**
-     * @return 모든 향수 response
+     * @return 모든 향수 response (name 기준 오름차순 정렬)
      */
-    public List<Object> getAllPerfumeResponses() {
-        // 모든 퍼퓸 엔티티 가져오기
+    public List<PerfumeResponse> getAllPerfumeResponses() {
+        // 모든 perfume 엔티티 가져오기
         List<Perfume> allPerfumeEntityList = perfumeRepository.findAll();
 
-        // Response List 만들기
-        List<Object> allPerfumeResponses = allPerfumeEntityList.stream().map(perfume -> {
-                    // 향수 아이디로 향수 이미지 찾아오기
-                    PerfumeImage perfumeImageEntity = perfumeImageRepository.findByPerfumeId(perfume.getId());
+        // stream 이용하여 엔티티 -> response 로 변환하며 담아 리스트 생성
+        List<PerfumeResponse> allPerfumeResponseList = allPerfumeEntityList.stream().map(perfumeEntity -> {
+            PerfumeResponse perfumeResponse = new PerfumeResponse(); // 내용 담을 response 생성
+            perfumeResponse.setId(perfumeEntity.getId()); // 향수 id 담기
+            perfumeResponse.setName(perfumeEntity.getName()); // 향수 이름 담기
+            perfumeResponse.setDescription(perfumeEntity.getDescription()); // 향수 설명 담기
 
-                    // 향수 아이디로 SingleNote 찾아보기
-                    SingleNote singleNoteEntity = singleNoteRepository.findByPerfumeId(perfume.getId());
+            // image 엔티티 조회
+            PerfumeImage perfumeImageEntity = perfumeImageRepository.findByPerfumeId(perfumeEntity.getId());
+            if (perfumeImageEntity != null) {
+                // 향수 이미지가 존재하면 response 에 담기
+                perfumeResponse.setImageUrl(perfumeImageEntity.getUrl());
+            } else {
+                // 향수 이미지가 존재하지 않으면 null 담기
+                perfumeResponse.setImageUrl(null);
+            }
 
-                    // 만약 해당하는 싱글노트 엔티티가 있다면 singlePerfumeResponse 반환
-                    if (singleNoteEntity != null && perfumeImageEntity != null) {
-                        return new SinglePerfumeResponse().from(perfume, perfumeImageEntity, singleNoteEntity);
-                    }
+            // singleNote 엔티티 조회
+            SingleNote singleNoteEntity = singleNoteRepository.findByPerfumeId(perfumeEntity.getId());
+            if (singleNoteEntity != null) {
+                // 싱글노트가 존재하면 response 에 담기
+                perfumeResponse.setSingleNote(singleNoteEntity.getSpices());
+            } else {
+                // 싱글노트가 존재하지 않으면 null 담기
+                perfumeResponse.setSingleNote(null);
+            }
 
-                    // 향수 아이디로 탑, 미들, 베이스 노트 찾아보기
-                    TopNote topNoteEntity = topNoteRepository.findByPerfumeId(perfume.getId());
-                    MiddleNote middleNoteEntity = middleNoteRepository.findByPerfumeId(perfume.getId());
-                    BaseNote baseNoteEntity = baseNoteRepository.findByPerfumeId(perfume.getId());
+            // topNote 엔티티 조회
+            TopNote topNoteEntity = topNoteRepository.findByPerfumeId(perfumeEntity.getId());
+            if (topNoteEntity != null) {
+                perfumeResponse.setTopNote(topNoteEntity.getSpices());
+            } else {
+                perfumeResponse.setTopNote(null);
+            }
 
-                    // 탑, 미들, 베이스 노트가 모두 존재하면 multiPerfumeResponse 반환
-                    if (topNoteEntity != null &&
-                            middleNoteEntity != null &&
-                            baseNoteEntity != null &&
-                            perfumeImageEntity != null) {
-                        return new MultiPerfumeResponse()
-                                .from(
-                                        perfume,
-                                        perfumeImageEntity,
-                                        topNoteEntity,
-                                        middleNoteEntity,
-                                        baseNoteEntity
-                                );
-                    }
+            // middleNote 엔티티 조회
+            MiddleNote middleNoteEntity = middleNoteRepository.findByPerfumeId(perfumeEntity.getId());
+            if (middleNoteEntity != null) {
+                // 미들노트가 존재하면 response 에 담기
+                perfumeResponse.setMiddleNote(middleNoteEntity.getSpices());
+            } else {
+                perfumeResponse.setMiddleNote(null);
+            }
 
-                    // 위 조건들을 충족하지 못하면 null 반환
-                    return null;
+            // baseNote 엔티티 조회
+            BaseNote baseNoteEntity = baseNoteRepository.findByPerfumeId(perfumeEntity.getId());
+            if (baseNoteEntity != null) {
+                perfumeResponse.setBaseNote(baseNoteEntity.getSpices());
+            } else {
+                perfumeResponse.setBaseNote(null);
+            }
 
-                    // 필터로 null 은 제외하고 리스트로 변환
-                }).filter(Objects::nonNull)
-                // 이름을 기준으로 정렬
-                .sorted(Comparator.comparing(perfumeResponse -> {
-                    // single 과 multi 인지 판별하여 각 response 에 맞게 getName
-                    if (perfumeResponse instanceof SinglePerfumeResponse) {
-                        return ((SinglePerfumeResponse) perfumeResponse).getName();
-                    } else {
-                        return ((MultiPerfumeResponse) perfumeResponse).getName();
-                    }
-                }))
-                .toList();
+            // 내용 담은 response 반환
+            return perfumeResponse;
 
-        return allPerfumeResponses;
+            // 이름 오름차순으로 정렬하여 리스트로 담기
+        }).sorted(Comparator.comparing(PerfumeResponse::getName, String.CASE_INSENSITIVE_ORDER)).toList();
+
+
+        return allPerfumeResponseList;
     }
 
     /**
