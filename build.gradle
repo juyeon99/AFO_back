@@ -29,6 +29,8 @@ dependencies {
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor' // @ConfigurationPropertiesScan
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test' // Spring boot test
+
+    implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE' // AWS S3
 }
 
 //tasks.named('test') {useJUnitPlatform()}
