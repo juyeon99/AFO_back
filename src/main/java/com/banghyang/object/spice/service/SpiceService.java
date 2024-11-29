@@ -2,6 +2,7 @@ package com.banghyang.object.spice.service;
 
 import com.banghyang.object.line.entity.Line;
 import com.banghyang.object.line.repository.LineRepository;
+import com.banghyang.object.spice.dto.SpiceCreateRequest;
 import com.banghyang.object.spice.dto.SpiceModifyRequest;
 import com.banghyang.object.spice.dto.SpiceResponse;
 import com.banghyang.object.spice.entity.Spice;
@@ -99,5 +100,30 @@ public class SpiceService {
      */
     public void deleteSpice(Long spiceId) {
         spiceRepository.deleteById(spiceId);
+    }
+
+    /**
+     * 향료 추가 메소드
+     */
+    public void createSpice(SpiceCreateRequest spiceCreateRequest) {
+        // 등록할 향료의 계열 엔티티 가져오기
+        Line lineEntity = lineRepository.findByName(spiceCreateRequest.getLineName());
+
+        // 리퀘스트 정보로 새로운 향료 엔티티 생성하여 저장
+        Spice newSpiceEntity = Spice.builder()
+                .name(spiceCreateRequest.getName())
+                .nameKr(spiceCreateRequest.getNameKr())
+                .description(spiceCreateRequest.getDescription())
+                .line(lineEntity)
+                .build();
+        spiceRepository.save(newSpiceEntity);
+
+        if (spiceCreateRequest.getImageUrl() != null) {
+            SpiceImage newSpiceImageEntity = SpiceImage.builder()
+                    .url(spiceCreateRequest.getImageUrl())
+                    .spice(newSpiceEntity)
+                    .build();
+            spiceImageRepository.save(newSpiceImageEntity);
+        }
     }
 }

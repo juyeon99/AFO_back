@@ -1,5 +1,6 @@
 package com.banghyang.object.spice.controller;
 
+import com.banghyang.object.spice.dto.SpiceCreateRequest;
 import com.banghyang.object.spice.dto.SpiceModifyRequest;
 import com.banghyang.object.spice.dto.SpiceResponse;
 import com.banghyang.object.spice.service.SpiceService;
@@ -30,6 +31,12 @@ public class SpiceController {
     @DeleteMapping
     public ResponseEntity<?> deleteSpice(@RequestBody Long spiceId) {
         spiceService.deleteSpice(spiceId);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping
+    public ResponseEntity<?> createSpice(@RequestBody SpiceCreateRequest spiceCreateRequest) {
+        spiceService.createSpice(spiceCreateRequest);
         return ResponseEntity.ok().build();
     }
 }

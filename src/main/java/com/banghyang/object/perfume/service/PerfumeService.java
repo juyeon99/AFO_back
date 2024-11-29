@@ -9,6 +9,7 @@ import com.banghyang.object.note.repository.MiddleNoteRepository;
 import com.banghyang.object.note.repository.SingleNoteRepository;
 import com.banghyang.object.note.repository.TopNoteRepository;
 import com.banghyang.object.perfume.dto.MultiPerfumeResponse;
+import com.banghyang.object.perfume.dto.PerfumeCreateRequest;
 import com.banghyang.object.perfume.dto.PerfumeModifyRequest;
 import com.banghyang.object.perfume.dto.SinglePerfumeResponse;
 import com.banghyang.object.perfume.entity.Perfume;
@@ -208,5 +209,44 @@ public class PerfumeService {
      */
     public void deletePerfume(Long perfumeId) {
         perfumeRepository.deleteById(perfumeId);
+    }
+
+    /**
+     * 향수 추가 기능
+     */
+    public void createPerfume(PerfumeCreateRequest perfumeCreateRequest) {
+        // 새로운 Perfume 엔티티 생성
+        Perfume newPerfume = perfumeCreateRequest.toPerfumeEntity();
+        perfumeRepository.save(newPerfume);
+
+        // PerfumeImage 생성
+        if (perfumeCreateRequest.getImageUrl() != null) {
+            PerfumeImage newPerfumeImage = perfumeCreateRequest.toPerfumeImageEntity();
+            perfumeImageRepository.save(newPerfumeImage);
+        }
+
+        // 싱글노트 향수일 시
+        if (perfumeCreateRequest.getSingleNote() != null) {
+            if (perfumeCreateRequest.getTopNote() != null ||
+                    perfumeCreateRequest.getMiddleNote() != null ||
+                    perfumeCreateRequest.getBaseNote() != null) {
+                throw new IllegalArgumentException("싱글 노트와 다른 종류의 노트가 공존할 수 없습니다.");
+            } else {
+                SingleNote newSingleNote = perfumeCreateRequest.toSingleNoteEntity();
+                singleNoteRepository.save(newSingleNote);
+            }
+        }
+
+        // 멀티노트 향수일 시
+        if (perfumeCreateRequest.getTopNote() != null &&
+                perfumeCreateRequest.getMiddleNote() != null &&
+                perfumeCreateRequest.getBaseNote() != null) {
+            TopNote newTopNote = perfumeCreateRequest.toTopNoteEntity();
+            topNoteRepository.save(newTopNote);
+            MiddleNote newMiddleNote = perfumeCreateRequest.toMiddleNoteEntity();
+            middleNoteRepository.save(newMiddleNote);
+            BaseNote newBaseNote = perfumeCreateRequest.toBaseNoteEntity();
+            baseNoteRepository.save(newBaseNote);
+        }
     }
 }
