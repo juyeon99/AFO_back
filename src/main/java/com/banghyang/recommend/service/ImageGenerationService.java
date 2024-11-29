@@ -26,7 +26,7 @@ public class ImageGenerationService {
     // FastAPI로 이미지를 전송하여 결과를 받음
     public Map<String, Object> generateImage(String prompt) {
         try {
-            String url = fastApiUrl + "/generate-image";  // FastAPI의 이미지 생성 엔드포인트
+            String url = fastApiUrl + "/image-generation/generate-image";  // FastAPI의 이미지 생성 엔드포인트
 
             // 텍스트 프롬프트 데이터를 MultiValueMap으로 변환
             MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
