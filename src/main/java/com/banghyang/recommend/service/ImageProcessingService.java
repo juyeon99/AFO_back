@@ -27,7 +27,7 @@ public class ImageProcessingService {
     // FastAPI로 이미지를 전송하여 결과를 받음
     public Map<String, Object> processImage(MultipartFile image) {
         try {
-            String url = fastApiUrl + "/process-image";  // FastAPI의 이미지 처리 엔드포인트
+            String url = fastApiUrl + "/image-processing/process-image";  // FastAPI의 이미지 처리 엔드포인트
 
             // 파일을 MultiValueMap으로 변환
             MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();

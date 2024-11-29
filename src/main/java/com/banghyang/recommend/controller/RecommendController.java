@@ -20,7 +20,6 @@ public class RecommendController {
             @RequestParam("user_input") String userInput,
             @RequestParam(value = "image", required = false) MultipartFile image) {
 
-        // 사용자 입력과 이미지 처리
         Map<String, Object> response = recommendService.processInputAndImage(userInput, image);
         return ResponseEntity.ok(response);
     }
