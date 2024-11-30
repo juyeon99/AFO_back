@@ -1,6 +1,7 @@
 package com.banghyang.object.note.entity;
 
 import com.banghyang.object.perfume.entity.Perfume;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -20,6 +21,7 @@ public class SingleNote {
 
     @OneToOne
     @JoinColumn(name = "perfume_id", unique = true, nullable = false)
+    @JsonIgnore
     private Perfume perfume;
 
     @Builder(toBuilder = true)

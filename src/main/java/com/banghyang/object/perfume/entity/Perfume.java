@@ -10,6 +10,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -22,6 +25,9 @@ public class Perfume {
     private String description;
     private String brand;
     private String grade;
+
+    @OneToMany(mappedBy = "perfume", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<PerfumeImage> imageList = new ArrayList<>();
 
     @OneToOne(mappedBy = "perfume", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private SingleNote singleNote;

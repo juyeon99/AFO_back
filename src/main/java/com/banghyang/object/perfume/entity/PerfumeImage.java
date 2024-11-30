@@ -1,12 +1,11 @@
 package com.banghyang.object.perfume.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
 @Getter
@@ -19,9 +18,9 @@ public class PerfumeImage {
 
     private String url;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "perfume_id", nullable = false)
-    @OnDelete(action = OnDeleteAction.CASCADE)
+    @JsonIgnore // 순환 참조 방지
     private Perfume perfume;
 
     @Builder(toBuilder = true)
