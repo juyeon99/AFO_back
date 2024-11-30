@@ -1,5 +1,6 @@
 package com.banghyang.object.perfume.mapper;
 
+import com.banghyang.object.perfume.dto.PerfumeCreateRequest;
 import com.banghyang.object.perfume.dto.PerfumeResponse;
 import com.banghyang.object.perfume.entity.Perfume;
 import com.banghyang.object.perfume.entity.PerfumeImage;
@@ -7,8 +8,11 @@ import com.banghyang.object.perfume.entity.PerfumeImage;
 import java.util.Collections;
 import java.util.Comparator;
 
-public class PerfumeMapper {
-    public static PerfumeResponse mapPerfumeToResponse(Perfume perfumeEntity) {
+public class Mapper {
+    /**
+     * 엔티티에서 향수 조회 response 로 변환하는 메소드
+     */
+    public static PerfumeResponse mapPerfumeEntityToResponse(Perfume perfumeEntity) {
         PerfumeResponse perfumeResponse = new PerfumeResponse(); // 내용 담을 response 생성
         perfumeResponse.setId(perfumeEntity.getId()); // 향수 id 담기
         perfumeResponse.setName(perfumeEntity.getName()); // 향수 이름 담기
@@ -44,5 +48,23 @@ public class PerfumeMapper {
                 perfumeEntity.getBaseNote().getSpices() : null);
 
         return perfumeResponse;
+    }
+
+    public static Perfume mapPerfumeCreateRequestToEntity(PerfumeCreateRequest perfumeCreateRequest) {
+        if (perfumeCreateRequest.getName() != null &&
+                perfumeCreateRequest.getDescription() != null &&
+                perfumeCreateRequest.getBrand() != null &&
+                perfumeCreateRequest.getGrade() != null) {
+            // 이름, 설명, 브랜드, 등급 정보가 모두 있어야 perfume 반환
+            return Perfume.builder()
+                    .name(perfumeCreateRequest.getName())
+                    .description(perfumeCreateRequest.getDescription())
+                    .brand(perfumeCreateRequest.getBrand())
+                    .grade(perfumeCreateRequest.getGrade())
+                    .build();
+        } else {
+            // 정보 누락되어있으면 exception 발생
+            throw new IllegalArgumentException("향수 등록에 필요한 필수 정보가 누락되었습니다. (이름, 설명, 브랜드, 등급");
+        }
     }
 }
