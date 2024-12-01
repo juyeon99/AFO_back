@@ -10,7 +10,7 @@ import java.util.Comparator;
 
 public class Mapper {
     /**
-     * 엔티티에서 향수 조회 response 로 변환하는 메소드
+     * 향수 엔티티에서 향수 조회 response 로 변환하는 매퍼
      */
     public static PerfumeResponse mapPerfumeEntityToResponse(Perfume perfumeEntity) {
         PerfumeResponse perfumeResponse = new PerfumeResponse(); // 내용 담을 response 생성
@@ -50,6 +50,9 @@ public class Mapper {
         return perfumeResponse;
     }
 
+    /**
+     * 향수 생성 request 를 향수 엔티티로 변환하는 매퍼
+     */
     public static Perfume mapPerfumeCreateRequestToEntity(PerfumeCreateRequest perfumeCreateRequest) {
         if (perfumeCreateRequest.getName() != null &&
                 perfumeCreateRequest.getDescription() != null &&
@@ -64,7 +67,7 @@ public class Mapper {
                     .build();
         } else {
             // 정보 누락되어있으면 exception 발생
-            throw new IllegalArgumentException("향수 등록에 필요한 필수 정보가 누락되었습니다. (이름, 설명, 브랜드, 등급");
+            throw new IllegalArgumentException("향수 등록에 필요한 필수 정보가 누락되었습니다. (이름, 설명, 브랜드, 등급)");
         }
     }
 }
