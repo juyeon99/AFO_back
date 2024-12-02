@@ -2,15 +2,15 @@ package com.banghyang.recommend.service;
 
 import com.banghyang.recommend.entity.ChatImage;
 import com.banghyang.recommend.repository.ChatImageRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.http.ResponseEntity;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.Map;
 
@@ -34,35 +34,50 @@ public class ImageGenerationService {
     // FastAPI로 이미지를 전송하여 결과를 받음
     public Map<String, Object> generateImage(String prompt) {
         try {
-            String url = fastApiUrl + "/image-generation/generate-image";  // FastAPI의 이미지 생성 엔드포인트
-
-            // 텍스트 프롬프트 데이터를 MultiValueMap으로 변환
-            MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-            body.add("prompt", prompt);
+            String url = fastApiUrl + "/image-generation/generate-image";
+            log.info("전송하는 프롬프트: {}", prompt);
 
             HttpHeaders headers = new HttpHeaders();
-            HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
+            headers.setContentType(MediaType.APPLICATION_JSON);
 
-            // FastAPI의 /generate-image API 호출
+            // JSON 요청 바디 생성
+            ObjectMapper mapper = new ObjectMapper();
+            String jsonBody = mapper.writeValueAsString(Map.of("prompt", prompt));
+
+            HttpEntity<String> requestEntity = new HttpEntity<>(jsonBody, headers);
+
+            log.info("전송하는 JSON: {}", jsonBody);
+
             ResponseEntity<Map> responseEntity = restTemplate.postForEntity(url, requestEntity, Map.class);
+
             if (!responseEntity.getStatusCode().is2xxSuccessful()) {
                 throw new RuntimeException("FastAPI 서버 응답 실패");
             }
 
             Map<String, Object> response = responseEntity.getBody();
+            log.info("FastAPI 응답: {}", response);
 
-            // output_path가 Map 형태로 들어있으므로 이를 처리
-            Map<String, String> pathInfo = (Map<String, String>) response.get("output_path");
-            String generatedImagePath = pathInfo.get("output_path");
+            // output_path가 Map인 경우를 처리
+            Object outputPathObj = response.get("output_path");
+            String generatedImagePath;
 
-            // generatedImageUrl을 생성할 때 슬래시 중복 방지 처리
+            if (outputPathObj instanceof Map) {
+                Map<String, String> outputPathMap = (Map<String, String>) outputPathObj;
+                generatedImagePath = outputPathMap.get("output_path");
+            } else if (outputPathObj instanceof String) {
+                generatedImagePath = (String) outputPathObj;
+            } else {
+                throw new RuntimeException("Unexpected output_path format");
+            }
+
+            // generatedImageUrl 생성
             String generatedImageUrl = fastApiUrl;
             if (fastApiUrl.endsWith("/") && generatedImagePath.startsWith("/")) {
-                generatedImageUrl += generatedImagePath.substring(1);  // 첫 번째 슬래시 제거
+                generatedImageUrl += generatedImagePath.substring(1);
             } else if (!fastApiUrl.endsWith("/") && !generatedImagePath.startsWith("/")) {
-                generatedImageUrl += "/" + generatedImagePath;  // 슬래시 추가
+                generatedImageUrl += "/" + generatedImagePath;
             } else {
-                generatedImageUrl += generatedImagePath;  // 그대로 사용
+                generatedImageUrl += generatedImagePath;
             }
 
             ResponseEntity<byte[]> imageResponse = restTemplate.getForEntity(generatedImageUrl, byte[].class);
@@ -86,7 +101,9 @@ public class ImageGenerationService {
 
             response.put("s3_url", s3ImageUrl);
             return response;
+
         } catch (Exception e) {
+            log.error("이미지 생성 중 오류 발생. URL: {}, 에러: {}", fastApiUrl, e.getMessage());
             throw new RuntimeException("이미지 생성 오류: " + e.getMessage());
         }
     }
