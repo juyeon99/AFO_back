@@ -17,6 +17,8 @@ public class RecommendController {
 
     @Autowired
     private RecommendService recommendService;
+
+    @Autowired
     private ImageProcessingService imageProcessingService;
 
     @PostMapping("/recommend")
@@ -27,26 +29,31 @@ public class RecommendController {
         Map<String, Object> response = new HashMap<>();
 
         try {
-            // 이미지가 없을 경우 처리
+            // 이미지가 있을 경우 처리
+            String processedDescription = "";
             if (image != null && !image.isEmpty()) {
                 Map<String, Object> imageProcessingResult = imageProcessingService.processImage(image);
                 response.put("imageProcessed", imageProcessingResult);
+
+                // 이미지 처리 결과를 user_input에 추가
+                processedDescription = (String) imageProcessingResult.get("description");
+                if (userInput == null || userInput.isEmpty()) {
+                    // user_input이 없으면 처리된 이미지 설명을 user_input으로 사용
+                    userInput = processedDescription;
+                } else {
+                    // 이미지 설명을 기존 user_input에 추가
+                    userInput += " " + processedDescription;
+                }
             } else {
-                // 이미지가 없을 때 처리 로직
+                // 이미지가 없을 때 처리
                 response.put("message", "No image provided.");
             }
 
-            // 사용자 입력 처리
-            if (userInput != null && !userInput.isEmpty()) {
-                // 사용자 입력 처리
-                response.put("userInputProcessed", userInput);
-            } else {
-                // 사용자 입력이 비어 있을 때 처리 로직
-                response.put("message", "No user input provided.");
-            }
+            // 2. 사용자 입력 처리 후, 서비스로 넘기기
+            Map<String, Object> finalResponse = recommendService.processInputAndImage(userInput);
 
-            // 성공 응답 반환
-            return ResponseEntity.ok(response);
+            // 3. 최종 응답 반환
+            return ResponseEntity.ok(finalResponse);
 
         } catch (Exception e) {
             e.printStackTrace();
