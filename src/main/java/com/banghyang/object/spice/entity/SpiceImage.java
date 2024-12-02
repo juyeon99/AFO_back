@@ -20,7 +20,7 @@ public class SpiceImage {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "spice_id", nullable = false)
-    @JsonIgnore // 손환참조 방지
+    @JsonIgnore // 순환참조 방지
     private Spice spice;
 
     @Builder(toBuilder = true)
