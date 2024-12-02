@@ -1,5 +1,6 @@
 package com.banghyang.object.perfume.service;
 
+import com.banghyang.object.mapper.Mapper;
 import com.banghyang.object.note.entity.BaseNote;
 import com.banghyang.object.note.entity.MiddleNote;
 import com.banghyang.object.note.entity.SingleNote;
@@ -13,7 +14,6 @@ import com.banghyang.object.perfume.dto.PerfumeModifyRequest;
 import com.banghyang.object.perfume.dto.PerfumeResponse;
 import com.banghyang.object.perfume.entity.Perfume;
 import com.banghyang.object.perfume.entity.PerfumeImage;
-import com.banghyang.object.mapper.Mapper;
 import com.banghyang.object.perfume.repository.PerfumeImageRepository;
 import com.banghyang.object.perfume.repository.PerfumeRepository;
 import jakarta.transaction.Transactional;
@@ -90,23 +90,31 @@ public class PerfumeService {
                         .spices(perfumeCreateRequest.getTopNote())
                         .build();
                 topNoteRepository.save(newTopNoteEntity);
-                // 미들노트
-            } else if (perfumeCreateRequest.getMiddleNote() != null) {
+            }
+
+            // 미들노트
+            if (perfumeCreateRequest.getMiddleNote() != null) {
                 MiddleNote newMiddleNoteEntity = MiddleNote.builder()
                         .perfume(newPerfumeEntity)
                         .spices(perfumeCreateRequest.getMiddleNote())
                         .build();
                 middleNoteRepository.save(newMiddleNoteEntity);
-                // 베이스노트
-            } else if (perfumeCreateRequest.getBaseNote() != null) {
+            }
+
+            // 베이스노트
+            if (perfumeCreateRequest.getBaseNote() != null) {
                 BaseNote newBaseNoteEntity = BaseNote.builder()
                         .perfume(newPerfumeEntity)
                         .spices(perfumeCreateRequest.getBaseNote())
                         .build();
                 baseNoteRepository.save(newBaseNoteEntity);
-            } else {
+            }
+
+            if (perfumeCreateRequest.getTopNote() == null &&
+                    perfumeCreateRequest.getMiddleNote() == null &&
+                    perfumeCreateRequest.getBaseNote() == null) {
                 // 노트가 아무것도 존재하지 않을 시 예외 발생시키기
-                throw new IllegalArgumentException("노트 정보가 존재하지 않습니다.");
+                throw new IllegalArgumentException("노트 정보가 존재하지 않아 향수 등록을 실패했습니다.");
             }
         }
     }
@@ -119,24 +127,29 @@ public class PerfumeService {
         Perfume targetPerfumeEntity = perfumeRepository.findById(perfumeModifyRequest.getId())
                 .orElseThrow(() -> new IllegalArgumentException("수정하려 하는 향수의 정보를 찾을 수 없습니다."));
         // toBuilder 사용하여 찾아온 perfume 엔티티 수정
-        Perfume modifyPerfumeEntity = targetPerfumeEntity.toBuilder()
+        Perfume modifyPerfumeEntity = Perfume.builder()
                 .name(perfumeModifyRequest.getName())
                 .description(perfumeModifyRequest.getDescription())
                 .brand(perfumeModifyRequest.getBrand())
                 .grade(perfumeModifyRequest.getGrade())
                 .build();
-        // 수정한 perfume 엔티티 저장
-        perfumeRepository.save(modifyPerfumeEntity);
+        // 향수 엔티티 클래스에 만들어둔 수정 메소드로 수정 적용
+        targetPerfumeEntity.modify(modifyPerfumeEntity);
 
         // 향수 이미지
         if (perfumeModifyRequest.getImageUrl() != null) {
             // request 에 이미지 URL 존재할 시 이미지 수정 진행
             PerfumeImage targetPerfumeImageEntity = perfumeImageRepository.findByPerfumeId(modifyPerfumeEntity.getId());
-            PerfumeImage modifyPerfumeImageEntity = targetPerfumeImageEntity.toBuilder()
-                    .url(perfumeModifyRequest.getImageUrl())
-                    .perfume(modifyPerfumeEntity)
-                    .build();
-            perfumeImageRepository.save(modifyPerfumeImageEntity);
+
+            if (targetPerfumeImageEntity != null) {
+                PerfumeImage modifyPerfumeImageEntity = targetPerfumeImageEntity.toBuilder()
+                        .url(perfumeModifyRequest.getImageUrl())
+                        .perfume(modifyPerfumeEntity)
+                        .build();
+                perfumeImageRepository.save(modifyPerfumeImageEntity);
+            } else {
+                throw new IllegalArgumentException("수정하려는 향수 이미지 정보를 찾을 수 없습니다.");
+            }
         }
 
         // 노트
