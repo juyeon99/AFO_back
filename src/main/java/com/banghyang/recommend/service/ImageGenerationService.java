@@ -62,7 +62,6 @@ public class ImageGenerationService {
             String generatedImagePath;
 
             if (outputPathObj instanceof Map) {
-                @SuppressWarnings("unchecked")
                 Map<String, String> outputPathMap = (Map<String, String>) outputPathObj;
                 generatedImagePath = outputPathMap.get("output_path");
             } else if (outputPathObj instanceof String) {
