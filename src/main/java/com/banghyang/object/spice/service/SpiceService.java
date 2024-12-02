@@ -2,6 +2,7 @@ package com.banghyang.object.spice.service;
 
 import com.banghyang.object.line.entity.Line;
 import com.banghyang.object.line.repository.LineRepository;
+import com.banghyang.object.mapper.Mapper;
 import com.banghyang.object.spice.dto.SpiceCreateRequest;
 import com.banghyang.object.spice.dto.SpiceModifyRequest;
 import com.banghyang.object.spice.dto.SpiceResponse;
@@ -14,7 +15,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -25,73 +25,72 @@ public class SpiceService {
     private final LineRepository lineRepository;
 
     /**
-     * @return 모든 향료 response
+     * @return 모든 향료 response 리스트 (영문명 오름차순 정렬)
      */
-    public List<SpiceResponse> getAllSpiceResponses() {
+    public List<SpiceResponse> getAllSpiceResponse() {
+        // 향료 모든 entity 가져와서 리스트에 담기
+        List<Spice> spiceEntityList = spiceRepository.findAll();
 
-        // 모든 향료 엔티티 찾아오기
-        List<Spice> allSpiceEntityList = spiceRepository.findAll();
+        return spiceEntityList.stream() // stream 으로 엔티티 리스트의 모든 항목에 접근하여
+                .map(Mapper::mapSpiceEntityToResponse) // 매퍼를 이용하여 entity 를 response 로 변환하고
+                .sorted(Comparator.comparing(SpiceResponse::getName)) // 영문명 기준으로 정렬하여
+                .toList(); // 리스트에 담아 반환하기
+    }
 
-        // Response List 만들기
-        List<SpiceResponse> allSpiceResponseList = allSpiceEntityList.stream().map(spice -> {
-                    // 향료 아이디로 이미지 엔티티 찾아오기
-                    SpiceImage spiceImageEntity = spiceImageRepository.findBySpiceId(spice.getId());
-                    // 계열 엔티티
-                    Line lineEntity = spice.getLine();
+    /**
+     * 새로운 향로 생성 메소드(향료, 향료이미지)
+     */
+    public void createSpice(SpiceCreateRequest spiceCreateRequest) {
+        if (spiceCreateRequest.getLineName() != null) {
+            // 계열 이름이 존재할 시에만 생성 진행
+            // 계열이름으로 계열 엔티티 찾아오기
+            Line lineEntity = lineRepository.findByName(spiceCreateRequest.getLineName());
+            // 매퍼를 이용하여 리퀘스트의 정보로 엔티티 변환하여 생성
+            Spice newSpiceEntity = Mapper.mapSpiceCreateRequestToEntity(spiceCreateRequest, lineEntity);
+            // 생성한 향료 엔티티 저장
+            spiceRepository.save(newSpiceEntity);
 
-                    // 이미지와 계열 엔티티가 모두 존재할 시 response 반환
-                    if (spiceImageEntity != null && lineEntity != null) {
-                        return new SpiceResponse().from(spice, spiceImageEntity, lineEntity);
-                    }
-
-                    // 하나라도 없으면 null 반환
-                    return null;
-
-                    // 필터로 null 값은 제외하고 리스트로 변환
-                }).filter(Objects::nonNull)
-                // 이름 기준 정렬
-                .sorted(Comparator.comparing(SpiceResponse::getName))
-                .toList();
-
-        return allSpiceResponseList;
+            // 향료 이미지
+            if (spiceCreateRequest.getImageUrl() != null) {
+                // 만약 request 에 이미지 url 이 담겨있다면 이미지 엔티티 생성 진행
+                SpiceImage newSpiceImageEntity = SpiceImage.builder()
+                        .spice(newSpiceEntity)
+                        .url(spiceCreateRequest.getImageUrl())
+                        .build();
+                spiceImageRepository.save(newSpiceImageEntity);
+            }
+        } else {
+            // 계열 정보가 존재하지 않는다면 예외 발생시키기
+            throw new IllegalArgumentException("향료 등록에 필요한 계열 정보가 존재하지 않습니다.");
+        }
     }
 
     /**
      * 향료 정보 수정 메소드
      */
     public void modifySpice(SpiceModifyRequest spiceModifyRequest) {
-        // 수정할 향료 엔티티 가져오기
+        // 수정할 향료 엔티티 찾아오기
         Spice targetSpiceEntity = spiceRepository.findById(spiceModifyRequest.getId())
-                .orElseThrow(() -> new IllegalArgumentException("항료 정보를 찾을 수 없습니다."));
-
-        // 수정할 향료 엔티티를 복사하면서 수정
+                .orElseThrow(() -> new IllegalArgumentException("수정하려는 향료의 정보를 찾을 수 없습니다."));
+        // toBuilder 사용하여 향료 엔티티 수정
         Spice modifySpiceEntity = targetSpiceEntity.toBuilder()
-                .name(targetSpiceEntity.getName())
-                .nameKr(targetSpiceEntity.getNameKr())
-                .description(targetSpiceEntity.getDescription())
+                .name(spiceModifyRequest.getName())
+                .nameKr(spiceModifyRequest.getNameKr())
+                .description(spiceModifyRequest.getDescription())
+                .line(lineRepository.findByName(spiceModifyRequest.getLineName()))
                 .build();
-
-        // 수정한 향료 저장
+        // 수정한 향료 엔티티 저장
         spiceRepository.save(modifySpiceEntity);
 
-        // request 에 이미지 url 이 있으면 이미지 수정 진행
+        // 향료 이미지
         if (spiceModifyRequest.getImageUrl() != null) {
-            // 수정할 이미지 엔티티 가져오기
-            SpiceImage targetSpiceImageEntity = spiceImageRepository.findBySpiceId(spiceModifyRequest.getId());
-            if (targetSpiceImageEntity != null) {
-                // 해당하는 이미지 엔티티가 존재할 시 수정 진행
-                SpiceImage modifySpiceImageEntity = targetSpiceImageEntity.toBuilder()
-                        .url(spiceModifyRequest.getImageUrl())
-                        .build();
-                spiceImageRepository.save(modifySpiceImageEntity);
-            } else {
-                // 만약 없다면 새로 생성
-                SpiceImage newSpiceImageEntity = SpiceImage.builder()
-                        .url(spiceModifyRequest.getImageUrl())
-                        .spice(modifySpiceEntity)
-                        .build();
-                spiceImageRepository.save(newSpiceImageEntity);
-            }
+            // request 에 이미지 url 정보가 담겨있으면 이미지 수정 진행
+            SpiceImage targetSpiceImageEntity = spiceImageRepository.findBySpiceId(modifySpiceEntity.getId());
+            SpiceImage modifySpiceImageEntity = targetSpiceImageEntity.toBuilder()
+                    .url(spiceModifyRequest.getImageUrl())
+                    .spice(modifySpiceEntity)
+                    .build();
+            spiceImageRepository.save(modifySpiceImageEntity);
         }
     }
 
@@ -99,31 +98,8 @@ public class SpiceService {
      * 향료 삭제 메소드
      */
     public void deleteSpice(Long spiceId) {
-        spiceRepository.deleteById(spiceId);
-    }
-
-    /**
-     * 향료 추가 메소드
-     */
-    public void createSpice(SpiceCreateRequest spiceCreateRequest) {
-        // 등록할 향료의 계열 엔티티 가져오기
-        Line lineEntity = lineRepository.findByName(spiceCreateRequest.getLineName());
-
-        // 리퀘스트 정보로 새로운 향료 엔티티 생성하여 저장
-        Spice newSpiceEntity = Spice.builder()
-                .name(spiceCreateRequest.getName())
-                .nameKr(spiceCreateRequest.getNameKr())
-                .description(spiceCreateRequest.getDescription())
-                .line(lineEntity)
-                .build();
-        spiceRepository.save(newSpiceEntity);
-
-        if (spiceCreateRequest.getImageUrl() != null) {
-            SpiceImage newSpiceImageEntity = SpiceImage.builder()
-                    .url(spiceCreateRequest.getImageUrl())
-                    .spice(newSpiceEntity)
-                    .build();
-            spiceImageRepository.save(newSpiceImageEntity);
-        }
+        Spice targetSpiceEntity = spiceRepository.findById(spiceId)
+                .orElseThrow(() -> new IllegalArgumentException("삭제하려는 향료의 정보를 찾을 수 없습니다."));
+        spiceRepository.delete(targetSpiceEntity);
     }
 }

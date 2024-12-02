@@ -4,5 +4,4 @@ import com.banghyang.object.note.entity.SingleNote;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface SingleNoteRepository extends JpaRepository<SingleNote, Long> {
-    SingleNote findByPerfumeId(Long perfume_id);
 }

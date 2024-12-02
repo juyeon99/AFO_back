@@ -20,8 +20,11 @@ public class Spice {
     private String nameKr;
     private String description;
 
+    @OneToOne(mappedBy = "spice", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private SpiceImage spiceImage;
+
     @ManyToOne
-    @JoinColumn(name = "line_id")
+    @JoinColumn(name = "line_id", nullable = false)
     private Line line;
 
     @Builder(toBuilder = true)
@@ -29,6 +32,5 @@ public class Spice {
         this.name = name;
         this.nameKr = nameKr;
         this.description = description;
-        this.line = line;
     }
 }

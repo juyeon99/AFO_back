@@ -1,13 +1,12 @@
 package com.banghyang.object.note.entity;
 
 import com.banghyang.object.perfume.entity.Perfume;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
 @Getter
@@ -22,7 +21,7 @@ public class TopNote {
 
     @OneToOne
     @JoinColumn(name = "perfume_id", unique = true, nullable = false)
-    @OnDelete(action = OnDeleteAction.CASCADE)
+    @JsonIgnore
     private Perfume perfume;
 
     @Builder(toBuilder = true)

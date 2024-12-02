@@ -1,12 +1,11 @@
 package com.banghyang.object.spice.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
 @Getter
@@ -19,9 +18,9 @@ public class SpiceImage {
 
     private String url;
 
-    @ManyToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "spice_id", nullable = false)
-    @OnDelete(action = OnDeleteAction.CASCADE)
+    @JsonIgnore // 순환참조 방지
     private Spice spice;
 
     @Builder(toBuilder = true)

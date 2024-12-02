@@ -9,4 +9,5 @@ public class SpiceModifyRequest {
     private String nameKr;
     private String description;
     private String imageUrl;
+    private String lineName;
 }
