@@ -33,35 +33,36 @@ public class ImageProcessingService {
     // FastAPI로 이미지를 전송하여 결과를 받음
     public Map<String, Object> processImage(MultipartFile image) {
         try {
-            // S3에 이미지 업로드하고 URL 받기
             String imageUrl = s3Service.uploadImage(image);
 
-            // ChatImage 엔티티 생성 및 저장
             ChatImage chatImage = ChatImage.builder()
                     .imageUrl(imageUrl)
                     .build();
             chatImageRepository.save(chatImage);
 
-            String url = fastApiUrl + "/image-processing/process-image";  // FastAPI의 이미지 처리 엔드포인트
+            String url = fastApiUrl + "/image-processing/process-image";
 
-            // 파일을 MultiValueMap으로 변환
             MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
             body.add("file", image.getResource());
 
             HttpHeaders headers = new HttpHeaders();
             HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
 
-            // FastAPI의 /process-image API 호출
             ResponseEntity<Map> responseEntity = restTemplate.postForEntity(url, requestEntity, Map.class);
             Map<String, Object> response = responseEntity.getBody();
 
-            // 저장된 이미지의 ID와 URL을 응답에 포함
+            if (response == null) {
+                throw new RuntimeException("FastAPI 응답이 null입니다.");
+            }
+
+            // 응답에 imageUrl 추가
             response.put("imageUrl", imageUrl);
 
-            // FastAPI의 응답 반환
             return response;
         } catch (Exception e) {
-            throw new RuntimeException("이미지 처리 오류: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("FastAPI 호출 오류: " + e.getMessage());
         }
     }
+
 }
