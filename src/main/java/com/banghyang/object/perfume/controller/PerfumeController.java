@@ -46,8 +46,8 @@ public class PerfumeController {
     /**
      * 기존 향수 삭제하기
      */
-    @DeleteMapping
-    public ResponseEntity<?> deletePerfume(@RequestBody Long perfumeId) {
+    @DeleteMapping("/{perfumeId}")
+    public ResponseEntity<?> deletePerfume(@PathVariable Long perfumeId) {
         perfumeService.deletePerfume(perfumeId);
         return ResponseEntity.ok().build();
     }
