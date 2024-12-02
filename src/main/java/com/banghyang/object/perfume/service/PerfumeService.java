@@ -13,7 +13,7 @@ import com.banghyang.object.perfume.dto.PerfumeModifyRequest;
 import com.banghyang.object.perfume.dto.PerfumeResponse;
 import com.banghyang.object.perfume.entity.Perfume;
 import com.banghyang.object.perfume.entity.PerfumeImage;
-import com.banghyang.object.perfume.mapper.Mapper;
+import com.banghyang.object.mapper.Mapper;
 import com.banghyang.object.perfume.repository.PerfumeImageRepository;
 import com.banghyang.object.perfume.repository.PerfumeRepository;
 import jakarta.transaction.Transactional;
@@ -60,7 +60,7 @@ public class PerfumeService {
 
         // 향수 이미지
         if (perfumeCreateRequest.getImageUrl() != null) {
-            // 만약 request 에 이미지 url 정보가 담겨있다면
+            // 만약 request 에 이미지 url 정보가 담겨있다면 이미지 엔티티 생성 진행
             PerfumeImage newPerfumeImageEntity = PerfumeImage.builder()
                     .perfume(newPerfumeEntity)
                     .url(perfumeCreateRequest.getImageUrl())
@@ -118,7 +118,6 @@ public class PerfumeService {
         // 수정할 perfume 엔티티 request 의 id 값으로 찾아오기
         Perfume targetPerfumeEntity = perfumeRepository.findById(perfumeModifyRequest.getId())
                 .orElseThrow(() -> new IllegalArgumentException("수정하려 하는 향수의 정보를 찾을 수 없습니다."));
-
         // toBuilder 사용하여 찾아온 perfume 엔티티 수정
         Perfume modifyPerfumeEntity = targetPerfumeEntity.toBuilder()
                 .name(perfumeModifyRequest.getName())
@@ -126,7 +125,6 @@ public class PerfumeService {
                 .brand(perfumeModifyRequest.getBrand())
                 .grade(perfumeModifyRequest.getGrade())
                 .build();
-
         // 수정한 perfume 엔티티 저장
         perfumeRepository.save(modifyPerfumeEntity);
 

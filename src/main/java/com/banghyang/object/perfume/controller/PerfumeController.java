@@ -17,23 +17,35 @@ public class PerfumeController {
 
     private final PerfumeService perfumeService;
 
+    /**
+     * 모든 향수 조회하기
+     */
     @GetMapping
     public ResponseEntity<List<PerfumeResponse>> getAllPerfumes() {
         return ResponseEntity.ok(perfumeService.getAllPerfumeResponses());
     }
 
+    /**
+     * 새로운 향수 등록허가
+     */
     @PostMapping
     public ResponseEntity<?> createPerfume(@RequestBody PerfumeCreateRequest perfumeCreateRequest) {
         perfumeService.createPerfume(perfumeCreateRequest);
         return ResponseEntity.ok().build();
     }
 
+    /**
+     * 기존 향수 정보 수정하기
+     */
     @PutMapping
     public ResponseEntity<?> modifyPerfume(@RequestBody PerfumeModifyRequest perfumeModifyRequest) {
         perfumeService.modifyPerfume(perfumeModifyRequest);
         return ResponseEntity.ok().build();
     }
 
+    /**
+     * 기존 향수 삭제하기
+     */
     @DeleteMapping
     public ResponseEntity<?> deletePerfume(@RequestBody Long perfumeId) {
         perfumeService.deletePerfume(perfumeId);

@@ -18,7 +18,7 @@ public class PerfumeImage {
 
     private String url;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "perfume_id", nullable = false)
     @JsonIgnore // 순환 참조 방지
     private Perfume perfume;

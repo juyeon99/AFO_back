@@ -1,12 +1,12 @@
-package com.banghyang.object.perfume.mapper;
+package com.banghyang.object.mapper;
 
+import com.banghyang.object.line.entity.Line;
 import com.banghyang.object.perfume.dto.PerfumeCreateRequest;
 import com.banghyang.object.perfume.dto.PerfumeResponse;
 import com.banghyang.object.perfume.entity.Perfume;
-import com.banghyang.object.perfume.entity.PerfumeImage;
-
-import java.util.Collections;
-import java.util.Comparator;
+import com.banghyang.object.spice.dto.SpiceCreateRequest;
+import com.banghyang.object.spice.dto.SpiceResponse;
+import com.banghyang.object.spice.entity.Spice;
 
 public class Mapper {
     /**
@@ -18,18 +18,9 @@ public class Mapper {
         perfumeResponse.setName(perfumeEntity.getName()); // 향수 이름 담기
         perfumeResponse.setDescription(perfumeEntity.getDescription()); // 향수 설명 담기
 
-        if (perfumeEntity.getImageList() != null) {
-            // 엔티티의 이미지 리스트가 존재할 시에
-            perfumeResponse.setImageUrlList( // response 에 아래의 과정으로 담아줌
-                    perfumeEntity.getImageList().stream() // stream 으로 모든 항목에 접근하여
-                            .sorted(Comparator.comparing(PerfumeImage::getId)) // id 기준으로 정렬시키고
-                            .map(PerfumeImage::getUrl) // url 을 가져와서
-                            .toList() // 리스트로 담아줌
-            );
-        } else {
-            // 이미지 리스트가 없다면
-            perfumeResponse.setImageUrlList(Collections.emptyList()); // 빈 리스트 담기
-        }
+        // 이미지 존재시에 담고, 없을시 null
+        perfumeResponse.setImageUrl(perfumeEntity.getPerfumeImage() != null ?
+                perfumeEntity.getPerfumeImage().getUrl() : null);
 
         // 싱글노트 존재시에 담고, 없을시 null
         perfumeResponse.setSingleNote(perfumeEntity.getSingleNote() != null ?
@@ -68,6 +59,42 @@ public class Mapper {
         } else {
             // 정보 누락되어있으면 exception 발생
             throw new IllegalArgumentException("향수 등록에 필요한 필수 정보가 누락되었습니다. (이름, 설명, 브랜드, 등급)");
+        }
+    }
+
+    /**
+     * 향료 엔티티에서 향료 조회 response 로 변환하는 매퍼
+     */
+    public static SpiceResponse mapSpiceEntityToResponse(Spice spiceEntity) {
+        SpiceResponse spiceResponse = new SpiceResponse(); // 내용 담을 response 생성
+        spiceResponse.setId(spiceEntity.getId()); // id
+        spiceResponse.setName(spiceEntity.getName()); // 영문명
+        spiceResponse.setNameKr(spiceEntity.getNameKr()); // 한글명
+        spiceResponse.setDescription(spiceEntity.getDescription()); // 설명
+        spiceResponse.setLine(spiceEntity.getLine().getName()); // 계열명
+        spiceResponse.setColor(spiceEntity.getLine().getColor()); // 색상코드
+
+        // 이미지 존재시에 담고, 없을시 null
+        spiceResponse.setImageUrl(spiceEntity.getSpiceImage() != null ?
+                spiceEntity.getSpiceImage().getUrl() : null);
+
+        return spiceResponse;
+    }
+
+    public static Spice mapSpiceCreateRequestToEntity(SpiceCreateRequest spiceCreateRequest, Line lineEntity) {
+        if (spiceCreateRequest.getName() != null &&
+        spiceCreateRequest.getNameKr() != null &&
+        spiceCreateRequest.getDescription() != null) {
+            // 영문명, 한글명, 설명 모두 있어야 entity 반환
+            return Spice.builder()
+                    .name(spiceCreateRequest.getName())
+                    .nameKr(spiceCreateRequest.getNameKr())
+                    .description(spiceCreateRequest.getDescription())
+                    .line(lineEntity)
+                    .build();
+        } else {
+            // 정보 누락시 예외 발생시키기
+            throw new IllegalArgumentException("향료 등록에 필요한 정보가 누락되었습니다. (영문명, 한글명, 설명)");
         }
     }
 }
