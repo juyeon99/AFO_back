@@ -7,6 +7,8 @@ public class PerfumeResponse {
     private Long id;
     private String name;
     private String description;
+    private String brand;
+    private String grade;
     private String imageUrl;
     private String singleNote;
     private String topNote;

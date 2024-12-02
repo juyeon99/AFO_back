@@ -17,6 +17,8 @@ public class Mapper {
         perfumeResponse.setId(perfumeEntity.getId()); // 향수 id 담기
         perfumeResponse.setName(perfumeEntity.getName()); // 향수 이름 담기
         perfumeResponse.setDescription(perfumeEntity.getDescription()); // 향수 설명 담기
+        perfumeResponse.setBrand(perfumeEntity.getBrand()); // 브랜드명 담기
+        perfumeResponse.setGrade(perfumeEntity.getGrade()); // 부향률 담기
 
         // 이미지 존재시에 담고, 없을시 null
         perfumeResponse.setImageUrl(perfumeEntity.getPerfumeImage() != null ?
@@ -27,15 +29,15 @@ public class Mapper {
                 perfumeEntity.getSingleNote().getSpices() : null);
 
         // 탑노트
-        perfumeResponse.setTopNote(perfumeResponse.getTopNote() != null ?
+        perfumeResponse.setTopNote(perfumeEntity.getTopNote() != null ?
                 perfumeEntity.getTopNote().getSpices() : null);
 
         // 미들노트
-        perfumeResponse.setMiddleNote(perfumeResponse.getMiddleNote() != null ?
+        perfumeResponse.setMiddleNote(perfumeEntity.getMiddleNote() != null ?
                 perfumeEntity.getMiddleNote().getSpices() : null);
 
         // 베이스노트
-        perfumeResponse.setBaseNote(perfumeResponse.getBaseNote() != null ?
+        perfumeResponse.setBaseNote(perfumeEntity.getBaseNote() != null ?
                 perfumeEntity.getBaseNote().getSpices() : null);
 
         return perfumeResponse;
