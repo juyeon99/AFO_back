@@ -28,4 +28,10 @@ public class PerfumeImage {
         this.url = url;
         this.perfume = perfume;
     }
+
+    public PerfumeImage modify(PerfumeImage modifyPerfumeImageEntity) {
+        this.url = modifyPerfumeImageEntity.url;
+        this.perfume = modifyPerfumeImageEntity.perfume;
+        return this;
+    }
 }

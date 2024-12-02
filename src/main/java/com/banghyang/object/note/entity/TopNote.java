@@ -29,4 +29,10 @@ public class TopNote {
         this.spices = spices;
         this.perfume = perfume;
     }
+
+    public TopNote modify(TopNote modifyTopNoteEntity) {
+        this.spices = modifyTopNoteEntity.getSpices();
+        this.perfume = modifyTopNoteEntity.getPerfume();
+        return this;
+    }
 }

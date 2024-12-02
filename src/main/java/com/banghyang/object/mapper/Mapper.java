@@ -83,6 +83,9 @@ public class Mapper {
         return spiceResponse;
     }
 
+    /**
+     * 향료 등록 request 를 엔티티로 변환하는 매퍼
+     */
     public static Spice mapSpiceCreateRequestToEntity(SpiceCreateRequest spiceCreateRequest, Line lineEntity) {
         if (spiceCreateRequest.getName() != null &&
         spiceCreateRequest.getNameKr() != null &&

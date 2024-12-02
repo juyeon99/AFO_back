@@ -29,4 +29,10 @@ public class SingleNote {
         this.spices = spices;
         this.perfume = perfume;
     }
+
+    public SingleNote modify(SingleNote modifySingleNoteEntity) {
+        this.spices = modifySingleNoteEntity.getSpices();
+        this.perfume = modifySingleNoteEntity.getPerfume();
+        return this;
+    }
 }

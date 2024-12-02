@@ -29,4 +29,10 @@ public class MiddleNote {
         this.spices = spices;
         this.perfume = perfume;
     }
+
+    public MiddleNote modify(MiddleNote modifyMiddleNoteEntity) {
+        this.spices = modifyMiddleNoteEntity.getSpices();
+        this.perfume = modifyMiddleNoteEntity.getPerfume();
+        return this;
+    }
 }

@@ -29,4 +29,10 @@ public class BaseNote {
         this.spices = spices;
         this.perfume = perfume;
     }
+
+    public BaseNote modify(BaseNote modifyBaseNoteEntity) {
+        this.spices = modifyBaseNoteEntity.getSpices();
+        this.perfume = modifyBaseNoteEntity.getPerfume();
+        return this;
+    }
 }
