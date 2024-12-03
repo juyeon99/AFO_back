@@ -89,7 +89,7 @@ public class Mapper {
         spiceResponse.setName(spiceEntity.getName()); // 영문명
         spiceResponse.setNameKr(spiceEntity.getNameKr()); // 한글명
         spiceResponse.setDescription(spiceEntity.getDescription()); // 설명
-        spiceResponse.setLine(spiceEntity.getLine().getName()); // 계열명
+        spiceResponse.setLineName(spiceEntity.getLine().getName()); // 계열명
         spiceResponse.setColor(spiceEntity.getLine().getColor()); // 색상코드
 
         // 이미지 존재시에 담고, 없을시 null
