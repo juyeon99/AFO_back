@@ -126,8 +126,8 @@ public class PerfumeService {
     public void modifyPerfume(PerfumeModifyRequest perfumeModifyRequest) {
         // 수정할 perfume 엔티티 request 의 id 값으로 찾아오기
         Perfume targetPerfumeEntity = perfumeRepository.findById(perfumeModifyRequest.getId())
-                .orElseThrow(() -> new IllegalArgumentException("수정하려 하는 향수의 정보를 찾을 수 없습니다."));
-        // toBuilder 사용하여 찾아온 perfume 엔티티 수정
+                .orElseThrow(() -> new IllegalArgumentException("수정하려는 향수의 정보를 찾을 수 없습니다."));
+        // 찾아온 perfume 엔티티 수정
         Perfume modifyPerfumeEntity = Perfume.builder()
                 .name(perfumeModifyRequest.getName())
                 .description(perfumeModifyRequest.getDescription())
@@ -141,14 +141,18 @@ public class PerfumeService {
         if (ValidUtils.isNotBlank(perfumeModifyRequest.getImageUrl())) {
             // request 에 이미지 URL 존재할 시 이미지 수정 진행
             PerfumeImage targetPerfumeImageEntity = targetPerfumeEntity.getPerfumeImage();
+            // 수정 이미지 엔티티 생성
+            PerfumeImage modifyPerfumeImageEntity = PerfumeImage.builder()
+                    .url(perfumeModifyRequest.getImageUrl())
+                    .perfume(targetPerfumeEntity)
+                    .build();
+
             if (targetPerfumeImageEntity != null) {
-                PerfumeImage modifyPerfumeImageEntity = PerfumeImage.builder()
-                        .url(perfumeModifyRequest.getImageUrl())
-                        .perfume(targetPerfumeEntity)
-                        .build();
+                // 기존 엔티티가 있다면 수정
                 targetPerfumeImageEntity.modify(modifyPerfumeImageEntity);
             } else {
-                throw new IllegalArgumentException("수정하려는 향수 이미지 정보를 찾을 수 없습니다.");
+                // 기존 엔티티가 없다면 생성
+                perfumeImageRepository.save(modifyPerfumeImageEntity);
             }
         }
 
@@ -204,6 +208,11 @@ public class PerfumeService {
                 } else {
                     topNoteRepository.save(modifyTopNoteEntity);
                 }
+            } else {
+                // 탑노트 입력 정보가 없다면 기존 탑노트 존재 검증 후 삭제 처리
+                if (targetPerfumeEntity.getTopNote() != null) {
+                    topNoteRepository.delete(targetPerfumeEntity.getTopNote());
+                }
             }
             // 미들노트
             if (ValidUtils.isNotBlank(perfumeModifyRequest.getMiddleNote())) {
@@ -221,6 +230,11 @@ public class PerfumeService {
                     targetPerfumeEntity.getMiddleNote().modify(modifyMiddleNoteEntity);
                 } else {
                     middleNoteRepository.save(modifyMiddleNoteEntity);
+                }
+            } else {
+                // 미들노트 입력 정보가 없다면 기존 미들노트 존재 검증 후 삭제 처리
+                if (targetPerfumeEntity.getMiddleNote() != null) {
+                    middleNoteRepository.delete(targetPerfumeEntity.getMiddleNote());
                 }
             }
             // 베이스노트
@@ -240,7 +254,12 @@ public class PerfumeService {
                 } else {
                     baseNoteRepository.save(modifyBaseNoteEntity);
                 }
-            } // 노트 정보가 존재하지 않으면 노트 수정은 진행하지 않음
+            } else {
+                // 베이스노트 입력 정보가 없다면 기존 베이스노트 존재 검증 후 삭제 처리
+                if (targetPerfumeEntity.getBaseNote() != null) {
+                    baseNoteRepository.delete(targetPerfumeEntity.getBaseNote());
+                }
+            }
         }
     }
 

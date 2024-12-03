@@ -10,6 +10,7 @@ import com.banghyang.object.spice.entity.Spice;
 import com.banghyang.object.spice.entity.SpiceImage;
 import com.banghyang.object.spice.repository.SpiceImageRepository;
 import com.banghyang.object.spice.repository.SpiceRepository;
+import com.banghyang.object.util.ValidUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -41,7 +42,7 @@ public class SpiceService {
      * 새로운 향로 생성 메소드(향료, 향료이미지)
      */
     public void createSpice(SpiceCreateRequest spiceCreateRequest) {
-        if (spiceCreateRequest.getLineName() != null) {
+        if (ValidUtils.isNotBlank(spiceCreateRequest.getLineName())) {
             // 계열 이름이 존재할 시에만 생성 진행
             // 계열이름으로 계열 엔티티 찾아오기
             Line lineEntity = lineRepository.findByName(spiceCreateRequest.getLineName());
@@ -51,7 +52,7 @@ public class SpiceService {
             spiceRepository.save(newSpiceEntity);
 
             // 향료 이미지
-            if (spiceCreateRequest.getImageUrl() != null) {
+            if (ValidUtils.isNotBlank(spiceCreateRequest.getImageUrl())) {
                 // 만약 request 에 이미지 url 이 담겨있다면 이미지 엔티티 생성 진행
                 SpiceImage newSpiceImageEntity = SpiceImage.builder()
                         .spice(newSpiceEntity)
@@ -72,8 +73,9 @@ public class SpiceService {
         // 수정할 향료 엔티티 찾아오기
         Spice targetSpiceEntity = spiceRepository.findById(spiceModifyRequest.getId())
                 .orElseThrow(() -> new IllegalArgumentException("수정하려는 향료의 정보를 찾을 수 없습니다."));
-        // toBuilder 사용하여 향료 엔티티 수정
+        // 향료 엔티티 수정
         Spice modifySpiceEntity = targetSpiceEntity.toBuilder()
+                .id(spiceModifyRequest.getId())
                 .name(spiceModifyRequest.getName())
                 .nameKr(spiceModifyRequest.getNameKr())
                 .description(spiceModifyRequest.getDescription())
@@ -83,10 +85,11 @@ public class SpiceService {
         spiceRepository.save(modifySpiceEntity);
 
         // 향료 이미지
-        if (spiceModifyRequest.getImageUrl() != null) {
+        if (ValidUtils.isNotBlank(spiceModifyRequest.getImageUrl())) {
             // request 에 이미지 url 정보가 담겨있으면 이미지 수정 진행
             SpiceImage targetSpiceImageEntity = spiceImageRepository.findBySpiceId(modifySpiceEntity.getId());
             SpiceImage modifySpiceImageEntity = targetSpiceImageEntity.toBuilder()
+                    .id(spiceModifyRequest.getId())
                     .url(spiceModifyRequest.getImageUrl())
                     .spice(modifySpiceEntity)
                     .build();

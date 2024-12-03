@@ -24,7 +24,8 @@ public class SpiceImage {
     private Spice spice;
 
     @Builder(toBuilder = true)
-    public SpiceImage(String url, Spice spice) {
+    public SpiceImage(Long id, String url, Spice spice) {
+        this.id = id;
         this.url = url;
         this.spice = spice;
     }

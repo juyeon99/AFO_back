@@ -28,7 +28,8 @@ public class Spice {
     private Line line;
 
     @Builder(toBuilder = true)
-    public Spice(String name, String nameKr, String description, Line line) {
+    public Spice(Long id, String name, String nameKr, String description, Line line) {
+        this.id = id;
         this.name = name;
         this.nameKr = nameKr;
         this.description = description;
