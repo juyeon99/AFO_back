@@ -20,9 +20,6 @@ public class KakaoController {
 
     /**
      * KakaoAuthCode 발급받는 URL 로 리다이렉트 시키는 메소드
-     *
-     * @param response
-     * @return
      */
     @SneakyThrows
     @GetMapping("/login")
