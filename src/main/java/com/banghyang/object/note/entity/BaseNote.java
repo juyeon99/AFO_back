@@ -24,16 +24,14 @@ public class BaseNote {
     @JsonIgnore
     private Perfume perfume;
 
-    @Builder(toBuilder = true)
-    public BaseNote(Long id, String spices, Perfume perfume) {
-        this.id = id;
+    @Builder
+    public BaseNote(String spices, Perfume perfume) {
         this.spices = spices;
         this.perfume = perfume;
     }
 
-    public BaseNote modify(BaseNote modifyBaseNoteEntity) {
+    public void modify(BaseNote modifyBaseNoteEntity) {
         this.spices = modifyBaseNoteEntity.getSpices();
         this.perfume = modifyBaseNoteEntity.getPerfume();
-        return this;
     }
 }

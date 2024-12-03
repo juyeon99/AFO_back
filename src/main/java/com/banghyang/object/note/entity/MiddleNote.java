@@ -24,16 +24,14 @@ public class MiddleNote {
     @JsonIgnore
     private Perfume perfume;
 
-    @Builder(toBuilder = true)
-    public MiddleNote(Long id, String spices, Perfume perfume) {
-        this.id = id;
+    @Builder
+    public MiddleNote(String spices, Perfume perfume) {
         this.spices = spices;
         this.perfume = perfume;
     }
 
-    public MiddleNote modify(MiddleNote modifyMiddleNoteEntity) {
+    public void modify(MiddleNote modifyMiddleNoteEntity) {
         this.spices = modifyMiddleNoteEntity.getSpices();
         this.perfume = modifyMiddleNoteEntity.getPerfume();
-        return this;
     }
 }

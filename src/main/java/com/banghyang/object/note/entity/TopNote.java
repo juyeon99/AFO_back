@@ -24,16 +24,14 @@ public class TopNote {
     @JsonIgnore
     private Perfume perfume;
 
-    @Builder(toBuilder = true)
-    public TopNote(Long id, String spices, Perfume perfume) {
-        this.id = id;
+    @Builder
+    public TopNote(String spices, Perfume perfume) {
         this.spices = spices;
         this.perfume = perfume;
     }
 
-    public TopNote modify(TopNote modifyTopNoteEntity) {
+    public void modify(TopNote modifyTopNoteEntity) {
         this.spices = modifyTopNoteEntity.getSpices();
         this.perfume = modifyTopNoteEntity.getPerfume();
-        return this;
     }
 }

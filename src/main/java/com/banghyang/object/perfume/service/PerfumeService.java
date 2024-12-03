@@ -154,6 +154,10 @@ public class PerfumeService {
                 // 기존 엔티티가 없다면 생성
                 perfumeImageRepository.save(modifyPerfumeImageEntity);
             }
+        } else {
+            if (targetPerfumeEntity.getPerfumeImage() != null) {
+                perfumeImageRepository.delete(targetPerfumeEntity.getPerfumeImage());
+            }
         }
 
         // 노트

@@ -38,20 +38,18 @@ public class Perfume {
     @OneToOne(mappedBy = "perfume", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private BaseNote baseNote;
 
-    @Builder(toBuilder = true)
-    public Perfume(Long id, String name, String description, String brand, String grade) {
-        this.id = id;
+    @Builder
+    public Perfume(String name, String description, String brand, String grade) {
         this.name = name;
         this.description = description;
         this.brand = brand;
         this.grade = grade;
     }
 
-    public Perfume modify(Perfume modifyPerfumeEntity) {
+    public void modify(Perfume modifyPerfumeEntity) {
         this.name = modifyPerfumeEntity.getName();
         this.description = modifyPerfumeEntity.getDescription();
         this.brand = modifyPerfumeEntity.getBrand();
         this.grade = modifyPerfumeEntity.getGrade();
-        return this;
     }
 }
