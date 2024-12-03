@@ -23,10 +23,12 @@ public class RecommendService {
         try {
             // LLM 서비스 호출하여 결과 받기
             Map<String, Object> llmResponse = llmService.processInputFromFastAPI(userInput);
+
             String mode = (String) llmResponse.get("mode");
 
             if ("recommendation".equals(mode)) {
                 // 향수 추천 및 공통 감정 처리
+                response.put("mode", "recommendation");
                 response.put("recommendedPerfumes", llmResponse.get("recommended_perfumes"));
                 response.put("commonFeeling", llmResponse.get("common_feeling"));
 
@@ -38,16 +40,27 @@ public class RecommendService {
                 // 공통 감정을 프롬프트에 포함시켜 이미지 생성 요청
                 Map<String, Object> generatedImageResult = imageGenerationService.generateImage(prompt);
                 response.put("generatedImage", generatedImageResult.get("output_path"));
-            } else {
+            } else if ("chat".equals(mode)) {
                 // 대화 모드 처리
                 String chatResponse = (String) llmResponse.get("response");
                 response.put("mode", "chat");
                 response.put("response", chatResponse);
+            } else {
+                throw new IllegalArgumentException("LLM 응답에서 알 수 없는 모드: " + mode);
             }
-
+        } catch (IllegalArgumentException e) {
+            // 알 수 없는 모드 예외 처리 (두 번째 코드의 추가 부분)
+            System.err.println("LLM 서비스 오류: " + e.getMessage());
+            response.put("error", "Invalid mode from LLM response: " + e.getMessage());
+        } catch (NullPointerException e) {
+            // 예상치 못한 null 값 처리 (두 번째 코드의 추가 부분)
+            System.err.println("LLM 응답에 예상되지 않은 null 값이 포함됨: " + e.getMessage());
+            response.put("error", "Unexpected null value in LLM response: " + e.getMessage());
         } catch (Exception e) {
-            response.put("error", "Processing error");
-            e.printStackTrace();  // 예외를 출력하여 디버깅에 도움이 되도록 함
+            // 일반적인 예외 처리
+            System.err.println("추천 처리 중 예외 발생: " + e.getMessage());
+            response.put("error", "Processing error: " + e.getMessage());
+            e.printStackTrace(); // 예외를 출력하여 디버깅에 도움이 되도록 함
         }
         return response;
     }
