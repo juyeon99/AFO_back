@@ -38,7 +38,7 @@ public class Perfume {
     @OneToOne(mappedBy = "perfume", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private BaseNote baseNote;
 
-    @Builder
+    @Builder(toBuilder = true)
     public Perfume(Long id, String name, String description, String brand, String grade) {
         this.id = id;
         this.name = name;

@@ -24,7 +24,8 @@ public class PerfumeImage {
     private Perfume perfume;
 
     @Builder(toBuilder = true)
-    public PerfumeImage(String url, Perfume perfume) {
+    public PerfumeImage(Long id, String url, Perfume perfume) {
+        this.id = id;
         this.url = url;
         this.perfume = perfume;
     }

@@ -25,7 +25,8 @@ public class TopNote {
     private Perfume perfume;
 
     @Builder(toBuilder = true)
-    public TopNote(String spices, Perfume perfume) {
+    public TopNote(Long id, String spices, Perfume perfume) {
+        this.id = id;
         this.spices = spices;
         this.perfume = perfume;
     }

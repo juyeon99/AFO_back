@@ -25,7 +25,8 @@ public class SingleNote {
     private Perfume perfume;
 
     @Builder(toBuilder = true)
-    public SingleNote(String spices, Perfume perfume) {
+    public SingleNote(Long id, String spices, Perfume perfume) {
+        this.id = id;
         this.spices = spices;
         this.perfume = perfume;
     }

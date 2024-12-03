@@ -25,7 +25,8 @@ public class MiddleNote {
     private Perfume perfume;
 
     @Builder(toBuilder = true)
-    public MiddleNote(String spices, Perfume perfume) {
+    public MiddleNote(Long id, String spices, Perfume perfume) {
+        this.id = id;
         this.spices = spices;
         this.perfume = perfume;
     }
