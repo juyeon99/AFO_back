@@ -18,6 +18,7 @@ repositories {
 }
 
 dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher' // 필수
     implementation 'org.springframework.boot:spring-boot-starter' // Spring boot
     implementation 'org.springframework.boot:spring-boot-starter-web' // REST API
