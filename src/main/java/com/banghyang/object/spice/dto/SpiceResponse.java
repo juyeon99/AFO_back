@@ -9,6 +9,6 @@ public class SpiceResponse {
     private String nameKr;
     private String description;
     private String imageUrl;
-    private String line;
+    private String lineName;
     private String color;
 }
