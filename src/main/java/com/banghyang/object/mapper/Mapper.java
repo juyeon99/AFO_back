@@ -1,5 +1,7 @@
 package com.banghyang.object.mapper;
 
+import com.banghyang.member.dto.MemberResponse;
+import com.banghyang.member.entity.Member;
 import com.banghyang.object.line.entity.Line;
 import com.banghyang.object.perfume.dto.PerfumeCreateRequest;
 import com.banghyang.object.perfume.dto.PerfumeResponse;
@@ -10,6 +12,20 @@ import com.banghyang.object.spice.entity.Spice;
 import com.banghyang.object.util.ValidUtils;
 
 public class Mapper {
+    /**
+     * 멤버 엔티티에서 멤버 조회 response 로 변환하는 매퍼
+     */
+    public static MemberResponse mapMemberEntityToResponse(Member member) {
+        MemberResponse memberResponse = new MemberResponse(); // 내용 담을 response 생성
+        memberResponse.setEmail(member.getEmail());
+        memberResponse.setName(member.getName());
+        memberResponse.setGender(member.getGender());
+        memberResponse.setBirthyear(member.getBirthyear());
+        memberResponse.setRole(member.getRole());
+        memberResponse.setCreatedAt(member.getCreatedAt());
+        return memberResponse;
+    }
+
     /**
      * 향수 엔티티에서 향수 조회 response 로 변환하는 매퍼
      */
