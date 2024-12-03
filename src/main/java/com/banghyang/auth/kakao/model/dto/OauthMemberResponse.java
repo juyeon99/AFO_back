@@ -3,6 +3,7 @@ package com.banghyang.auth.kakao.model.dto;
 import com.banghyang.member.entity.Member;
 
 public record OauthMemberResponse(
+        Long id,
         String name,
         String email,
         String birthyear,
@@ -11,6 +12,7 @@ public record OauthMemberResponse(
 ) {
     public static OauthMemberResponse from(Member member) {
         return new OauthMemberResponse(
+                member.getId(),
                 member.getName(),
                 member.getEmail(),
                 member.getBirthyear(),
