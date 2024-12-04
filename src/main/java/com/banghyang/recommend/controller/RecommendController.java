@@ -1,5 +1,6 @@
 package com.banghyang.recommend.controller;
 
+import com.banghyang.recommend.dto.ChatDto;
 import com.banghyang.recommend.service.ImageProcessingService;
 import com.banghyang.recommend.service.RecommendService;
 import lombok.extern.slf4j.Slf4j;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
