@@ -44,29 +44,26 @@ public class RecommendService {
                 log.info("회원 조회 성공: {}", member.getId());
             }
 
-            // 이미지가 있는 경우 처리
             if (image != null && !image.isEmpty()) {
                 Map<String, Object> processedResult = imageProcessingService.processImage(image);
                 userImageUrl = (String) processedResult.get("imageUrl");
                 log.info("이미지 처리 완료 - URL: {}", userImageUrl);
             }
 
-            // 사용자가 보낸 이미지나 텍스트가 있는 경우에만 사용자 채팅 저장(dto로 받아서 entity로 변환후 db에 저장)
             if (member != null && (StringUtils.hasText(userInput) || StringUtils.hasText(userImageUrl))) {
+                // USER 타입의 메시지는 line_id를 생성하지 않음
                 ChatDto userChatDto = ChatDto.builder()
                         .memberId(member.getId())
                         .messageText(StringUtils.hasText(userInput) ? userInput : null)
                         .type(Chat.MessageType.USER)
                         .timestamp(LocalDateTime.now())
                         .chatImage(userImageUrl)
-                        .lineId(generateLineId())
                         .build();
 
                 chatRepository.save(userChatDto.toEntity(member));
                 log.info("사용자 채팅 저장 완료 - 텍스트: {}, 이미지: {}", userInput, userImageUrl);
             }
 
-            // 텍스트 입력이 있는 경우에만 LLM 서비스 호출
             if (StringUtils.hasText(userInput)) {
                 Map<String, Object> llmResponse = llmService.processInputFromFastAPI(userInput);
                 String mode = (String) llmResponse.get("mode");
@@ -75,7 +72,6 @@ public class RecommendService {
                 if ("recommendation".equals(mode)) {
                     log.info("추천 모드 진입");
 
-                    // Recommendation 리스트 생성
                     List<Map<String, Object>> recommendationsList = (List<Map<String, Object>>) llmResponse.get("recommendations");
                     List<Chat.Recommendation> recommendations = recommendationsList.stream()
                             .map(rec -> Chat.Recommendation.builder()
@@ -88,7 +84,6 @@ public class RecommendService {
                     String imagePrompt = (String) llmResponse.get("image_prompt");
                     String aiGeneratedImageUrl = null;
 
-                    // 이미지 생성 처리
                     if (imagePrompt != null) {
                         Map<String, Object> generatedImageResult = imageGenerationService.generateImage(
                                 "Generate an image based on the following feeling: " + imagePrompt
@@ -97,15 +92,16 @@ public class RecommendService {
                         response.put("generatedImage", generatedImageResult);
                     }
 
-                    //dto로 받아서 entity로 변환후 db에 저장
                     if (member != null) {
+                        // AI 타입의 응답에 대해서만 line_id를 응답에서 가져옴
+                        Integer lineId = (Integer) llmResponse.get("line_id");  // line_id가 포함된 응답을 사용
                         ChatDto aiChatDto = ChatDto.builder()
                                 .memberId(member.getId())
-                                .messageText(null) // 추천 모드에서는 텍스트 대신 추천 데이터를 저장
+                                .messageText(null)
                                 .type(Chat.MessageType.AI)
                                 .timestamp(LocalDateTime.now())
                                 .chatImage(aiGeneratedImageUrl)
-                                .lineId((Integer) llmResponse.get("line_id"))
+                                .lineId(lineId)
                                 .recommendations(recommendations)
                                 .commonFeeling((String) llmResponse.get("common_feeling"))
                                 .imagePrompt(imagePrompt)
@@ -113,7 +109,6 @@ public class RecommendService {
                         chatRepository.save(aiChatDto.toEntity(member));
                         log.info("AI 응답 저장 완료 - 추천 모드");
                     }
-                    // 응답 구성
                     response.put("mode", "recommendation");
                     response.put("recommendations", recommendationsList);
                     response.put("common_feeling", llmResponse.get("common_feeling"));
@@ -125,20 +120,20 @@ public class RecommendService {
                     String chatResponse = (String) llmResponse.get("response");
 
                     if (member != null) {
+                        Integer lineId = generateLineId();  // 기본적으로 generateLineId()를 사용
                         ChatDto aiChatDto = ChatDto.builder()
                                 .memberId(member.getId())
-                                .messageText(chatResponse) // 채팅 응답 텍스트 저장
+                                .messageText(chatResponse)
                                 .type(Chat.MessageType.AI)
                                 .timestamp(LocalDateTime.now())
                                 .chatImage(null)
-                                .lineId(generateLineId())
+                                .lineId(lineId)
                                 .build();
 
                         chatRepository.save(aiChatDto.toEntity(member));
                         log.info("AI 응답 저장 완료 - 채팅 모드");
                     }
 
-                    // 응답 구성
                     response.put("mode", "chat");
                     response.put("response", chatResponse);
                 }
@@ -150,14 +145,12 @@ public class RecommendService {
         return response;
     }
 
-    // line_id 생성 메서드
     private Integer generateLineId() {
-        return (int) (System.currentTimeMillis() % Integer.MAX_VALUE); // Unix 타임스탬프 기반
+        return (int) (System.currentTimeMillis() % Integer.MAX_VALUE);
     }
 
     public String generateBotResponse(String userInput) {
         try {
-            // LLM 서비스 호출하여 봇 응답 생성
             Map<String, Object> llmResponse = llmService.processInputFromFastAPI(userInput);
 
             if ("chat".equals(llmResponse.get("mode"))) {
@@ -174,11 +167,9 @@ public class RecommendService {
     }
 
     public List<ChatDto> getChatHistory(Long memberId) {
-        // 엔티티 리스트로 받아서
         List<Chat> chats = chatRepository.findByMemberId(memberId);
         log.info("조회된 채팅 수: {}", chats.size());
 
-        // DTO로 변환
         List<ChatDto> chatDtos = chats.stream()
                 .map(ChatDto::fromEntity)
                 .toList();
