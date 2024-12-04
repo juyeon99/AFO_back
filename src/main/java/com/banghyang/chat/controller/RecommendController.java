@@ -1,10 +1,9 @@
-package com.banghyang.recommend.controller;
+package com.banghyang.chat.controller;
 
-import com.banghyang.recommend.dto.ChatDto;
-import com.banghyang.recommend.service.ImageProcessingService;
-import com.banghyang.recommend.service.RecommendService;
+import com.banghyang.chat.dto.ChatDto;
+import com.banghyang.chat.service.ImageProcessingService;
+import com.banghyang.chat.service.RecommendService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,7 +15,7 @@ import java.util.Map;
 
 @Slf4j
 @RestController
-@RequestMapping("/")
+@RequestMapping("/recommends")
 public class RecommendController {
 
     private final RecommendService recommendService;
@@ -27,7 +26,7 @@ public class RecommendController {
         this.imageProcessingService = imageProcessingService;
     }
 
-    @PostMapping("/recommend")
+    @PostMapping
     public ResponseEntity<Map<String, Object>> processInputAndImage(
             @RequestParam(value = "user_input", required = false, defaultValue = "") String userInput,
             @RequestParam(value = "userId", required = false) Long memberId,
@@ -96,7 +95,7 @@ public class RecommendController {
     }
 
     // 봇 응답 생성 API
-    @PostMapping("/recommend/response")
+    @PostMapping("/response")
     public ResponseEntity<Map<String, Object>> getBotResponse(@RequestParam("userInput") String userInput) {
         Map<String, Object> response = new HashMap<>();
 
@@ -114,7 +113,7 @@ public class RecommendController {
         }
     }
 
-    @GetMapping("recommend/{memberId}")
+    @GetMapping("/{memberId}")
     public ResponseEntity<List<ChatDto>> getChatHistory(@PathVariable Long memberId) {
         List<ChatDto> chatHistory = recommendService.getChatHistory(memberId);
         return ResponseEntity.ok(chatHistory);

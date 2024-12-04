@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 
 import java.time.LocalDateTime;
 
-import static com.banghyang.auth.kakao.type.OauthServerType.KAKAO;
+import static com.banghyang.common.type.OauthServerType.KAKAO;
 
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public record KakaoMemberResponse(

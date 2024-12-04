@@ -1,6 +1,5 @@
-package com.banghyang.recommend.dto;
+package com.banghyang.chat.dto;
 
-import com.banghyang.recommend.entity.ChatImage;
 import lombok.Builder;
 import lombok.Getter;
 

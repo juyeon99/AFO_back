@@ -1,6 +1,5 @@
-package com.banghyang.recommend.repository;
+package com.banghyang.chat.repository;
 
-import com.banghyang.recommend.entity.ChatImage;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

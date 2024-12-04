@@ -1,7 +1,7 @@
-package com.banghyang.recommend.service;
+package com.banghyang.chat.service;
 
-import com.banghyang.recommend.entity.ChatImage;
-import com.banghyang.recommend.repository.ChatImageRepository;
+import com.banghyang.chat.repository.ChatImageRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,30 +15,26 @@ import org.springframework.http.HttpHeaders;
 import java.util.Map;
 
 @Service
+@RequiredArgsConstructor
 public class ImageProcessingService {
 
-    @Value("${base-url}")  // FastAPI 서버 URL 설정 (application.properties에서 관리)
+    @Value("${base-url}")  // FastAPI 서버 URL 설정 (application.yml 에서 관리)
     private String fastApiUrl;
 
     private final RestTemplate restTemplate;
     private final S3Service s3Service;
     private final ChatImageRepository chatImageRepository;
 
-    public ImageProcessingService(RestTemplate restTemplate, S3Service s3Service, ChatImageRepository chatImageRepository) {
-        this.restTemplate = restTemplate;
-        this.s3Service = s3Service;
-        this.chatImageRepository = chatImageRepository;
-    }
-
-    // FastAPI로 이미지를 전송하여 결과를 받음
+    // FastAPI 로 이미지를 전송하여 결과를 받음
     public Map<String, Object> processImage(MultipartFile image) {
         try {
             String imageUrl = s3Service.uploadImage(image);
 
-            ChatImage chatImage = ChatImage.builder()
-                    .imageUrl(imageUrl)
-                    .build();
-            chatImageRepository.save(chatImage);
+            // 생성된 이미지는 url 만 필요하고 객체로써의 저장을 필요없다고 판단하여 삭제
+//            ChatImage chatImage = ChatImage.builder()
+//                    .imageUrl(imageUrl)
+//                    .build();
+//            chatImageRepository.save(chatImage);
 
             String url = fastApiUrl + "/image-processing/process-image";
 

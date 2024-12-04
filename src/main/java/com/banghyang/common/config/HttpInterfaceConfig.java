@@ -1,4 +1,4 @@
-package com.banghyang.auth.common.config;
+package com.banghyang.common.config;
 
 import com.banghyang.auth.kakao.client.KakaoAPIClient;
 import org.springframework.context.annotation.Bean;

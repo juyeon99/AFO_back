@@ -1,6 +1,6 @@
-package com.banghyang.recommend.repository;
+package com.banghyang.chat.repository;
 
-import com.banghyang.recommend.entity.Chat;
+import com.banghyang.chat.entity.Chat;
 import org.springframework.data.mongodb.repository.Aggregation;
 import org.springframework.data.mongodb.repository.MongoRepository;
 

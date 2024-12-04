@@ -1,7 +1,8 @@
-package com.banghyang.recommend.dto;
+package com.banghyang.chat.dto;
 
+import com.banghyang.common.type.ChatType;
 import com.banghyang.member.entity.Member;
-import com.banghyang.recommend.entity.Chat;
+import com.banghyang.chat.entity.Chat;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -13,8 +14,8 @@ import java.util.List;
 public class ChatDto {
     private String id;
     private Long memberId;
-    private String messageText; // 사용자 입력 또는 AI 응답 텍스트
-    private Chat.MessageType type;
+    private String content; // 사용자 입력 또는 AI 응답 텍스트
+    private ChatType type;
     private LocalDateTime timestamp;
     private String chatImage;
     private Integer lineId; // 메시지 구분자
@@ -27,7 +28,7 @@ public class ChatDto {
         return ChatDto.builder()
                 .id(chat.getChatId()) // MongoDB의 기본 키
                 .memberId(chat.getMemberId())
-                .messageText(chat.getMessageText())
+                .content(chat.getMessageText())
                 .type(chat.getType())
                 .timestamp(chat.getTimestamp())
                 .chatImage(chat.getChatImage())
@@ -43,7 +44,7 @@ public class ChatDto {
         return Chat.builder()
                 .chatId(id) // MongoDB의 기본 키
                 .memberId(member.getId())
-                .messageText(this.messageText)
+                .messageText(this.content)
                 .type(this.type)
                 .timestamp(this.timestamp)
                 .chatImage(this.chatImage)
