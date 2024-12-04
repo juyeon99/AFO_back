@@ -2,6 +2,7 @@ package com.banghyang.recommend.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 @Entity
 @Builder
@@ -15,5 +16,6 @@ public class ChatImage {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Field("image_url")
     private String imageUrl;
 }

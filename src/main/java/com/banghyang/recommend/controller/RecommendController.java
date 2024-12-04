@@ -17,54 +17,78 @@ import java.util.Map;
 @RequestMapping("/")
 public class RecommendController {
 
-    @Autowired
-    private RecommendService recommendService;
+    private final RecommendService recommendService;
+    private final ImageProcessingService imageProcessingService;
 
-    @Autowired
-    private ImageProcessingService imageProcessingService;
+    public RecommendController(RecommendService recommendService, ImageProcessingService imageProcessingService) {
+        this.recommendService = recommendService;
+        this.imageProcessingService = imageProcessingService;
+    }
 
     @PostMapping("/recommend")
     public ResponseEntity<Map<String, Object>> processInputAndImage(
             @RequestParam(value = "user_input", required = false, defaultValue = "") String userInput,
+            @RequestParam(value = "userId", required = false) Long memberId,
             @RequestPart(value = "image", required = false) MultipartFile image) {
 
+        log.info("요청 받음 - 회원 ID: {}, 사용자 입력: {}", memberId, userInput);
         Map<String, Object> response = new HashMap<>();
 
         try {
             String processedFeeling = "";
+            String imageUrl = null;
+
+            // 이미지 처리
             if (image != null && !image.isEmpty()) {
                 try {
+                    log.info("회원 ID: {}의 이미지 처리 중", memberId);
                     Map<String, Object> imageProcessingResult = imageProcessingService.processImage(image);
                     response.put("imageProcessed", imageProcessingResult);
 
-                    // 여기를 수정: result 객체에서 description 가져오기
+                    // 이미지 처리 결과에서 감정과 URL 가져오기
                     Map<String, Object> result = (Map<String, Object>) imageProcessingResult.get("result");
                     processedFeeling = (String) result.get("feeling");
+                    imageUrl = (String) imageProcessingResult.get("imageUrl"); // imageUrl 위치 수정
+                    log.info("이미지 처리 완료. 추출된 감정: {}, URL: {}", processedFeeling, imageUrl);
 
+                    // 감정을 사용자 입력에 추가
                     if (userInput == null || userInput.isEmpty()) {
                         userInput = processedFeeling;
+                        log.info("처리된 감정을 사용자 입력으로 사용: {}", userInput);
                     } else {
                         userInput += " " + processedFeeling;
+                        log.info("처리된 감정을 사용자 입력에 추가: {}", userInput);
                     }
                 } catch (Exception e) {
-                    log.error("Error processing image : {}", e.getMessage(), e);
+                    log.error("이미지 처리 중 오류 발생: {}", e.getMessage(), e);
                     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                            .body(Map.of("error", "Image processing failed"));
+                            .body(Map.of("error", "이미지 처리에 실패했습니다"));
                 }
-            } else {
-                response.put("message", "No image provided.");
-            }
-            Map<String, Object> finalResponse = recommendService.processInputAndImage(userInput);
-            if (finalResponse == null || finalResponse.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                        .body(Map.of("error", "Recommendation processing failed"));
             }
 
+            // recommendService 호출
+            log.info("추천 서비스 호출 - 회원 ID: {}, 사용자 입력: {}, 이미지 URL: {}",
+                    memberId, userInput, image);
+            Map<String, Object> finalResponse = recommendService.processInputAndImage(userInput, image, memberId);
+
+            if (finalResponse == null || finalResponse.isEmpty()) {
+                log.error("추천 처리 결과가 null이거나 비어있습니다");
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body(Map.of("error", "추천 처리에 실패했습니다"));
+            }
+
+            // 최종 응답에 이미지 처리 결과 포함
+            if (response.containsKey("imageProcessed")) {
+                finalResponse.put("imageProcessed", response.get("imageProcessed"));
+            }
+
+            log.info("회원 ID: {}의 요청 처리 완료", memberId);
             return ResponseEntity.ok(finalResponse);
 
         } catch (Exception e) {
+            log.error("회원 ID: {}의 요청 처리 중 오류 발생", memberId, e);
             e.printStackTrace();
-            response.put("error", "Processing error");
+            response.put("error", "처리 중 오류가 발생했습니다");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
@@ -87,5 +111,12 @@ public class RecommendController {
             return ResponseEntity.status(500).body(response);
         }
     }
+
+    @GetMapping("recommend/{memberId}")
+    public ResponseEntity<List<ChatDto>> getChatHistory(@PathVariable Long memberId) {
+        List<ChatDto> chatHistory = recommendService.getChatHistory(memberId);
+        return ResponseEntity.ok(chatHistory);
+    }
 }
+
 

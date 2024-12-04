@@ -1,70 +1,127 @@
 package com.banghyang.recommend.service;
 
+import com.banghyang.member.entity.Member;
+import com.banghyang.member.repository.MemberRepository;
+import com.banghyang.recommend.dto.ChatDto;
+import com.banghyang.recommend.entity.Chat;
+import com.banghyang.recommend.repository.ChatRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.time.LocalDateTime;
+import java.util.*;
 
+@Slf4j
 @Service
 public class RecommendService {
 
     private final LLMService llmService;
     private final ImageGenerationService imageGenerationService;
+    private final ChatRepository chatRepository;
+    private final MemberRepository memberRepository;
+    private final ImageProcessingService imageProcessingService;
 
-    // 생성자 주입
-    public RecommendService(LLMService llmService, ImageGenerationService imageGenerationService) {
+    public RecommendService(LLMService llmService, ImageGenerationService imageGenerationService,
+                            ChatRepository chatRepository, MemberRepository memberRepository, ImageProcessingService imageProcessingService) {
         this.llmService = llmService;
         this.imageGenerationService = imageGenerationService;
+        this.chatRepository = chatRepository;
+        this.memberRepository = memberRepository;
+        this.imageProcessingService = imageProcessingService;
     }
 
-    // 사용자 입력과 이미지를 처리하는 메서드
-    public Map<String, Object> processInputAndImage(String userInput) {
+    public Map<String, Object> processInputAndImage(String userInput, MultipartFile image, Long memberId) {
         Map<String, Object> response = new HashMap<>();
         try {
-            // LLM 서비스 호출하여 결과 받기
-            Map<String, Object> llmResponse = llmService.processInputFromFastAPI(userInput);
+            log.info("처리 시작 - 회원 ID: {}", memberId);
+            Member member = null;
+            String userImageUrl = null;
 
-            String mode = (String) llmResponse.get("mode");
-
-            if ("recommendation".equals(mode)) {
-                // 향수 추천 및 공통 감정 처리
-                response.put("mode", "recommendation");
-                response.put("recommendedPerfumes", llmResponse.get("recommended_perfumes"));
-                response.put("commonFeeling", llmResponse.get("common_feeling"));
-
-                // 공통 감정과 이미지 프롬프트 결합하여 이미지 생성 요청
-                String commonFeeling = (String) llmResponse.get("common_feeling");
-                String imagePrompt = (String) llmResponse.get("image_prompt"); // 이미지 프롬프트 받아오기
-                String prompt = "Generate an image based on the following feeling: " + imagePrompt;
-
-                // 공통 감정을 프롬프트에 포함시켜 이미지 생성 요청
-                Map<String, Object> generatedImageResult = imageGenerationService.generateImage(prompt);
-                response.put("generatedImage", generatedImageResult.get("output_path"));
-
-                // 이미지 생성만 수행하고 결과 반환
-                Map<String, Object> additionalGeneratedImageResult = imageGenerationService.generateImage(prompt);
-                response.put("generatedImage", additionalGeneratedImageResult);
-            } else if ("chat".equals(mode)) {
-                // 대화 모드 처리
-                String chatResponse = (String) llmResponse.get("response");
-                response.put("mode", "chat");
-                response.put("response", chatResponse);
-            } else {
-                throw new IllegalArgumentException("LLM 응답에서 알 수 없는 모드: " + mode);
+            if (memberId != null) {
+                member = memberRepository.findById(memberId)
+                        .orElseThrow(() -> new RuntimeException("회원을 찾을 수 없습니다"));
+                log.info("회원 조회 성공: {}", member.getId());
             }
-        } catch (IllegalArgumentException e) {
-            // 알 수 없는 모드 예외 처리
-            System.err.println("LLM 서비스 오류: " + e.getMessage());
-            response.put("error", "Invalid mode from LLM response: " + e.getMessage());
-        } catch (NullPointerException e) {
-            // 예상치 못한 null 값 처리
-            System.err.println("LLM 응답에 예상되지 않은 null 값이 포함됨: " + e.getMessage());
-            response.put("error", "Unexpected null value in LLM response: " + e.getMessage());
+
+            // 이미지가 있는 경우 처리
+            if (image != null && !image.isEmpty()) {
+                Map<String, Object> processedResult = imageProcessingService.processImage(image);
+                userImageUrl = (String) processedResult.get("imageUrl");
+                log.info("이미지 처리 완료 - URL: {}", userImageUrl);
+            }
+
+            // 사용자가 보낸 이미지나 텍스트가 있는 경우에만 사용자 채팅 저장(dto로 받아서 entity로 변환후 db에 저장)
+            if (member != null && (StringUtils.hasText(userInput) || StringUtils.hasText(userImageUrl))) {
+                ChatDto userChatDto = ChatDto.builder()
+                        .memberId(member.getId())
+                        .content(StringUtils.hasText(userInput) ? userInput : "")
+                        .type(Chat.MessageType.USER)
+                        .timestamp(LocalDateTime.now())
+                        .chatImage(userImageUrl)
+                        .build();
+
+                chatRepository.save(userChatDto.toEntity(member));
+                log.info("사용자 채팅 저장 완료 - 텍스트: {}, 이미지: {}", userInput, userImageUrl);
+            }
+
+            // 텍스트 입력이 있는 경우에만 LLM 서비스 호출
+            if (StringUtils.hasText(userInput)) {
+                Map<String, Object> llmResponse = llmService.processInputFromFastAPI(userInput);
+                String mode = (String) llmResponse.get("mode");
+                log.info("현재 모드: {}", mode);
+
+                if ("recommendation".equals(mode)) {
+                    log.info("추천 모드 진입");
+                    response.put("mode", "recommendation");
+                    response.put("recommendedPerfumes", llmResponse.get("recommended_perfumes"));
+                    response.put("commonFeeling", llmResponse.get("common_feeling"));
+
+                    String imagePrompt = (String) llmResponse.get("image_prompt");
+                    String prompt = "Generate an image based on the following feeling: " + imagePrompt;
+                    Map<String, Object> generatedImageResult = imageGenerationService.generateImage(prompt);
+                    response.put("generatedImage", generatedImageResult);
+                    String aiGeneratedImageUrl = (String) generatedImageResult.get("s3_url");
+
+                    //dto로 받아서 entity로 변환후 db에 저장
+                    if (member != null) {
+                        ChatDto aiChatDto = ChatDto.builder()
+                                .memberId(member.getId())
+                                .content(llmResponse.toString())
+                                .type(Chat.MessageType.AI)
+                                .timestamp(LocalDateTime.now())
+                                .chatImage(aiGeneratedImageUrl)
+                                .build();
+
+                        chatRepository.save(aiChatDto.toEntity(member));
+                        log.info("AI 응답 저장 완료 - 추천 모드");
+                    }
+                } else if ("chat".equals(mode)) {
+                    log.info("채팅 모드 진입");
+                    String chatResponse = (String) llmResponse.get("response");
+                    response.put("mode", "chat");
+                    response.put("response", chatResponse);
+
+                    if (member != null) {
+                        ChatDto aiChatDto = ChatDto.builder()
+                                .memberId(member.getId())
+                                .content(chatResponse)
+                                .type(Chat.MessageType.AI)
+                                .timestamp(LocalDateTime.now())
+                                .chatImage(null)
+                                .build();
+
+                        chatRepository.save(aiChatDto.toEntity(member));
+                        log.info("AI 응답 저장 완료 - 채팅 모드");
+                    }
+                }
+            }
         } catch (Exception e) {
-            // 일반적인 예외 처리
-            System.err.println("추천 처리 중 예외 발생: " + e.getMessage());
-            response.put("error", "Processing error: " + e.getMessage());
-            e.printStackTrace();
+            log.error("처리 중 오류 발생", e);
+            log.error("예외 종류: {}", e.getClass().getName());
+            log.error("예외 메시지: {}", e.getMessage());
+            response.put("error", "처리 중 오류: " + e.getMessage());
         }
         return response;
     }
@@ -85,5 +142,44 @@ public class RecommendService {
             e.printStackTrace();
             return "Error while generating bot response: " + e.getMessage();
         }
+    }
+
+    public List<ChatDto> getChatHistory(Long memberId) {
+        // 엔티티 리스트로 받아서
+        List<Chat> chats = chatRepository.findByMemberId(memberId);
+        log.info("조회된 채팅 수: {}", chats.size());
+
+        // DTO로 변환
+        List<ChatDto> chatDtos = chats.stream()
+                .map(ChatDto::fromEntity)
+                .toList();
+
+        chatDtos.forEach(chat -> {
+            log.info("Chat ID: {}, MemberId: {}, Content: {}, Image URL: {}, Type: {}",
+                    chat.getId(), chat.getMemberId(), chat.getContent(), chat.getChatImage(), chat.getType());
+        });
+
+        Queue<ChatDto> userChats = new LinkedList<>();
+        Queue<ChatDto> aiChats = new LinkedList<>();
+
+        for (ChatDto chatDto : chatDtos) {
+            if (chatDto.getType() == Chat.MessageType.USER) {
+                userChats.add(chatDto);
+            } else {
+                aiChats.add(chatDto);
+            }
+        }
+
+        List<ChatDto> result = new ArrayList<>();
+        while (!userChats.isEmpty() || !aiChats.isEmpty()) {
+            if (!userChats.isEmpty()) {
+                result.add(userChats.poll());
+            }
+            if (!aiChats.isEmpty()) {
+                result.add(aiChats.poll());
+            }
+        }
+
+        return result;
     }
 }
