@@ -19,8 +19,7 @@
         private String id;
 
         @Field("member_id")
-        @DocumentReference(lazy = true)  // Member 컬렉션을 참조
-        private Member member;
+        private Long memberId;
 
         @Field("content")
         private String content;

@@ -21,12 +21,10 @@ import java.util.Map;
 public class RecommendController {
 
     private final RecommendService recommendService;
-    private final MemberRepository memberRepository;
     private final ImageProcessingService imageProcessingService;
 
-    public RecommendController(RecommendService recommendService, MemberRepository memberRepository, ImageProcessingService imageProcessingService) {
+    public RecommendController(RecommendService recommendService, ImageProcessingService imageProcessingService) {
         this.recommendService = recommendService;
-        this.memberRepository = memberRepository;
         this.imageProcessingService = imageProcessingService;
     }
 

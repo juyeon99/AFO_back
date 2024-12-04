@@ -19,10 +19,9 @@ public class ChatDto {
 
     // Entity -> DTO
     public static ChatDto fromEntity(Chat chat) {
-        Member member = chat.getMember();
         return ChatDto.builder()
                 .id(chat.getId())
-                .memberId(member != null ? member.getId() : null)
+                .memberId(chat.getMemberId())
                 .content(chat.getContent())
                 .type(chat.getType())
                 .timestamp(chat.getTimestamp())
@@ -34,7 +33,7 @@ public class ChatDto {
     public Chat toEntity(Member member) {
         return Chat.builder()
                 .id(id)
-                .member(member)
+                .memberId(member.getId())
                 .content(this.content)
                 .type(this.type)
                 .timestamp(this.timestamp)

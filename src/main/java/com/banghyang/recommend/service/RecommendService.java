@@ -137,8 +137,8 @@ public class RecommendService {
                 .toList();
 
         chatDtos.forEach(chat -> {
-            log.info("Chat ID: {}, Content: {}, Image URL: {}, Type: {}",
-                    chat.getMemberId(), chat.getContent(), chat.getChatImage(), chat.getType());
+            log.info("Chat ID: {}, MemberId: {}, Content: {}, Image URL: {}, Type: {}",
+                    chat.getId(), chat.getMemberId(), chat.getContent(), chat.getChatImage(), chat.getType());
         });
 
         Queue<ChatDto> userChats = new LinkedList<>();
