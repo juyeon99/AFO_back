@@ -68,5 +68,24 @@ public class RecommendController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
+
+    // 봇 응답 생성 API
+    @PostMapping("/recommend/response")
+    public ResponseEntity<Map<String, Object>> getBotResponse(@RequestParam("userInput") String userInput) {
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            // 봇 응답 생성
+            String botResponse = recommendService.generateBotResponse(userInput);
+            response.put("userInput", userInput);
+            response.put("botResponse", botResponse);
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.put("error", "Failed to generate bot response: " + e.getMessage());
+            return ResponseEntity.status(500).body(response);
+        }
+    }
 }
 

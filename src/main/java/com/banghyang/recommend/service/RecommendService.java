@@ -68,4 +68,22 @@ public class RecommendService {
         }
         return response;
     }
+
+    public String generateBotResponse(String userInput) {
+        try {
+            // LLM 서비스 호출하여 봇 응답 생성
+            Map<String, Object> llmResponse = llmService.processInputFromFastAPI(userInput);
+
+            if ("chat".equals(llmResponse.get("mode"))) {
+                return (String) llmResponse.get("response");
+            } else if ("recommendation".equals(llmResponse.get("mode"))) {
+                return "Recommendation mode detected. Response: " + llmResponse.get("recommended_perfumes");
+            } else {
+                return "Unknown mode: Unable to generate response.";
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "Error while generating bot response: " + e.getMessage();
+        }
+    }
 }
