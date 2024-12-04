@@ -55,10 +55,11 @@ public class RecommendService {
             if (member != null && (StringUtils.hasText(userInput) || StringUtils.hasText(userImageUrl))) {
                 ChatDto userChatDto = ChatDto.builder()
                         .memberId(member.getId())
-                        .content(StringUtils.hasText(userInput) ? userInput : "")
+                        .messageText(StringUtils.hasText(userInput) ? userInput : null)
                         .type(Chat.MessageType.USER)
                         .timestamp(LocalDateTime.now())
                         .chatImage(userImageUrl)
+                        .lineId(generateLineId())
                         .build();
 
                 chatRepository.save(userChatDto.toEntity(member));
@@ -73,56 +74,85 @@ public class RecommendService {
 
                 if ("recommendation".equals(mode)) {
                     log.info("추천 모드 진입");
-                    response.put("mode", "recommendation");
-                    response.put("recommendedPerfumes", llmResponse.get("recommended_perfumes"));
-                    response.put("commonFeeling", llmResponse.get("common_feeling"));
+
+                    // Recommendation 리스트 생성
+                    List<Map<String, Object>> recommendationsList = (List<Map<String, Object>>) llmResponse.get("recommendations");
+                    List<Chat.Recommendation> recommendations = recommendationsList.stream()
+                            .map(rec -> Chat.Recommendation.builder()
+                                    .id((String) rec.get("id"))
+                                    .reason((String) rec.get("reason"))
+                                    .situation((String) rec.get("situation"))
+                                    .build())
+                            .toList();
 
                     String imagePrompt = (String) llmResponse.get("image_prompt");
-                    String prompt = "Generate an image based on the following feeling: " + imagePrompt;
-                    Map<String, Object> generatedImageResult = imageGenerationService.generateImage(prompt);
-                    response.put("generatedImage", generatedImageResult);
-                    String aiGeneratedImageUrl = (String) generatedImageResult.get("s3_url");
+                    String aiGeneratedImageUrl = null;
+
+                    // 이미지 생성 처리
+                    if (imagePrompt != null) {
+                        Map<String, Object> generatedImageResult = imageGenerationService.generateImage(
+                                "Generate an image based on the following feeling: " + imagePrompt
+                        );
+                        aiGeneratedImageUrl = (String) generatedImageResult.get("s3_url");
+                        response.put("generatedImage", generatedImageResult);
+                    }
 
                     //dto로 받아서 entity로 변환후 db에 저장
                     if (member != null) {
                         ChatDto aiChatDto = ChatDto.builder()
                                 .memberId(member.getId())
-                                .content(llmResponse.toString())
+                                .messageText(null) // 추천 모드에서는 텍스트 대신 추천 데이터를 저장
                                 .type(Chat.MessageType.AI)
                                 .timestamp(LocalDateTime.now())
                                 .chatImage(aiGeneratedImageUrl)
+                                .lineId((Integer) llmResponse.get("line_id"))
+                                .recommendations(recommendations)
+                                .commonFeeling((String) llmResponse.get("common_feeling"))
+                                .imagePrompt(imagePrompt)
                                 .build();
-
                         chatRepository.save(aiChatDto.toEntity(member));
                         log.info("AI 응답 저장 완료 - 추천 모드");
                     }
+                    // 응답 구성
+                    response.put("mode", "recommendation");
+                    response.put("recommendations", recommendationsList);
+                    response.put("common_feeling", llmResponse.get("common_feeling"));
+                    response.put("line_id", llmResponse.get("line_id"));
+                    response.put("image_prompt", imagePrompt);
+
                 } else if ("chat".equals(mode)) {
                     log.info("채팅 모드 진입");
                     String chatResponse = (String) llmResponse.get("response");
-                    response.put("mode", "chat");
-                    response.put("response", chatResponse);
 
                     if (member != null) {
                         ChatDto aiChatDto = ChatDto.builder()
                                 .memberId(member.getId())
-                                .content(chatResponse)
+                                .messageText(chatResponse) // 채팅 응답 텍스트 저장
                                 .type(Chat.MessageType.AI)
                                 .timestamp(LocalDateTime.now())
                                 .chatImage(null)
+                                .lineId(generateLineId())
                                 .build();
 
                         chatRepository.save(aiChatDto.toEntity(member));
                         log.info("AI 응답 저장 완료 - 채팅 모드");
                     }
+
+                    // 응답 구성
+                    response.put("mode", "chat");
+                    response.put("response", chatResponse);
                 }
             }
         } catch (Exception e) {
             log.error("처리 중 오류 발생", e);
-            log.error("예외 종류: {}", e.getClass().getName());
-            log.error("예외 메시지: {}", e.getMessage());
             response.put("error", "처리 중 오류: " + e.getMessage());
         }
         return response;
+    }
+
+    // line_id 생성 메서드
+    private Integer generateLineId() {
+        return (int) (System.currentTimeMillis() % Integer.MAX_VALUE); // Unix 타임스탬프 기반
     }
 
     public String generateBotResponse(String userInput) {
@@ -154,8 +184,8 @@ public class RecommendService {
                 .toList();
 
         chatDtos.forEach(chat -> {
-            log.info("Chat ID: {}, MemberId: {}, Content: {}, Image URL: {}, Type: {}",
-                    chat.getId(), chat.getMemberId(), chat.getContent(), chat.getChatImage(), chat.getType());
+            log.info("Chat ID: {}, MemberId: {}, MessageText: {}, Image URL: {}, Type: {}",
+                    chat.getId(), chat.getMemberId(), chat.getMessageText(), chat.getChatImage(), chat.getType());
         });
 
         Queue<ChatDto> userChats = new LinkedList<>();
