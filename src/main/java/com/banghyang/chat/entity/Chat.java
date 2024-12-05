@@ -26,22 +26,25 @@ public class Chat {
     private Long memberId; // 회원 ID
 
     @Field("content")
-    private String content;
+    private String content; // 회원 채팅 텍스트 입력값
 
-    @Field("chat_image")
-    private String imageUrl;
+    @Field("user_input_image_s3_url")
+    private String userInputImageS3Url; // 회원 채팅 이미지 입력값
+
+    @Field("mode")
+    private ChatMode mode; // ai 채팅 답변 모드(chat, recommend)
+
+    @Field("line_id")
+    private Long lineId; // 향수 추천 기준 계열 아이디
+
+    @Field("generated_image_s3_url")
+    private String generatedImageS3Url;
+
+    @Field("recommendations")
+    private List<Recommendation> recommendations; // 향수 추천 내용
 
     @Field("timeStamp")
     private LocalDateTime timeStamp; // 메시지 생성 시간
-
-    @Field("mode")
-    private ChatMode mode;
-
-    @Field("line_id")
-    private Long lineId;
-
-    @Field("recommendations")
-    private List<Recommendation> recommendations;
 
     @Data
     public static class Recommendation {
@@ -54,6 +57,7 @@ public class Chat {
         private String situation;
     }
 
+    // chat 생성시간 자동 생성 메소드
     @PrePersist
     public void prePersist() {
         timeStamp = LocalDateTime.now();
@@ -64,17 +68,19 @@ public class Chat {
             ChatType type,
             Long memberId,
             String content,
-            String imageUrl,
+            String userInputImageS3Url,
             ChatMode mode,
             Long lineId,
+            String generatedImageS3Url,
             List<Recommendation> recommendations
     ) {
         this.type = type;
         this.memberId = memberId;
         this.content = content;
-        this.imageUrl = imageUrl;
+        this.userInputImageS3Url = userInputImageS3Url;
         this.mode = mode;
         this.lineId = lineId;
+        this.generatedImageS3Url = generatedImageS3Url;
         this.recommendations = recommendations;
     }
 }

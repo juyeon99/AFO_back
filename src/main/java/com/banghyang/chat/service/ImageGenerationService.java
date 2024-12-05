@@ -23,7 +23,6 @@ public class ImageGenerationService {
 
     private final RestTemplate restTemplate;
     private final S3Service s3Service;
-    private final ChatImageRepository chatImageRepository;
 
     // FastAPI 로 이미지를 전송하여 결과를 받음
     public Map<String, Object> generateImage(String prompt) {
@@ -51,7 +50,7 @@ public class ImageGenerationService {
             Map<String, Object> response = responseEntity.getBody();
             log.info("FastAPI 응답: {}", response);
 
-            // output_path가 Map인 경우를 처리
+            // output_path 가 Map 인 경우를 처리
             Object outputPathObj = response.get("output_path");
             String generatedImagePath;
 
@@ -86,13 +85,6 @@ public class ImageGenerationService {
             }
 
             String s3ImageUrl = s3Service.byteUploadImage(imageBytes, "generated-image.png");
-
-            // 생성된 이미지는 url 만 필요하고 객체로써의 저장을 필요없다고 판단하여 삭제
-//            ChatImage chatImage = ChatImage.builder()
-//                    .imageUrl(s3ImageUrl)
-//                    .build();
-//            chatImageRepository.save(chatImage);
-//            log.info("데이터베이스에 이미지 정보 저장 완료");
 
             response.put("s3_url", s3ImageUrl);
             return response;
