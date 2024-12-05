@@ -1,20 +1,18 @@
 package com.banghyang.history.entity;
 
 import com.banghyang.common.type.ChatMode;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table
 @NoArgsConstructor
 @Getter
-public class ChatHistory {
+public class History {
 
     @Id
     private Long id;
@@ -24,7 +22,9 @@ public class ChatHistory {
     private Long lineId;
     private Long memberId;
     private ChatMode mode;
-//    private Recommendation recommendation;
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name = "history_id")
+    private List<Recommendation> recommendation;
     private LocalDateTime timeStamp;
     private String type;
 
