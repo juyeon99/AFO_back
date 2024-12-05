@@ -23,9 +23,14 @@ public class SpiceImage {
     @JsonIgnore // 순환참조 방지
     private Spice spice;
 
-    @Builder(toBuilder = true)
+    @Builder
     public SpiceImage(String url, Spice spice) {
         this.url = url;
         this.spice = spice;
+    }
+
+    public void modify(SpiceImage modifySpiceImageEntity) {
+        this.url = modifySpiceImageEntity.url;
+        this.spice = modifySpiceImageEntity.spice;
     }
 }

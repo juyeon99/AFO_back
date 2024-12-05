@@ -24,9 +24,14 @@ public class SingleNote {
     @JsonIgnore
     private Perfume perfume;
 
-    @Builder(toBuilder = true)
+    @Builder
     public SingleNote(String spices, Perfume perfume) {
         this.spices = spices;
         this.perfume = perfume;
+    }
+
+    public void modify(SingleNote modifySingleNoteEntity) {
+        this.spices = modifySingleNoteEntity.getSpices();
+        this.perfume = modifySingleNoteEntity.getPerfume();
     }
 }

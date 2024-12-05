@@ -24,9 +24,14 @@ public class TopNote {
     @JsonIgnore
     private Perfume perfume;
 
-    @Builder(toBuilder = true)
+    @Builder
     public TopNote(String spices, Perfume perfume) {
         this.spices = spices;
         this.perfume = perfume;
+    }
+
+    public void modify(TopNote modifyTopNoteEntity) {
+        this.spices = modifyTopNoteEntity.getSpices();
+        this.perfume = modifyTopNoteEntity.getPerfume();
     }
 }

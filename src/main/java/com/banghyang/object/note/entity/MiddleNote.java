@@ -24,9 +24,14 @@ public class MiddleNote {
     @JsonIgnore
     private Perfume perfume;
 
-    @Builder(toBuilder = true)
+    @Builder
     public MiddleNote(String spices, Perfume perfume) {
         this.spices = spices;
         this.perfume = perfume;
+    }
+
+    public void modify(MiddleNote modifyMiddleNoteEntity) {
+        this.spices = modifyMiddleNoteEntity.getSpices();
+        this.perfume = modifyMiddleNoteEntity.getPerfume();
     }
 }

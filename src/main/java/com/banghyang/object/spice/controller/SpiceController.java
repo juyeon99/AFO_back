@@ -46,8 +46,8 @@ public class SpiceController {
     /**
      * 기존 향료 삭제하기
      */
-    @DeleteMapping
-    public ResponseEntity<?> deleteSpice(@RequestBody Long spiceId) {
+    @DeleteMapping("/{spiceId}")
+    public ResponseEntity<?> deleteSpice(@PathVariable Long spiceId) {
         spiceService.deleteSpice(spiceId);
         return ResponseEntity.ok().build();
     }
