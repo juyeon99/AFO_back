@@ -11,6 +11,7 @@ import com.banghyang.object.spice.entity.SpiceImage;
 import com.banghyang.object.spice.repository.SpiceImageRepository;
 import com.banghyang.object.spice.repository.SpiceRepository;
 import com.banghyang.object.util.ValidUtils;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +19,7 @@ import java.util.Comparator;
 import java.util.List;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class SpiceService {
 
