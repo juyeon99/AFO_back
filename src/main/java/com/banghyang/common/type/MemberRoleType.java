@@ -1,4 +1,4 @@
-package com.banghyang.member.type;
+package com.banghyang.common.type;
 
 public enum MemberRoleType {
     USER,

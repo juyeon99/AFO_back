@@ -1,5 +1,6 @@
 package com.banghyang.object.spice.service;
 
+import com.banghyang.common.util.ValidUtils;
 import com.banghyang.object.line.entity.Line;
 import com.banghyang.object.line.repository.LineRepository;
 import com.banghyang.object.mapper.Mapper;
@@ -10,7 +11,6 @@ import com.banghyang.object.spice.entity.Spice;
 import com.banghyang.object.spice.entity.SpiceImage;
 import com.banghyang.object.spice.repository.SpiceImageRepository;
 import com.banghyang.object.spice.repository.SpiceRepository;
-import com.banghyang.object.util.ValidUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

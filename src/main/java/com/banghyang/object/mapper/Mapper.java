@@ -1,5 +1,7 @@
 package com.banghyang.object.mapper;
 
+import com.banghyang.chat.entity.Chat;
+import com.banghyang.common.util.ValidUtils;
 import com.banghyang.member.dto.MemberResponse;
 import com.banghyang.member.entity.Member;
 import com.banghyang.object.line.entity.Line;
@@ -9,7 +11,6 @@ import com.banghyang.object.perfume.entity.Perfume;
 import com.banghyang.object.spice.dto.SpiceCreateRequest;
 import com.banghyang.object.spice.dto.SpiceResponse;
 import com.banghyang.object.spice.entity.Spice;
-import com.banghyang.object.util.ValidUtils;
 
 public class Mapper {
     /**
@@ -105,8 +106,8 @@ public class Mapper {
      */
     public static Spice mapSpiceCreateRequestToEntity(SpiceCreateRequest spiceCreateRequest, Line lineEntity) {
         if (ValidUtils.isNotBlank(spiceCreateRequest.getName()) &&
-        ValidUtils.isNotBlank(spiceCreateRequest.getNameKr()) &&
-        ValidUtils.isNotBlank(spiceCreateRequest.getDescription())) {
+                ValidUtils.isNotBlank(spiceCreateRequest.getNameKr()) &&
+                ValidUtils.isNotBlank(spiceCreateRequest.getDescription())) {
             // 영문명, 한글명, 설명 모두 있어야 entity 반환
             return Spice.builder()
                     .name(spiceCreateRequest.getName())
@@ -118,5 +119,21 @@ public class Mapper {
             // 정보 누락시 예외 발생시키기
             throw new IllegalArgumentException("향료 등록에 필요한 정보가 누락되었습니다. (영문명, 한글명, 설명)");
         }
+    }
+
+    // 향수 엔티티를 채팅기록의 추천향수정보로 변환하는 매퍼
+    public static Chat.Recommendation mapPerfumeEntityToChatRecommendation(
+            Perfume perfumeEntity,
+            String reason,
+            String situation
+    ) {
+        Chat.Recommendation recommendation = new Chat.Recommendation();
+        recommendation.setPerfumeName(perfumeEntity.getName());
+        recommendation.setPerfumeImageUrl(perfumeEntity.getPerfumeImage().getUrl());
+        recommendation.setPerfumeBrand(perfumeEntity.getBrand());
+        recommendation.setPerfumeGrade(perfumeEntity.getGrade());
+        recommendation.setReason(reason);
+        recommendation.setSituation(situation);
+        return recommendation;
     }
 }
