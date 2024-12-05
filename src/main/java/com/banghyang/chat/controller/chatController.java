@@ -6,10 +6,9 @@ import com.banghyang.chat.service.ChatService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -24,6 +23,11 @@ public class chatController {
         // ModelAttribute 를 이용하여 http 요청 데이터를 dto 로 바인딩(multipart 포함한 데이터 처리 가능)
         // service 에서 유저의 입력에 대한 답변을 dto 로 담아 전달
         return ResponseEntity.ok(chatService.answerToUserRequest(userRequest));
+    }
+
+    @GetMapping("/{memberId}")
+    public ResponseEntity<List<UserResponse>> getAllChats(@PathVariable Long memberId) {
+        return ResponseEntity.ok(chatService.getAllChats(memberId));
     }
 }
 

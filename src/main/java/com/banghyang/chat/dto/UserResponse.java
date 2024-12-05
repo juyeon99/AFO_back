@@ -12,6 +12,6 @@ public class UserResponse {
     private ChatMode mode;
     private String content;
     private Long lineId;
-    private String generatedImageS3Url;
+    private String imageUrl;
     private List<Chat.Recommendation> recommendations;
 }
