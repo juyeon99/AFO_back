@@ -2,9 +2,12 @@ package com.banghyang.recommend.service;
 
 import com.banghyang.member.entity.Member;
 import com.banghyang.member.repository.MemberRepository;
-import com.banghyang.recommend.dto.ChatDto;
 import com.banghyang.recommend.entity.Chat;
+import com.banghyang.recommend.entity.ChatHistory;
+import com.banghyang.recommend.exception.CustomException;
+import com.banghyang.recommend.repository.ChatHistoryRepository;
 import com.banghyang.recommend.repository.ChatRepository;
+import com.banghyang.recommend.type.ChatType;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -22,14 +25,16 @@ public class RecommendService {
     private final ChatRepository chatRepository;
     private final MemberRepository memberRepository;
     private final ImageProcessingService imageProcessingService;
+    private final ChatHistoryRepository chatHistoryRepository;
 
     public RecommendService(LLMService llmService, ImageGenerationService imageGenerationService,
-                            ChatRepository chatRepository, MemberRepository memberRepository, ImageProcessingService imageProcessingService) {
+                            ChatRepository chatRepository, MemberRepository memberRepository, ImageProcessingService imageProcessingService, ChatHistoryRepository chatHistoryRepository) {
         this.llmService = llmService;
         this.imageGenerationService = imageGenerationService;
         this.chatRepository = chatRepository;
         this.memberRepository = memberRepository;
         this.imageProcessingService = imageProcessingService;
+        this.chatHistoryRepository = chatHistoryRepository;
     }
 
     public Map<String, Object> processInputAndImage(String userInput, MultipartFile image, Long memberId) {
@@ -54,15 +59,14 @@ public class RecommendService {
 
             // 사용자가 보낸 이미지나 텍스트가 있는 경우에만 사용자 채팅 저장(dto로 받아서 entity로 변환후 db에 저장)
             if (member != null && (StringUtils.hasText(userInput) || StringUtils.hasText(userImageUrl))) {
-                ChatDto userChatDto = ChatDto.builder()
+                Chat userChat = Chat.builder()
                         .memberId(member.getId())
                         .content(StringUtils.hasText(userInput) ? userInput : "")
-                        .type(Chat.MessageType.USER)
-                        .timestamp(LocalDateTime.now())
-                        .chatImage(userImageUrl)
+                        .type(ChatType.USER)
+                        .imageUrl(userImageUrl)
                         .build();
 
-                chatRepository.save(userChatDto.toEntity(member));
+                chatRepository.save(userChat);
                 log.info("사용자 채팅 저장 완료 - 텍스트: {}, 이미지: {}", userInput, userImageUrl);
             }
 
@@ -86,15 +90,14 @@ public class RecommendService {
 
                     //dto로 받아서 entity로 변환후 db에 저장
                     if (member != null) {
-                        ChatDto aiChatDto = ChatDto.builder()
+                        Chat aiChat = Chat.builder()
                                 .memberId(member.getId())
                                 .content(llmResponse.toString())
-                                .type(Chat.MessageType.AI)
-                                .timestamp(LocalDateTime.now())
-                                .chatImage(aiGeneratedImageUrl)
+                                .type(ChatType.AI)
+                                .imageUrl(aiGeneratedImageUrl)
                                 .build();
 
-                        chatRepository.save(aiChatDto.toEntity(member));
+                        chatRepository.save(aiChat);
                         log.info("AI 응답 저장 완료 - 추천 모드");
                     }
                 } else if ("chat".equals(mode)) {
@@ -104,15 +107,14 @@ public class RecommendService {
                     response.put("response", chatResponse);
 
                     if (member != null) {
-                        ChatDto aiChatDto = ChatDto.builder()
+                        Chat aiChat = Chat.builder()
                                 .memberId(member.getId())
                                 .content(chatResponse)
-                                .type(Chat.MessageType.AI)
-                                .timestamp(LocalDateTime.now())
-                                .chatImage(null)
+                                .type(ChatType.AI)
+                                .imageUrl(null)
                                 .build();
 
-                        chatRepository.save(aiChatDto.toEntity(member));
+                        chatRepository.save(aiChat);
                         log.info("AI 응답 저장 완료 - 채팅 모드");
                     }
                 }
@@ -126,33 +128,31 @@ public class RecommendService {
         return response;
     }
 
-    public List<ChatDto> getChatHistory(Long memberId) {
-        // 엔티티 리스트로 받아서
+    public List<Chat> getChatList(Long memberId) {
+        // 엔티티 리스트로 받기
         List<Chat> chats = chatRepository.findByMemberId(memberId);
         log.info("조회된 채팅 수: {}", chats.size());
 
-        // DTO로 변환
-        List<ChatDto> chatDtos = chats.stream()
-                .map(ChatDto::fromEntity)
-                .toList();
-
-        chatDtos.forEach(chat -> {
+        // 디버깅을 위한 로깅
+        chats.forEach(chat -> {
             log.info("Chat ID: {}, MemberId: {}, Content: {}, Image URL: {}, Type: {}",
-                    chat.getId(), chat.getMemberId(), chat.getContent(), chat.getChatImage(), chat.getType());
+                    chat.getId(), chat.getMemberId(), chat.getContent(), chat.getImageUrl(), chat.getType());
         });
 
-        Queue<ChatDto> userChats = new LinkedList<>();
-        Queue<ChatDto> aiChats = new LinkedList<>();
+        Queue<Chat> userChats = new LinkedList<>();
+        Queue<Chat> aiChats = new LinkedList<>();
 
-        for (ChatDto chatDto : chatDtos) {
-            if (chatDto.getType() == Chat.MessageType.USER) {
-                userChats.add(chatDto);
+        // 유저와 AI 메시지 분리
+        for (Chat chat : chats) {
+            if (chat.getType() == ChatType.USER) {
+                userChats.add(chat);
             } else {
-                aiChats.add(chatDto);
+                aiChats.add(chat);
             }
         }
 
-        List<ChatDto> result = new ArrayList<>();
+        // 결과 리스트 생성
+        List<Chat> result = new ArrayList<>();
         while (!userChats.isEmpty() || !aiChats.isEmpty()) {
             if (!userChats.isEmpty()) {
                 result.add(userChats.poll());
@@ -163,5 +163,36 @@ public class RecommendService {
         }
 
         return result;
+    }
+
+    public ChatHistory createChatHistory(String chatId) {
+
+        // 원본 채팅 조회
+        Chat originalChat = chatRepository.findById(chatId)
+                .orElseThrow(() -> new CustomException("채팅을 찾을 수 없습니다."));
+
+        // 히스토리 생성
+        ChatHistory history = ChatHistory.builder()
+                .chatId(originalChat.getId())
+                .memberId(originalChat.getMemberId())
+                .type(originalChat.getType())
+                .imageUrl(originalChat.getImageUrl())
+                .timeStamp(originalChat.getTimeStamp())
+                .content(originalChat.getContent())
+                .mode(originalChat.getMode())
+                .lineId(originalChat.getLineId())
+                .recommendations(originalChat.getRecommendations())
+                .build();
+
+        System.out.println("================= history : "+ history);
+
+        return chatHistoryRepository.save(history);
+
+    }
+
+    public List<ChatHistory> getChatHistory(Long memberId) {
+        List<ChatHistory> chats = chatHistoryRepository.findByMemberIdOrderByTimeStampDesc(memberId);
+        log.info("조회된 히스토리 수: {}", chats.size());
+        return chats;
     }
 }

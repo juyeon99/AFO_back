@@ -1,8 +1,7 @@
 package com.banghyang.recommend.controller;
 
-import com.banghyang.member.repository.MemberRepository;
-import com.banghyang.recommend.dto.ChatDto;
 import com.banghyang.recommend.entity.Chat;
+import com.banghyang.recommend.entity.ChatHistory;
 import com.banghyang.recommend.service.ImageProcessingService;
 import com.banghyang.recommend.service.RecommendService;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +16,7 @@ import java.util.Map;
 
 @Slf4j
 @RestController
-@RequestMapping("/")
+@RequestMapping()
 public class RecommendController {
 
     private final RecommendService recommendService;
@@ -28,7 +27,7 @@ public class RecommendController {
         this.imageProcessingService = imageProcessingService;
     }
 
-    @PostMapping("/recommend")
+    @PostMapping("/recommends/")
     public ResponseEntity<Map<String, Object>> processInputAndImage(
             @RequestParam(value = "user_input", required = false, defaultValue = "") String userInput,
             @RequestParam(value = "userId", required = false) Long memberId,
@@ -96,9 +95,23 @@ public class RecommendController {
         }
     }
 
-    @GetMapping("recommend/{memberId}")
-    public ResponseEntity<List<ChatDto>> getChatHistory(@PathVariable Long memberId) {
-        List<ChatDto> chatHistory = recommendService.getChatHistory(memberId);
+    @GetMapping("recommends/{memberId}")
+    public ResponseEntity<List<Chat>> getChaList(@PathVariable Long memberId) {
+        List<Chat> chatHistory = recommendService.getChatList(memberId);
         return ResponseEntity.ok(chatHistory);
     }
+
+    @PostMapping("/recommend/history")
+    public ResponseEntity<ChatHistory> createFragranceCard(@RequestParam String chatId) {
+        ChatHistory result = recommendService.createChatHistory(chatId);
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("recommend/history/{memberId}")
+    public ResponseEntity<List<ChatHistory>> getChatHistory(@PathVariable Long memberId) {
+        System.out.println("=================================");
+        List<ChatHistory> history = recommendService.getChatHistory(memberId);
+        return ResponseEntity.ok(history);
+    }
+
 }
