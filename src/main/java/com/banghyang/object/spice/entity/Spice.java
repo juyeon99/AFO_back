@@ -27,10 +27,18 @@ public class Spice {
     @JoinColumn(name = "line_id", nullable = false)
     private Line line;
 
-    @Builder(toBuilder = true)
+    @Builder
     public Spice(String name, String nameKr, String description, Line line) {
         this.name = name;
         this.nameKr = nameKr;
         this.description = description;
+        this.line = line;
+    }
+
+    public void modify(Spice modifySpiceEntity) {
+        this.name = modifySpiceEntity.getName();
+        this.nameKr = modifySpiceEntity.getNameKr();
+        this.description = modifySpiceEntity.getDescription();
+        this.line = modifySpiceEntity.getLine();
     }
 }

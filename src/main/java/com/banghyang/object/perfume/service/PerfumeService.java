@@ -1,5 +1,6 @@
 package com.banghyang.object.perfume.service;
 
+import com.banghyang.object.mapper.Mapper;
 import com.banghyang.object.note.entity.BaseNote;
 import com.banghyang.object.note.entity.MiddleNote;
 import com.banghyang.object.note.entity.SingleNote;
@@ -13,9 +14,9 @@ import com.banghyang.object.perfume.dto.PerfumeModifyRequest;
 import com.banghyang.object.perfume.dto.PerfumeResponse;
 import com.banghyang.object.perfume.entity.Perfume;
 import com.banghyang.object.perfume.entity.PerfumeImage;
-import com.banghyang.object.mapper.Mapper;
 import com.banghyang.object.perfume.repository.PerfumeImageRepository;
 import com.banghyang.object.perfume.repository.PerfumeRepository;
+import com.banghyang.object.util.ValidUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -59,7 +60,7 @@ public class PerfumeService {
         perfumeRepository.save(newPerfumeEntity);
 
         // 향수 이미지
-        if (perfumeCreateRequest.getImageUrl() != null) {
+        if (ValidUtils.isNotBlank(perfumeCreateRequest.getImageUrl())) {
             // 만약 request 에 이미지 url 정보가 담겨있다면 이미지 엔티티 생성 진행
             PerfumeImage newPerfumeImageEntity = PerfumeImage.builder()
                     .perfume(newPerfumeEntity)
@@ -69,10 +70,10 @@ public class PerfumeService {
         }
 
         // 노트
-        if (perfumeCreateRequest.getSingleNote() != null) { // 싱글노트가 존재하고,
-            if (perfumeCreateRequest.getTopNote() == null &&
-                    perfumeCreateRequest.getMiddleNote() == null &&
-                    perfumeCreateRequest.getBaseNote() == null) { // 나머지 노트들이 다 null 일때
+        if (ValidUtils.isNotBlank(perfumeCreateRequest.getSingleNote())) { // 싱글노트가 존재하고,
+            if (!ValidUtils.isNotBlank(perfumeCreateRequest.getTopNote()) &&
+                    !ValidUtils.isNotBlank(perfumeCreateRequest.getMiddleNote()) &&
+                    !ValidUtils.isNotBlank(perfumeCreateRequest.getBaseNote())) { // 나머지 노트들이 다 null 일때
                 SingleNote newSingleNoteEntity = SingleNote.builder()
                         .perfume(newPerfumeEntity)
                         .spices(perfumeCreateRequest.getSingleNote())
@@ -84,29 +85,37 @@ public class PerfumeService {
             }
         } else { // 싱글노트가 존재하지 않는 경우 탑, 미들, 베이스 노트 생성 진행
             // 탑노트
-            if (perfumeCreateRequest.getTopNote() != null) {
+            if (ValidUtils.isNotBlank(perfumeCreateRequest.getTopNote())) {
                 TopNote newTopNoteEntity = TopNote.builder()
                         .perfume(newPerfumeEntity)
                         .spices(perfumeCreateRequest.getTopNote())
                         .build();
                 topNoteRepository.save(newTopNoteEntity);
-                // 미들노트
-            } else if (perfumeCreateRequest.getMiddleNote() != null) {
+            }
+
+            // 미들노트
+            if (ValidUtils.isNotBlank(perfumeCreateRequest.getMiddleNote())) {
                 MiddleNote newMiddleNoteEntity = MiddleNote.builder()
                         .perfume(newPerfumeEntity)
                         .spices(perfumeCreateRequest.getMiddleNote())
                         .build();
                 middleNoteRepository.save(newMiddleNoteEntity);
-                // 베이스노트
-            } else if (perfumeCreateRequest.getBaseNote() != null) {
+            }
+
+            // 베이스노트
+            if (ValidUtils.isNotBlank(perfumeCreateRequest.getBaseNote())) {
                 BaseNote newBaseNoteEntity = BaseNote.builder()
                         .perfume(newPerfumeEntity)
                         .spices(perfumeCreateRequest.getBaseNote())
                         .build();
                 baseNoteRepository.save(newBaseNoteEntity);
-            } else {
+            }
+
+            if (!ValidUtils.isNotBlank(perfumeCreateRequest.getTopNote()) &&
+                    !ValidUtils.isNotBlank(perfumeCreateRequest.getMiddleNote()) &&
+                    !ValidUtils.isNotBlank(perfumeCreateRequest.getBaseNote())) {
                 // 노트가 아무것도 존재하지 않을 시 예외 발생시키기
-                throw new IllegalArgumentException("노트 정보가 존재하지 않습니다.");
+                throw new IllegalArgumentException("노트 정보가 존재하지 않아 향수 등록을 실패했습니다.");
             }
         }
     }
@@ -117,86 +126,144 @@ public class PerfumeService {
     public void modifyPerfume(PerfumeModifyRequest perfumeModifyRequest) {
         // 수정할 perfume 엔티티 request 의 id 값으로 찾아오기
         Perfume targetPerfumeEntity = perfumeRepository.findById(perfumeModifyRequest.getId())
-                .orElseThrow(() -> new IllegalArgumentException("수정하려 하는 향수의 정보를 찾을 수 없습니다."));
-        // toBuilder 사용하여 찾아온 perfume 엔티티 수정
-        Perfume modifyPerfumeEntity = targetPerfumeEntity.toBuilder()
+                .orElseThrow(() -> new IllegalArgumentException("수정하려는 향수의 정보를 찾을 수 없습니다."));
+        // 찾아온 perfume 엔티티 수정
+        Perfume modifyPerfumeEntity = Perfume.builder()
                 .name(perfumeModifyRequest.getName())
                 .description(perfumeModifyRequest.getDescription())
                 .brand(perfumeModifyRequest.getBrand())
                 .grade(perfumeModifyRequest.getGrade())
                 .build();
-        // 수정한 perfume 엔티티 저장
-        perfumeRepository.save(modifyPerfumeEntity);
+        // 향수 엔티티 클래스에 만들어둔 수정 메소드로 수정 적용
+        targetPerfumeEntity.modify(modifyPerfumeEntity);
 
         // 향수 이미지
-        if (perfumeModifyRequest.getImageUrl() != null) {
+        if (ValidUtils.isNotBlank(perfumeModifyRequest.getImageUrl())) {
             // request 에 이미지 URL 존재할 시 이미지 수정 진행
-            PerfumeImage targetPerfumeImageEntity = perfumeImageRepository.findByPerfumeId(modifyPerfumeEntity.getId());
-            PerfumeImage modifyPerfumeImageEntity = targetPerfumeImageEntity.toBuilder()
+            PerfumeImage targetPerfumeImageEntity = targetPerfumeEntity.getPerfumeImage();
+            // 수정 이미지 엔티티 생성
+            PerfumeImage modifyPerfumeImageEntity = PerfumeImage.builder()
                     .url(perfumeModifyRequest.getImageUrl())
-                    .perfume(modifyPerfumeEntity)
+                    .perfume(targetPerfumeEntity)
                     .build();
-            perfumeImageRepository.save(modifyPerfumeImageEntity);
+
+            if (targetPerfumeImageEntity != null) {
+                // 기존 엔티티가 있다면 수정
+                targetPerfumeImageEntity.modify(modifyPerfumeImageEntity);
+            } else {
+                // 기존 엔티티가 없다면 생성
+                perfumeImageRepository.save(modifyPerfumeImageEntity);
+            }
+        } else {
+            if (targetPerfumeEntity.getPerfumeImage() != null) {
+                perfumeImageRepository.delete(targetPerfumeEntity.getPerfumeImage());
+            }
         }
 
         // 노트
-        if (perfumeModifyRequest.getSingleNote() != null) {
-            if (perfumeModifyRequest.getTopNote() == null &&
-                    perfumeModifyRequest.getMiddleNote() == null &&
-                    perfumeModifyRequest.getBaseNote() == null) {
+        if (ValidUtils.isNotBlank(perfumeModifyRequest.getSingleNote())) {
+            if (!ValidUtils.isNotBlank(perfumeModifyRequest.getTopNote()) &&
+                    !ValidUtils.isNotBlank(perfumeModifyRequest.getMiddleNote()) &&
+                    !ValidUtils.isNotBlank(perfumeModifyRequest.getBaseNote())) {
                 // request 에 싱글노트가 존재하고 다른 노트가 없을 시 싱글노트 수정 진행
-                SingleNote modifySingleNoteEntity = modifyPerfumeEntity.getSingleNote().toBuilder()
-                        .perfume(modifyPerfumeEntity)
+                SingleNote modifySingleNoteEntity = SingleNote.builder()
+                        .perfume(targetPerfumeEntity)
                         .spices(perfumeModifyRequest.getSingleNote())
                         .build();
-                singleNoteRepository.save(modifySingleNoteEntity);
+
+                if (targetPerfumeEntity.getSingleNote() != null) {
+                    targetPerfumeEntity.getSingleNote().modify(modifySingleNoteEntity);
+                } else {
+                    singleNoteRepository.save(modifySingleNoteEntity);
+                }
 
                 // 싱글노트 외의 다른 노트 엔티티 모두 삭제
-                topNoteRepository.delete(modifyPerfumeEntity.getTopNote());
-                middleNoteRepository.delete(modifyPerfumeEntity.getMiddleNote());
-                baseNoteRepository.delete(modifyPerfumeEntity.getBaseNote());
+                // 탑노트 삭제
+                if (targetPerfumeEntity.getTopNote() != null) {
+                    topNoteRepository.delete(targetPerfumeEntity.getTopNote());
+                }
+                // 미들노트 삭제
+                if (targetPerfumeEntity.getMiddleNote() != null) {
+                    middleNoteRepository.delete(targetPerfumeEntity.getMiddleNote());
+                }
+                // 베이스노트 삭제
+                if (targetPerfumeEntity.getBaseNote() != null) {
+                    baseNoteRepository.delete(targetPerfumeEntity.getBaseNote());
+                }
             } else {
                 // request 에 싱글노트와 다른 노트가 함께 존재시 예외 발생시키기
                 throw new IllegalArgumentException("싱글 노트와 다른 종류의 노트가 동시에 존재할 수 없습니다.");
             }
         } else { // 싱글노트가 존재하지 않을 시 싱글 노트 엔티티 삭제하고 탑, 미들, 베이스 노트 수정 진행
             // 탑노트
-            if (perfumeModifyRequest.getTopNote() != null) {
+            if (ValidUtils.isNotBlank(perfumeModifyRequest.getTopNote())) {
                 // 싱글노트 존재 시 삭제하기
-                if (modifyPerfumeEntity.getSingleNote() != null) {
-                    singleNoteRepository.delete(modifyPerfumeEntity.getSingleNote());
+                if (targetPerfumeEntity.getSingleNote() != null) {
+                    singleNoteRepository.delete(targetPerfumeEntity.getSingleNote());
                 }
 
-                TopNote modifyTopNoteEntity = modifyPerfumeEntity.getTopNote().toBuilder()
-                        .perfume(modifyPerfumeEntity)
+                TopNote modifyTopNoteEntity = TopNote.builder()
+                        .perfume(targetPerfumeEntity)
                         .spices(perfumeModifyRequest.getTopNote())
                         .build();
-                topNoteRepository.save(modifyTopNoteEntity);
-                // 미들노트
-            } else if (perfumeModifyRequest.getMiddleNote() != null) {
+
+                if (targetPerfumeEntity.getTopNote() != null) {
+                    targetPerfumeEntity.getTopNote().modify(modifyTopNoteEntity);
+                } else {
+                    topNoteRepository.save(modifyTopNoteEntity);
+                }
+            } else {
+                // 탑노트 입력 정보가 없다면 기존 탑노트 존재 검증 후 삭제 처리
+                if (targetPerfumeEntity.getTopNote() != null) {
+                    topNoteRepository.delete(targetPerfumeEntity.getTopNote());
+                }
+            }
+            // 미들노트
+            if (ValidUtils.isNotBlank(perfumeModifyRequest.getMiddleNote())) {
                 // 싱글노트 존재 시 삭제하기
-                if (modifyPerfumeEntity.getSingleNote() != null) {
-                    singleNoteRepository.delete(modifyPerfumeEntity.getSingleNote());
+                if (targetPerfumeEntity.getSingleNote() != null) {
+                    singleNoteRepository.delete(targetPerfumeEntity.getSingleNote());
                 }
 
-                MiddleNote modifyMiddleNoteEntity = modifyPerfumeEntity.getMiddleNote().toBuilder()
-                        .perfume(modifyPerfumeEntity)
+                MiddleNote modifyMiddleNoteEntity = MiddleNote.builder()
+                        .perfume(targetPerfumeEntity)
                         .spices(perfumeModifyRequest.getMiddleNote())
                         .build();
-                middleNoteRepository.save(modifyMiddleNoteEntity);
-                // 베이스노트
-            } else if (perfumeModifyRequest.getBaseNote() != null) {
+
+                if (targetPerfumeEntity.getMiddleNote() != null) {
+                    targetPerfumeEntity.getMiddleNote().modify(modifyMiddleNoteEntity);
+                } else {
+                    middleNoteRepository.save(modifyMiddleNoteEntity);
+                }
+            } else {
+                // 미들노트 입력 정보가 없다면 기존 미들노트 존재 검증 후 삭제 처리
+                if (targetPerfumeEntity.getMiddleNote() != null) {
+                    middleNoteRepository.delete(targetPerfumeEntity.getMiddleNote());
+                }
+            }
+            // 베이스노트
+            if (ValidUtils.isNotBlank(perfumeModifyRequest.getBaseNote())) {
                 // 싱글노트 존재 시 삭제하기
-                if (modifyPerfumeEntity.getSingleNote() != null) {
-                    singleNoteRepository.delete(modifyPerfumeEntity.getSingleNote());
+                if (targetPerfumeEntity.getSingleNote() != null) {
+                    singleNoteRepository.delete(targetPerfumeEntity.getSingleNote());
                 }
 
-                BaseNote modifyBaseNoteEntity = modifyPerfumeEntity.getBaseNote().toBuilder()
-                        .perfume(modifyPerfumeEntity)
+                BaseNote modifyBaseNoteEntity = BaseNote.builder()
+                        .perfume(targetPerfumeEntity)
                         .spices(perfumeModifyRequest.getBaseNote())
                         .build();
-                baseNoteRepository.save(modifyBaseNoteEntity);
-            } // 노트 정보가 존재하지 않으면 노트 수정은 진행하지 않음
+
+                if (targetPerfumeEntity.getBaseNote() != null) {
+                    targetPerfumeEntity.getBaseNote().modify(modifyBaseNoteEntity);
+                } else {
+                    baseNoteRepository.save(modifyBaseNoteEntity);
+                }
+            } else {
+                // 베이스노트 입력 정보가 없다면 기존 베이스노트 존재 검증 후 삭제 처리
+                if (targetPerfumeEntity.getBaseNote() != null) {
+                    baseNoteRepository.delete(targetPerfumeEntity.getBaseNote());
+                }
+            }
         }
     }
 

@@ -23,9 +23,14 @@ public class PerfumeImage {
     @JsonIgnore // 순환 참조 방지
     private Perfume perfume;
 
-    @Builder(toBuilder = true)
+    @Builder
     public PerfumeImage(String url, Perfume perfume) {
         this.url = url;
         this.perfume = perfume;
+    }
+
+    public void modify(PerfumeImage modifyPerfumeImageEntity) {
+        this.url = modifyPerfumeImageEntity.url;
+        this.perfume = modifyPerfumeImageEntity.perfume;
     }
 }

@@ -9,6 +9,7 @@ import com.banghyang.object.perfume.entity.Perfume;
 import com.banghyang.object.spice.dto.SpiceCreateRequest;
 import com.banghyang.object.spice.dto.SpiceResponse;
 import com.banghyang.object.spice.entity.Spice;
+import com.banghyang.object.util.ValidUtils;
 
 public class Mapper {
     /**
@@ -63,10 +64,10 @@ public class Mapper {
      * 향수 생성 request 를 향수 엔티티로 변환하는 매퍼
      */
     public static Perfume mapPerfumeCreateRequestToEntity(PerfumeCreateRequest perfumeCreateRequest) {
-        if (perfumeCreateRequest.getName() != null &&
-                perfumeCreateRequest.getDescription() != null &&
-                perfumeCreateRequest.getBrand() != null &&
-                perfumeCreateRequest.getGrade() != null) {
+        if (ValidUtils.isNotBlank(perfumeCreateRequest.getName()) &&
+                ValidUtils.isNotBlank(perfumeCreateRequest.getDescription()) &&
+                ValidUtils.isNotBlank(perfumeCreateRequest.getBrand()) &&
+                ValidUtils.isNotBlank(perfumeCreateRequest.getGrade())) {
             // 이름, 설명, 브랜드, 등급 정보가 모두 있어야 perfume 반환
             return Perfume.builder()
                     .name(perfumeCreateRequest.getName())
@@ -99,10 +100,13 @@ public class Mapper {
         return spiceResponse;
     }
 
+    /**
+     * 향료 등록 request 를 엔티티로 변환하는 매퍼
+     */
     public static Spice mapSpiceCreateRequestToEntity(SpiceCreateRequest spiceCreateRequest, Line lineEntity) {
-        if (spiceCreateRequest.getName() != null &&
-        spiceCreateRequest.getNameKr() != null &&
-        spiceCreateRequest.getDescription() != null) {
+        if (ValidUtils.isNotBlank(spiceCreateRequest.getName()) &&
+        ValidUtils.isNotBlank(spiceCreateRequest.getNameKr()) &&
+        ValidUtils.isNotBlank(spiceCreateRequest.getDescription())) {
             // 영문명, 한글명, 설명 모두 있어야 entity 반환
             return Spice.builder()
                     .name(spiceCreateRequest.getName())
