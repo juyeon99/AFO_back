@@ -7,10 +7,10 @@ import com.banghyang.chat.entity.Chat;
 import com.banghyang.chat.repository.ChatRepository;
 import com.banghyang.common.type.ChatMode;
 import com.banghyang.common.type.ChatType;
-import com.banghyang.object.mapper.Mapper;
+import com.banghyang.common.util.ValidUtils;
+import com.banghyang.common.mapper.Mapper;
 import com.banghyang.object.perfume.entity.Perfume;
 import com.banghyang.object.perfume.repository.PerfumeRepository;
-import com.banghyang.common.util.ValidUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -29,6 +29,21 @@ public class ChatService {
     private final WebClient webClient;
     private final S3Service s3Service;
     private final PerfumeRepository perfumeRepository;
+
+    public List<UserResponse> getAllChats(Long memberId) {
+        // memberId 에 해당하는 모든 채팅 기록 가져오기
+        List<Chat> chatEntityList = chatRepository.findChatByMemberId(memberId);
+        return chatEntityList.stream().map(chatEntity -> {
+            UserResponse userResponse = new UserResponse();
+            userResponse.setId(chatEntity.getId());
+            userResponse.setMode(chatEntity.getMode());
+            userResponse.setContent(chatEntity.getContent());
+            userResponse.setLineId(chatEntity.getLineId());
+            userResponse.setImageUrl(chatEntity.getImageUrl());
+            userResponse.setRecommendations(chatEntity.getRecommendations());
+            return userResponse;
+        }).toList();
+    }
 
     /**
      * 유저 채팅에 답변하는 서비스 메소드
@@ -65,7 +80,7 @@ public class ChatService {
                     .type(ChatType.USER)
                     .memberId(userRequest.getMemberId())
                     .content(userRequest.getContent())
-                    .userInputImageS3Url(userInputImageS3Url)
+                    .imageUrl(userInputImageS3Url)
                     .build();
             chatRepository.save(userChat);
 
@@ -110,7 +125,7 @@ public class ChatService {
                     .content(perfumeRecommendResponse.getContent())
                     .mode(perfumeRecommendResponse.getMode())
                     .lineId(perfumeRecommendResponse.getLineId())
-                    .generatedImageS3Url(generatedImageS3Url)
+                    .imageUrl(generatedImageS3Url)
                     .recommendations(recommendations)
                     .build();
             chatRepository.save(aiChat);
@@ -121,7 +136,7 @@ public class ChatService {
             userResponse.setMode(perfumeRecommendResponse.getMode());
             userResponse.setContent(perfumeRecommendResponse.getContent());
             userResponse.setLineId(perfumeRecommendResponse.getLineId());
-            userResponse.setGeneratedImageS3Url(generatedImageS3Url);
+            userResponse.setImageUrl(generatedImageS3Url);
             userResponse.setRecommendations(recommendations);
             // 값들 담은 userResponse 반환
             return userResponse;
@@ -165,7 +180,8 @@ public class ChatService {
                     }
 
                     // 생성된 byte[] 형식의 이미지를 S3 에 저장하고 S3 URL 받기
-                    String generatedImageS3Url = s3Service.byteUploadImage(generatedImageByte, "generatedImage");
+                    String generatedImageS3Url = s3Service.byteUploadImage(
+                            generatedImageByte, "generatedImage");
                     // S3에 생성된 이미지 저장 후 url 이 반환되지 않으면 예외 발생시키기
                     if (!ValidUtils.isNotBlank(generatedImageS3Url)) {
                         throw new IllegalArgumentException("S3에 AI 생성 이미지 저장을 실패했습니다.");
@@ -178,7 +194,7 @@ public class ChatService {
                             .memberId(userRequest.getMemberId())
                             .content(perfumeRecommendResponse.getContent())
                             .lineId(perfumeRecommendResponse.getLineId())
-                            .generatedImageS3Url(generatedImageS3Url)
+                            .imageUrl(generatedImageS3Url)
                             .recommendations(recommendations)
                             .build();
                     chatRepository.save(aiChat);
@@ -189,7 +205,7 @@ public class ChatService {
                     userResponse.setMode(perfumeRecommendResponse.getMode());
                     userResponse.setContent(perfumeRecommendResponse.getContent());
                     userResponse.setLineId(perfumeRecommendResponse.getLineId());
-                    userResponse.setGeneratedImageS3Url(generatedImageS3Url);
+                    userResponse.setImageUrl(generatedImageS3Url);
                     userResponse.setRecommendations(recommendations);
                     // 값을 담은 userResponse 반환
                     return userResponse;

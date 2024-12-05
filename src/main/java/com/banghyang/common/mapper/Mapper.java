@@ -1,4 +1,4 @@
-package com.banghyang.object.mapper;
+package com.banghyang.common.mapper;
 
 import com.banghyang.chat.entity.Chat;
 import com.banghyang.common.util.ValidUtils;

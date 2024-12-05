@@ -3,7 +3,7 @@ package com.banghyang.object.spice.service;
 import com.banghyang.common.util.ValidUtils;
 import com.banghyang.object.line.entity.Line;
 import com.banghyang.object.line.repository.LineRepository;
-import com.banghyang.object.mapper.Mapper;
+import com.banghyang.common.mapper.Mapper;
 import com.banghyang.object.spice.dto.SpiceCreateRequest;
 import com.banghyang.object.spice.dto.SpiceModifyRequest;
 import com.banghyang.object.spice.dto.SpiceResponse;

@@ -1,7 +1,7 @@
 package com.banghyang.object.perfume.service;
 
 import com.banghyang.common.util.ValidUtils;
-import com.banghyang.object.mapper.Mapper;
+import com.banghyang.common.mapper.Mapper;
 import com.banghyang.object.note.entity.BaseNote;
 import com.banghyang.object.note.entity.MiddleNote;
 import com.banghyang.object.note.entity.SingleNote;
