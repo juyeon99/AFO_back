@@ -48,12 +48,17 @@ public class Chat {
 
     @Data
     public static class Recommendation {
-        private Long perfumeId;
-        private String perfumeImageUrl;
+        @Field("perfume_name")
         private String perfumeName;
+        @Field("perfume_image_url")
+        private String perfumeImageUrl;
+        @Field("perfume_brand")
         private String perfumeBrand;
+        @Field("perfume_grade")
         private String perfumeGrade;
+        @Field("reason")
         private String reason;
+        @Field("situation")
         private String situation;
     }
 
