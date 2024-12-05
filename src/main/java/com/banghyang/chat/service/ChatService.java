@@ -234,6 +234,9 @@ public class ChatService {
                 .block();
     }
 
+    /**
+     * LLM 에 유저 입력값을 보내서 이미지 생성 프롬프트를 요청하는 메소드
+     */
     private String getImageGeneratePromptFromLLM(String userInput) {
         return webClient // api 요청에 webClient 사용
                 .post()
