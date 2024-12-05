@@ -1,4 +1,4 @@
-package com.banghyang.recommend.service;
+package com.banghyang.chat.service;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
@@ -48,7 +48,7 @@ public class S3Service {
         String fileName = createFileName(originalFileName);
         ObjectMetadata objectMetadata = new ObjectMetadata();
         objectMetadata.setContentLength(imageData.length);
-        objectMetadata.setContentType("image/png");  // FastAPI에서 생성된 이미지는 PNG라고 가정
+        objectMetadata.setContentType("image/png");  // FastAPI 에서 생성된 이미지는 PNG 라고 가정
 
         try (InputStream inputStream = new ByteArrayInputStream(imageData)) {
             amazonS3.putObject(new PutObjectRequest(bucket, fileName, inputStream, objectMetadata)

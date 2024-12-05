@@ -1,4 +1,4 @@
-package com.banghyang.recommend.config;
+package com.banghyang.common.config;
 
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
