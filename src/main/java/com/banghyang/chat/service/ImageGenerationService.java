@@ -1,6 +1,5 @@
 package com.banghyang.chat.service;
 
-import com.banghyang.chat.repository.ChatImageRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

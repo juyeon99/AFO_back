@@ -1,16 +1,15 @@
 package com.banghyang.chat.entity;
 
+import com.banghyang.common.type.ChatMode;
 import com.banghyang.common.type.ChatType;
 import jakarta.persistence.PrePersist;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Document(collection = "chat")
 @Getter
@@ -18,25 +17,42 @@ import java.time.LocalDateTime;
 public class Chat {
 
     @Id
-    private String chatId; // MongoDB 에서 자동 생성되는 ID
-
-    @Field("member_id")
-    private Long memberId; // 회원 ID
+    private String id; // MongoDB 에서 자동 생성되는 ID
 
     @Field("type")
     private ChatType type; // 메시지 타입 (USER, AI)
 
-    @Field("timestamp")
-    private LocalDateTime timeStamp; // 메시지 생성 시간
-
-    @Field("chat_image")
-    private String imageUrl; // 이미지 URL 또는 null
-
-    @Field("line_id")
-    private Integer lineId; // 메시지 구분자
+    @Field("member_id")
+    private Long memberId; // 회원 ID
 
     @Field("content")
     private String content;
+
+    @Field("chat_image")
+    private String imageUrl;
+
+    @Field("timeStamp")
+    private LocalDateTime timeStamp; // 메시지 생성 시간
+
+    @Field("mode")
+    private ChatMode mode;
+
+    @Field("line_id")
+    private Long lineId;
+
+    @Field("recommendations")
+    private List<Recommendation> recommendations;
+
+    @Data
+    public static class Recommendation {
+        private Long perfumeId;
+        private String perfumeImageUrl;
+        private String perfumeName;
+        private String perfumeBrand;
+        private String perfumeGrade;
+        private String reason;
+        private String situation;
+    }
 
     @PrePersist
     public void prePersist() {
@@ -44,11 +60,21 @@ public class Chat {
     }
 
     @Builder
-    public Chat(Long memberId, ChatType type, String imageUrl, Integer lineId, String content) {
-        this.memberId = memberId;
+    public Chat(
+            ChatType type,
+            Long memberId,
+            String content,
+            String imageUrl,
+            ChatMode mode,
+            Long lineId,
+            List<Recommendation> recommendations
+    ) {
         this.type = type;
-        this.imageUrl = imageUrl;
-        this.lineId = lineId;
+        this.memberId = memberId;
         this.content = content;
+        this.imageUrl = imageUrl;
+        this.mode = mode;
+        this.lineId = lineId;
+        this.recommendations = recommendations;
     }
 }

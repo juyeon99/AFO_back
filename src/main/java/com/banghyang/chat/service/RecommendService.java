@@ -1,22 +1,18 @@
 package com.banghyang.chat.service;
 
-import com.banghyang.chat.entity.Reason;
-import com.banghyang.chat.entity.Situation;
 import com.banghyang.chat.repository.ReasonRepository;
 import com.banghyang.common.type.ChatType;
 import com.banghyang.member.entity.Member;
 import com.banghyang.member.repository.MemberRepository;
-import com.banghyang.chat.dto.ChatDto;
 import com.banghyang.chat.entity.Chat;
 import com.banghyang.chat.repository.ChatRepository;
-import com.banghyang.object.perfume.entity.Perfume;
 import com.banghyang.object.perfume.repository.PerfumeRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
-import java.time.LocalDateTime;
+
 import java.util.*;
 
 @Slf4j
