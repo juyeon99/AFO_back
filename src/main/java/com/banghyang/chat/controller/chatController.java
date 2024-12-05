@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class chatController {
 
     private final ChatService chatService;
-    private final RecommendService recommendService;
 
     @PostMapping
     public ResponseEntity<UserResponse> processInputAndImage(@ModelAttribute UserRequest userRequest) {

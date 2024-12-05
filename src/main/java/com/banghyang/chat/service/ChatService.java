@@ -10,7 +10,7 @@ import com.banghyang.common.type.ChatType;
 import com.banghyang.object.mapper.Mapper;
 import com.banghyang.object.perfume.entity.Perfume;
 import com.banghyang.object.perfume.repository.PerfumeRepository;
-import com.banghyang.object.util.ValidUtils;
+import com.banghyang.common.util.ValidUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;

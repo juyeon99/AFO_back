@@ -1,4 +1,4 @@
-package com.banghyang.object.util;
+package com.banghyang.common.util;
 
 import com.banghyang.chat.dto.PerfumeRecommendResponse;
 

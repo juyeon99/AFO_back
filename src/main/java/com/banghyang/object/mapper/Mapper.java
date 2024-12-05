@@ -1,7 +1,7 @@
 package com.banghyang.object.mapper;
 
-import com.banghyang.chat.dto.PerfumeRecommendResponse;
 import com.banghyang.chat.entity.Chat;
+import com.banghyang.common.util.ValidUtils;
 import com.banghyang.member.dto.MemberResponse;
 import com.banghyang.member.entity.Member;
 import com.banghyang.object.line.entity.Line;
@@ -11,10 +11,6 @@ import com.banghyang.object.perfume.entity.Perfume;
 import com.banghyang.object.spice.dto.SpiceCreateRequest;
 import com.banghyang.object.spice.dto.SpiceResponse;
 import com.banghyang.object.spice.entity.Spice;
-import com.banghyang.object.util.ValidUtils;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class Mapper {
     /**
