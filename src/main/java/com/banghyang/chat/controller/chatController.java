@@ -3,7 +3,6 @@ package com.banghyang.chat.controller;
 import com.banghyang.chat.dto.UserRequest;
 import com.banghyang.chat.dto.UserResponse;
 import com.banghyang.chat.service.ChatService;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
