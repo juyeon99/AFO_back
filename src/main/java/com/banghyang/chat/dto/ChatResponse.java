@@ -12,6 +12,7 @@ public class ChatResponse {
     private Long memberId;
     private String content;
     private String imageUrl;
+    private Long lineId;
     private ChatType type;
     private ChatMode mode;
     private LocalDateTime timeStamp;
