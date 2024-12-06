@@ -15,7 +15,6 @@ import org.springframework.web.server.ResponseStatusException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -45,18 +44,18 @@ public class S3Service {
 
     // byte array 업로드용 새 메소드
     public String byteUploadImage(byte[] imageData, String originalFileName) {
+
         String fileName = createFileName(originalFileName);
+
         ObjectMetadata objectMetadata = new ObjectMetadata();
         objectMetadata.setContentLength(imageData.length);
-        objectMetadata.setContentType("image/png");  // FastAPI 에서 생성된 이미지는 PNG 라고 가정
+        objectMetadata.setContentType("image/jpeg");  // FastAPI 에서 생성된 이미지는 PNG 라고 가정
 
         try (InputStream inputStream = new ByteArrayInputStream(imageData)) {
             amazonS3.putObject(new PutObjectRequest(bucket, fileName, inputStream, objectMetadata)
                     .withCannedAcl(CannedAccessControlList.PublicRead));
-
             return amazonS3.getUrl(bucket, fileName).toString();
-
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "이미지 업로드에 실패했습니다.");
         }
     }
@@ -68,8 +67,10 @@ public class S3Service {
 
     // 파일 이름 생성 메소드
     private String createFileName(String fileName) {
-        return UUID.randomUUID().toString()
-                .concat(getFileExtension(fileName));
+
+        Long currentTime = System.currentTimeMillis();
+
+        return currentTime + fileName;
     }
 
     // 파일 확장자 추출 메소드

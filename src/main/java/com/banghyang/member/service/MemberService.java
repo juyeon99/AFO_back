@@ -3,7 +3,7 @@ package com.banghyang.member.service;
 import com.banghyang.member.dto.MemberResponse;
 import com.banghyang.member.entity.Member;
 import com.banghyang.member.repository.MemberRepository;
-import com.banghyang.object.mapper.Mapper;
+import com.banghyang.common.mapper.Mapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
