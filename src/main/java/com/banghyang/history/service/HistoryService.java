@@ -2,7 +2,6 @@ package com.banghyang.history.service;
 
 import com.banghyang.chat.entity.Chat;
 import com.banghyang.chat.repository.ChatRepository;
-import com.banghyang.common.exception.CustomException;
 import com.banghyang.history.dto.HistoryResponse;
 import com.banghyang.history.entity.History;
 import com.banghyang.history.entity.Recommendation;
