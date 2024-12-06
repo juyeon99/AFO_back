@@ -1,7 +1,9 @@
 package com.banghyang.history.entity;
 
 import com.banghyang.common.type.ChatMode;
+import com.banghyang.common.type.ChatType;
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -26,8 +28,19 @@ public class History {
     @JoinColumn(name = "history_id")
     private List<Recommendation> recommendation;
     private LocalDateTime timeStamp;
-    private String type;
+    private ChatType type;
 
 
-
+    @Builder
+    public History(String chatId, String content, String imageUrl, Long lineId, Long memberId, ChatMode mode, List<Recommendation> recommendation, LocalDateTime timeStamp, ChatType type) {
+        this.chatId = chatId;
+        this.content = content;
+        this.imageUrl = imageUrl;
+        this.lineId = lineId;
+        this.memberId = memberId;
+        this.mode = mode;
+        this.recommendation = recommendation;
+        this.timeStamp = timeStamp;
+        this.type = type;
+    }
 }
