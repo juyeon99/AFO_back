@@ -55,15 +55,19 @@ public class ChatService {
      * 유저 채팅에 답변하는 서비스 메소드
      */
     public UserResponse answerToUserRequest(UserRequest userRequest) {
+        System.out.println(userRequest.toString());
 
         if (userRequest.getImage() != null) {
             // 유저가 보낸 이미지가 있을 때의 처리
+            System.out.println("이미지 포함 입력 처리 진입");
 
             // 유저가 입력한 이미지를 S3 에 저장하고 S3 URL 받기
             String userInputImageS3Url = s3Service.uploadImage(userRequest.getImage());
+            System.out.println("[이미지입력향수]사용자 입력 이미지 저장 S3 url : " + userInputImageS3Url);
 
             // image to text model 로 전송하여 이미지 분석 결과 받기
             String imageProcessResult = getImageToTextProcessResult(userRequest.getImage());
+            System.out.println("[이미지입력향수]BLIP 모델 이미지 분석 결과 : " + imageProcessResult);
 
             // 유저가 보낸 request 를 MongoDB 에 채팅기록으로 저장
             Chat userChat = Chat.builder()
@@ -76,9 +80,11 @@ public class ChatService {
 
             // LLM 모델로 전송할 userInput 만들기(유저 입력 텍스트 + 유저 입력 이미지 분석 결과)
             String userInput = imageProcessResult + " " + userRequest.getContent();
+            System.out.println("[이미지입력향수]LLM 모델로 전송할 최종 userInput : " + userInput);
 
             //  유저 텍스트 입력값과 이미지 분석 결과를 LLM 모델로 전송하여 향수 추천 받기
             PerfumeRecommendResponse perfumeRecommendResponse = getPerfumeRecommendFromLLM(userInput);
+            System.out.println("[이미지입력향수]LLM 모델의 향수 추천 답변 내용 : " + perfumeRecommendResponse.toString());
 
             // 향수 추천 결과의 recommendation -> 채팅기록 저장 엔티티의 recommendation 으로 변환하는 메소드
             List<Chat.Recommendation> recommendations = mapAiRecommendationsToChatRecommendations(
@@ -87,12 +93,15 @@ public class ChatService {
 
             // 유저 텍스트 입력값과 이미지 분석 결과를 LLM 모델로 전송하여 이미지 생성 프롬프트 받기
             String imageGeneratePrompt = getImageGeneratePromptFromLLM(userInput);
+            System.out.println("[이미지입력향수]LLM 모델이 생성해준 이미지 프롬프트 : " + imageGeneratePrompt);
 
             // AI 가 생성한 이미지의 저장경로로 이미지 파일을 가져오고 byte[] 로 형변환하여 반환하는 메소드
             byte[] generatedImageByte = getGeneratedImageByteFromStableDiffusion(imageGeneratePrompt);
+            System.out.println("[이미지입력향수]AI 생성 이미지 byte[] : " + generatedImageByte.length);
 
             // 생성된 byte[] 형식의 이미지를 S3 에 저장하고 S3 URL 받기
             String generatedImageS3Url = s3Service.byteUploadImage(generatedImageByte, "generatedImage");
+            System.out.println("[이미지입력향수]AI 생성 이미지 저장 S3 URL : " + generatedImageS3Url);
 
             // AI API 들에게서 받아온 값으로 AI 채팅 기록 만들어 MongoDB에 저장하기
             Chat aiChat = Chat.builder()
@@ -114,11 +123,13 @@ public class ChatService {
             userResponse.setLineId(perfumeRecommendResponse.getLineId());
             userResponse.setImageUrl(generatedImageS3Url);
             userResponse.setRecommendations(recommendations);
+            System.out.println("[이미지입력향수]사용자에게 보낼 최종 response 값 : " + userResponse.toString());
             // 값들 담은 userResponse 반환
             return userResponse;
 
         } else {
             // 이미지 없을 때의 처리
+            System.out.println("이미지 미포함 입력 처리 진입");
 
             if (userRequest.getContent() != null) { // 이미지는 없지만 텍스트 입력값은 있을 때의 처리
                 // 유저가 보낸 내용을 MongoDB에 채팅기록으로 저장하기
@@ -177,6 +188,7 @@ public class ChatService {
 
                 } else {
                     // 답변이 일반 모드일 때의 처리
+                    System.out.println("일반 답변 모드 진입");
 
                     Chat aiChat = Chat.builder()
                             .type(ChatType.AI)
@@ -209,6 +221,7 @@ public class ChatService {
             MultiValueMap<String, Object> request = new LinkedMultiValueMap<>();
             // file 이라는 이름으로 사용자 입력 이미지를 보낸다.
             request.add("file", image.getResource());
+            System.out.println("이미지 설명 분석 리퀘스트 값 확인 : " + request.toString());
 
             Map<String, String> response = webClient // webClient 로 api 요청 보내기
                     .post() // post 요청
