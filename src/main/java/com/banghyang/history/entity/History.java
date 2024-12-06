@@ -17,29 +17,41 @@ import java.util.List;
 public class History {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private String chatId;
+
+    @Lob
+    @Column(columnDefinition = "LONGTEXT")
     private String content;
+
     private String imageUrl;
+
     private Long lineId;
+
     private Long memberId;
+
     private ChatMode mode;
-    @OneToMany(cascade = CascadeType.ALL)
+
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "history_id")
-    private List<Recommendation> recommendation;
+    private List<Recommendations> recommendations;
+
     private LocalDateTime timeStamp;
+
     private ChatType type;
 
 
     @Builder
-    public History(String chatId, String content, String imageUrl, Long lineId, Long memberId, ChatMode mode, List<Recommendation> recommendation, LocalDateTime timeStamp, ChatType type) {
+    public History(String chatId, String content, String imageUrl, Long lineId, Long memberId, ChatMode mode, List<Recommendations> recommendations, LocalDateTime timeStamp, ChatType type) {
         this.chatId = chatId;
         this.content = content;
         this.imageUrl = imageUrl;
         this.lineId = lineId;
         this.memberId = memberId;
         this.mode = mode;
-        this.recommendation = recommendation;
+        this.recommendations = recommendations;
         this.timeStamp = timeStamp;
         this.type = type;
     }

@@ -4,7 +4,7 @@ import com.banghyang.chat.entity.Chat;
 import com.banghyang.chat.repository.ChatRepository;
 import com.banghyang.history.dto.HistoryResponse;
 import com.banghyang.history.entity.History;
-import com.banghyang.history.entity.Recommendation;
+import com.banghyang.history.entity.Recommendations;
 import com.banghyang.history.repository.HistoryRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +32,7 @@ public class HistoryService {
      * @param chatId 히스토리로 저장할 채팅의 ID
      * @return 생성된 히스토리의 응답 DTO
      */
+    @Transactional
     public HistoryResponse createHistory(String chatId) {
         Chat chat = findChatById(chatId);
         History history = createHistoryFromChat(chat);
@@ -58,15 +59,19 @@ public class HistoryService {
      * @return 생성된 히스토리 엔티티
      */
     private History createHistoryFromChat(Chat chat) {
+        String content = chat.getContent();
+        System.out.println("==============content length: " + (content != null ? content.length() : "null"));
+        System.out.println("==============content: " + content);
+
         return History.builder()
                 .chatId(chat.getId())
                 .memberId(chat.getMemberId())
                 .type(chat.getType())
-                .imageUrl(chat.getGeneratedImageS3Url())
-                .content(chat.getContent())
+                .imageUrl(chat.getImageUrl())
+                .content(content)
                 .mode(chat.getMode())
                 .lineId(chat.getLineId())
-                .recommendation(convertToHistoryRecommendations(chat.getRecommendations()))
+                .recommendations(convertToHistoryRecommendations(chat.getRecommendations()))
                 .build();
     }
 
@@ -76,9 +81,9 @@ public class HistoryService {
      * @param chatRecommendations 채팅 엔티티의 추천 정보 리스트
      * @return 히스토리 엔티티의 추천 정보 리스트
      */
-    private List<Recommendation> convertToHistoryRecommendations(List<Chat.Recommendation> chatRecommendations) {
+    private List<Recommendations> convertToHistoryRecommendations(List<Chat.Recommendation> chatRecommendations) {
         return chatRecommendations.stream()
-                .map(chatRec -> Recommendation.builder()
+                .map(chatRec -> Recommendations.builder()
                         .perfumeName(chatRec.getPerfumeName())
                         .perfumeBrand(chatRec.getPerfumeBrand())
                         .perfumeGrade(chatRec.getPerfumeGrade())
@@ -116,7 +121,7 @@ public class HistoryService {
      * @return 변환된 추천 정보 DTO 리스트
      */
     private List<HistoryResponse.RecommendationDto> convertToRecommendationDtos(History history) {
-        return history.getRecommendation().stream()
+        return history.getRecommendations().stream()
                 .map(rec -> HistoryResponse.RecommendationDto.builder()
                         .perfumeName(rec.getPerfumeName())
                         .perfumeBrand(rec.getPerfumeBrand())
@@ -126,5 +131,17 @@ public class HistoryService {
                         .situation(rec.getSituation())
                         .build())
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * 회원의 카드 히스토리를 조회하는 메서드
+     *
+     * @param memberId 조회할 회원의 ID
+     * @return 시간 역순으로 정렬된 채팅 히스토리 목록
+     */
+    public List<History> getCardHistory(Long memberId) {
+        List<History> chats = historyRepository.findByMemberIdOrderByTimeStampDesc(memberId);
+        System.out.println("조회된 히스토리 수:"+ chats.size());
+        return chats;
     }
 }
