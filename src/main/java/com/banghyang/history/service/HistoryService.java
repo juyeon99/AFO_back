@@ -52,7 +52,7 @@ public class HistoryService {
                 .orElseThrow(() -> new NoSuchElementException("채팅을 찾을 수 없습니다."));
     }
 
-    /**1
+    /**
      * 채팅 엔티티로부터 히스토리 엔티티를 생성합니다.
      *
      * @param chat 원본 채팅 엔티티
@@ -62,13 +62,9 @@ public class HistoryService {
         return History.builder()
                 .chatId(chat.getId())
                 .memberId(chat.getMemberId())
-                .type(chat.getType())
-                .imageUrl(chat.getImageUrl())
                 .content(chat.getContent())
-                .mode(chat.getMode())
                 .lineId(chat.getLineId())
                 .recommendations(convertToHistoryRecommendations(chat.getRecommendations()))
-                .timeStamp(chat.getTimeStamp())
                 .build();
     }
 
@@ -92,7 +88,7 @@ public class HistoryService {
     }
 
     /**
-     * 히스토리 엔티티를 응답 DTO로 변환합니다.
+     * 히스토리 엔티티를 응답 DTO 로 변환합니다.
      *
      * @param history 변환할 히스토리 엔티티
      * @return 변환된 히스토리 응답 DTO
@@ -101,10 +97,7 @@ public class HistoryService {
         return HistoryResponse.builder()
                 .chatId(history.getChatId())
                 .memberId(history.getMemberId())
-                .type(history.getType())
-                .imageUrl(history.getImageUrl())
                 .content(history.getContent())
-                .mode(history.getMode())
                 .lineId(history.getLineId())
                 .timeStamp(history.getTimeStamp())
                 .recommendations(convertToRecommendationDtos(history))
