@@ -20,8 +20,8 @@ public class MemberController {
         return ResponseEntity.ok(memberService.getAllMembers());
     }
 
-    @PostMapping("/{memberId}")
-    public ResponseEntity<?> setMemberLeave(@RequestParam Long memberId) {
+    @PutMapping("/{memberId}")
+    public ResponseEntity<?> setMemberLeave(@PathVariable Long memberId) {
         memberService.setMemberLeave(memberId);
         return ResponseEntity.ok().build();
     }
