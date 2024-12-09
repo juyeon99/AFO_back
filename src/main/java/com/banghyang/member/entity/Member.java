@@ -34,7 +34,7 @@ public class Member {
     private String birthyear;           // 촐생연도
     private String gender;              // 성별
     private LocalDateTime createdAt;    // 가입일시
-    private LocalDateTime deletedAt;    // 탈퇴일시
+    private LocalDateTime leavedAt;    // 탈퇴일시
 
     @Enumerated(EnumType.STRING)
     private MemberRoleType role;   // 권한
@@ -82,5 +82,6 @@ public class Member {
 
     public void setMemberLeave() {
         this.role = MemberRoleType.LEAVE;
+        this.leavedAt = LocalDateTime.now();
     }
 }
