@@ -59,19 +59,16 @@ public class HistoryService {
      * @return 생성된 히스토리 엔티티
      */
     private History createHistoryFromChat(Chat chat) {
-        String content = chat.getContent();
-        System.out.println("==============content length: " + (content != null ? content.length() : "null"));
-        System.out.println("==============content: " + content);
-
         return History.builder()
                 .chatId(chat.getId())
                 .memberId(chat.getMemberId())
                 .type(chat.getType())
                 .imageUrl(chat.getImageUrl())
-                .content(content)
+                .content(chat.getContent())
                 .mode(chat.getMode())
                 .lineId(chat.getLineId())
                 .recommendations(convertToHistoryRecommendations(chat.getRecommendations()))
+                .timeStamp(chat.getTimeStamp())
                 .build();
     }
 
@@ -140,8 +137,6 @@ public class HistoryService {
      * @return 시간 역순으로 정렬된 채팅 히스토리 목록
      */
     public List<History> getCardHistory(Long memberId) {
-        List<History> chats = historyRepository.findByMemberIdOrderByTimeStampDesc(memberId);
-        System.out.println("조회된 히스토리 수:"+ chats.size());
-        return chats;
+        return historyRepository.findByMemberIdOrderByTimeStampDesc(memberId);
     }
 }
