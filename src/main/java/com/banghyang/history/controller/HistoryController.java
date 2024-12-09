@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/chats")
+@RequestMapping("/histories")
 @RequiredArgsConstructor
 public class HistoryController {
 
@@ -22,7 +22,7 @@ public class HistoryController {
      * @param chatId 생성할 채팅의 고유 ID
      * @return 생성된 히스토리 정보를 담은 HistoryResponse
      */
-    @PostMapping("/history")
+    @PostMapping
     public ResponseEntity<HistoryResponse> createHistory(@RequestParam String chatId) {
         HistoryResponse result = historyService.createHistory(chatId);
         return ResponseEntity.ok(result);
@@ -34,7 +34,7 @@ public class HistoryController {
      * @param memberId 조회할 회원의 ID
      * @return 해당 회원의 전체 카드 히스토리 목록
      */
-    @GetMapping("/history/{memberId}")
+    @GetMapping("/{memberId}")
     public ResponseEntity<List<History>> getChatHistory(@PathVariable Long memberId) {
         List<History> history = historyService.getCardHistory(memberId);
         return ResponseEntity.ok(history);
