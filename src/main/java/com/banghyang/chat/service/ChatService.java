@@ -42,11 +42,13 @@ public class ChatService {
         return chatEntityList.stream().map(chatEntity -> {
             UserResponse userResponse = new UserResponse();
             userResponse.setId(chatEntity.getId());
+            userResponse.setMemberId(chatEntity.getMemberId());
             userResponse.setMode(chatEntity.getMode());
             userResponse.setContent(chatEntity.getContent());
             userResponse.setLineId(chatEntity.getLineId());
             userResponse.setImageUrl(chatEntity.getImageUrl());
             userResponse.setRecommendations(chatEntity.getRecommendations());
+            userResponse.setTimeStamp(chatEntity.getTimeStamp());
             return userResponse;
         }).toList();
     }
@@ -118,11 +120,13 @@ public class ChatService {
             // UserResponse 에 생성된 값들 담기
             UserResponse userResponse = new UserResponse();
             userResponse.setId(aiChat.getId());
+            userResponse.setMemberId(aiChat.getMemberId());
             userResponse.setMode(perfumeRecommendResponse.getMode());
             userResponse.setContent(perfumeRecommendResponse.getContent());
             userResponse.setLineId(perfumeRecommendResponse.getLineId());
             userResponse.setImageUrl(generatedImageS3Url);
             userResponse.setRecommendations(recommendations);
+            userResponse.setTimeStamp(aiChat.getTimeStamp());
             System.out.println("[이미지입력향수]사용자에게 보낼 최종 response 값 : " + userResponse.toString());
             // 값들 담은 userResponse 반환
             return userResponse;
@@ -178,11 +182,13 @@ public class ChatService {
                     // UserResponse 에 AI 로 생성된 값들 담기
                     UserResponse userResponse = new UserResponse();
                     userResponse.setId(aiChat.getId());
+                    userResponse.setMemberId(aiChat.getMemberId());
                     userResponse.setMode(perfumeRecommendResponse.getMode());
                     userResponse.setContent(perfumeRecommendResponse.getContent());
                     userResponse.setLineId(perfumeRecommendResponse.getLineId());
                     userResponse.setImageUrl(generatedImageS3Url);
                     userResponse.setRecommendations(recommendations);
+                    userResponse.setTimeStamp(aiChat.getTimeStamp());
                     // 값을 담은 userResponse 반환
                     return userResponse;
 
@@ -201,8 +207,10 @@ public class ChatService {
                     // UserResponse 에 AI 답변 값들 담기
                     UserResponse userResponse = new UserResponse();
                     userResponse.setId(aiChat.getId());
+                    userResponse.setMemberId(aiChat.getMemberId());
                     userResponse.setMode(perfumeRecommendResponse.getMode());
                     userResponse.setContent(perfumeRecommendResponse.getContent());
+                    userResponse.setTimeStamp(aiChat.getTimeStamp());
                     // 값을 담은 userResponse 반환
                     return userResponse;
                 }
@@ -347,6 +355,6 @@ public class ChatService {
                             recommendedPerfumeEntity
                             , aiRecommendation.getReason(),
                             aiRecommendation.getSituation());
-                }).toList(); // 변환한 객체들 리스트로 담기
+                }).toList(); // 변환한 객체들 리스트로 담아서 반환
     }
 }
