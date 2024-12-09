@@ -66,11 +66,11 @@ public class ChatService {
 
             // 유저가 입력한 이미지를 S3 에 저장하고 S3 URL 받기
             String userInputImageS3Url = s3Service.uploadImage(userRequest.getImage());
-            System.out.println("[이미지입력향수]사용자 입력 이미지 저장 S3 url : " + userInputImageS3Url);
+//            System.out.println("[이미지입력향수]사용자 입력 이미지 저장 S3 url : " + userInputImageS3Url);
 
             // image to text model 로 전송하여 이미지 분석 결과 받기
             String imageProcessResult = getImageToTextProcessResult(userRequest.getImage());
-            System.out.println("[이미지입력향수]BLIP 모델 이미지 분석 결과 : " + imageProcessResult);
+//            System.out.println("[이미지입력향수]BLIP 모델 이미지 분석 결과 : " + imageProcessResult);
 
             // 유저가 보낸 request 를 MongoDB 에 채팅기록으로 저장
             Chat userChat = Chat.builder()
@@ -83,11 +83,11 @@ public class ChatService {
 
             // LLM 모델로 전송할 userInput 만들기(유저 입력 텍스트 + 유저 입력 이미지 분석 결과)
             String userInput = imageProcessResult + " " + userRequest.getContent();
-            System.out.println("[이미지입력향수]LLM 모델로 전송할 최종 userInput : " + userInput);
+//            System.out.println("[이미지입력향수]LLM 모델로 전송할 최종 userInput : " + userInput);
 
             //  유저 텍스트 입력값과 이미지 분석 결과를 LLM 모델로 전송하여 향수 추천 받기
             PerfumeRecommendResponse perfumeRecommendResponse = getPerfumeRecommendFromLLM(userInput);
-            System.out.println("[이미지입력향수]LLM 모델의 향수 추천 답변 내용 : " + perfumeRecommendResponse.toString());
+//            System.out.println("[이미지입력향수]LLM 모델의 향수 추천 답변 내용 : " + perfumeRecommendResponse.toString());
 
             // 향수 추천 결과의 recommendation -> 채팅기록 저장 엔티티의 recommendation 으로 변환하는 메소드
             List<Chat.Recommendation> recommendations = mapAiRecommendationsToChatRecommendations(
@@ -100,18 +100,18 @@ public class ChatService {
 
             // AI 가 생성한 이미지의 저장경로로 이미지 파일을 가져오고 byte[] 로 형변환하여 반환하는 메소드
             byte[] generatedImageByte = getGeneratedImageByteFromStableDiffusion(imageGeneratePrompt);
-            System.out.println("[이미지입력향수]AI 생성 이미지 byte[] : " + generatedImageByte.length);
+//            System.out.println("[이미지입력향수]AI 생성 이미지 byte[] : " + generatedImageByte.length);
 
             // 생성된 byte[] 형식의 이미지를 S3 에 저장하고 S3 URL 받기
             String generatedImageS3Url = s3Service.byteUploadImage(generatedImageByte, "generatedImage");
-            System.out.println("[이미지입력향수]AI 생성 이미지 저장 S3 URL : " + generatedImageS3Url);
+//            System.out.println("[이미지입력향수]AI 생성 이미지 저장 S3 URL : " + generatedImageS3Url);
 
             // AI API 들에게서 받아온 값으로 AI 채팅 기록 만들어 MongoDB에 저장하기
             Chat aiChat = Chat.builder()
                     .type(ChatType.AI)
+                    .mode(perfumeRecommendResponse.getMode())
                     .memberId(userRequest.getMemberId())
                     .content(perfumeRecommendResponse.getContent())
-                    .mode(perfumeRecommendResponse.getMode())
                     .lineId(perfumeRecommendResponse.getLineId())
                     .imageUrl(generatedImageS3Url)
                     .recommendations(recommendations)
@@ -149,7 +149,6 @@ public class ChatService {
                 // 유저 텍스트 입력값을 LLM 모델로 전송하여 향수 추천 받기
                 PerfumeRecommendResponse perfumeRecommendResponse = getPerfumeRecommendFromLLM(
                         userRequest.getContent()); // 이미지가 없으므로 입력 텍스트값만 LLM 으로 전송
-
 
                 if (perfumeRecommendResponse.getMode() == ChatMode.recommendation) {
                     // 답변이 추천 모드일 때의 처리
@@ -203,7 +202,7 @@ public class ChatService {
                             .type(ChatType.AI)
                             .mode(perfumeRecommendResponse.getMode())
                             .memberId(userRequest.getMemberId())
-                            .content(userRequest.getContent())
+                            .content(perfumeRecommendResponse.getContent())
                             .build();
                     chatRepository.save(aiChat);
 
