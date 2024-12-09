@@ -43,6 +43,7 @@ public class ChatService {
             UserResponse userResponse = new UserResponse();
             userResponse.setId(chatEntity.getId());
             userResponse.setMemberId(chatEntity.getMemberId());
+            userResponse.setType(chatEntity.getType());
             userResponse.setMode(chatEntity.getMode());
             userResponse.setContent(chatEntity.getContent());
             userResponse.setLineId(chatEntity.getLineId());
@@ -121,6 +122,7 @@ public class ChatService {
             UserResponse userResponse = new UserResponse();
             userResponse.setId(aiChat.getId());
             userResponse.setMemberId(aiChat.getMemberId());
+            userResponse.setType(aiChat.getType());
             userResponse.setMode(perfumeRecommendResponse.getMode());
             userResponse.setContent(perfumeRecommendResponse.getContent());
             userResponse.setLineId(perfumeRecommendResponse.getLineId());
@@ -182,6 +184,7 @@ public class ChatService {
                     // UserResponse 에 AI 로 생성된 값들 담기
                     UserResponse userResponse = new UserResponse();
                     userResponse.setId(aiChat.getId());
+                    userResponse.setType(aiChat.getType());
                     userResponse.setMemberId(aiChat.getMemberId());
                     userResponse.setMode(perfumeRecommendResponse.getMode());
                     userResponse.setContent(perfumeRecommendResponse.getContent());
@@ -207,6 +210,7 @@ public class ChatService {
                     // UserResponse 에 AI 답변 값들 담기
                     UserResponse userResponse = new UserResponse();
                     userResponse.setId(aiChat.getId());
+                    userResponse.setType(aiChat.getType());
                     userResponse.setMemberId(aiChat.getMemberId());
                     userResponse.setMode(perfumeRecommendResponse.getMode());
                     userResponse.setContent(perfumeRecommendResponse.getContent());
