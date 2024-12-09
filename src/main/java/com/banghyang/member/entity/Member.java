@@ -79,4 +79,8 @@ public class Member {
         this.role = role;
         this.createdAt = createdAt;
     }
+
+    public void setMemberLeave() {
+        this.role = MemberRoleType.LEAVE;
+    }
 }
