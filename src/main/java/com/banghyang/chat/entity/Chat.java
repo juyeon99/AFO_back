@@ -2,8 +2,8 @@ package com.banghyang.chat.entity;
 
 import com.banghyang.common.type.ChatMode;
 import com.banghyang.common.type.ChatType;
-import jakarta.persistence.PrePersist;
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
@@ -40,6 +40,7 @@ public class Chat {
     private List<Recommendation> recommendations; // 향수 추천 내용
 
     @Field("timeStamp")
+    @CreatedDate
     private LocalDateTime timeStamp; // 메시지 생성 시간
 
     @Data
@@ -56,12 +57,6 @@ public class Chat {
         private String reason;
         @Field("situation")
         private String situation;
-    }
-
-    // chat 생성시간 자동 생성 메소드
-    @PrePersist
-    public void prePersist() {
-        timeStamp = LocalDateTime.now();
     }
 
     @Builder
