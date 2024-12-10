@@ -67,7 +67,7 @@ public class PerfumeService {
     /**
      * 새로운 향수 정보 생성 메소드(향수, 향수이미지, 노트)
      */
-    @CacheEvict(value = "perfumes")
+    @CacheEvict(value = "perfumes") // 수정 시 마다 캐시데이터 함께 업데이트
     public void createPerfume(PerfumeCreateRequest perfumeCreateRequest) {
         // 새로운 향수 정보 담을 perfume 엔티티 생성
         // Mapper 클래스의 request -> entity 변환 메소드로 정보 담아줌
@@ -139,7 +139,7 @@ public class PerfumeService {
     /**
      * 향수 정보 수정 메소드
      */
-    @CacheEvict(value = "perfumes")
+    @CacheEvict(value = "perfumes") // 수정 시 마다 캐시데이터 함께 업데이트
     public void modifyPerfume(PerfumeModifyRequest perfumeModifyRequest) {
         // 수정할 perfume 엔티티 request 의 id 값으로 찾아오기
         Perfume targetPerfumeEntity = perfumeRepository.findById(perfumeModifyRequest.getId())
@@ -287,7 +287,7 @@ public class PerfumeService {
     /**
      * 향수 삭제 메소드
      */
-    @CacheEvict(value = "perfumes")
+    @CacheEvict(value = "perfumes") // 수정 시 마다 캐시데이터 함께 업데이트
     public void deletePerfume(Long perfumeId) {
         Perfume targetPerfumeEntity = perfumeRepository.findById(perfumeId)
                 .orElseThrow(() -> new IllegalArgumentException("삭제하려는 향수의 정보를 찾을 수 업습니다."));
