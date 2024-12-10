@@ -51,6 +51,7 @@ public class PerfumeService {
                 .sorted(Comparator.comparing(PerfumeResponse::getName, String.CASE_INSENSITIVE_ORDER)) // 이름순 정렬하여
                 .toList(); // 리스트에 담아서 반환
 
+        // 페이징 처리에서 캐싱 사용으로 변경함(추후 개선 사항 - 페이징, 캐싱 둘다 사용)
         // 페이지 번호 조정 및 정렬 설정
 //        pageable = PageRequest.of(
 //                pageable.getPageNumber() <= 0 ? 0 : pageable.getPageNumber() -1, // 0보다 크면 1 빼기 (1 시작을 위해)
