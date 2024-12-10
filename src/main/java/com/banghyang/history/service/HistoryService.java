@@ -33,42 +33,46 @@ public class HistoryService {
     /**
      * 히스토리 생성
      */
-    public void createHistoryByChat(String chatId) {
+    public void createHistoryByChat(String chatImageUrl) {
+        System.out.println("[히스토리 생성 메소드 진입]");
+        System.out.println("[전달 받은 채팅 아이디] : " + chatImageUrl);
         // 채팅 아이디로 채팅 정보 가져오기
-        Chat chatEntity = chatRepository.findById(chatId)
-                .orElseThrow(() -> new NoSuchElementException(
-                        "[History Service]히스토리 생성 중 채팅 정보 조회에 실패했습니다."
-                ));
+        Chat chatEntity = chatRepository.findByImageUrl(chatImageUrl);
 
-        // 채팅 정보의 회원 아이디로 회원 정보 가져오기
-        Member memberEntity = memberRepository.findById(chatEntity.getMemberId())
-                .orElseThrow(() -> new NoSuchElementException(
-                        "[History Service]히스토리 생성 중 회원 정보 조회에 실패했습니다."
-                ));
+        if (chatEntity != null) {
 
-        // 채팅 정보로 히스토리 생성하기
-        History newHistoryEntity = History.builder()
-                .chatId(chatEntity.getId())
-                .lineId(chatEntity.getLineId())
-                .member(memberEntity)
-                .build();
-        historyRepository.save(newHistoryEntity);
+            // 채팅 정보의 회원 아이디로 회원 정보 가져오기
+            Member memberEntity = memberRepository.findById(chatEntity.getMemberId())
+                    .orElseThrow(() -> new NoSuchElementException(
+                            "[History Service]히스토리 생성 중 회원 정보 조회에 실패했습니다."
+                    ));
 
-        // 채팅의 추천 속 향수 정보로 추천 엔티티 생성하기
-        List<Recommendation> recommnedationEntityList = chatEntity.getRecommendations().stream()
-                .map(chatRecommendation -> {
-                    Recommendation newRecommendationEntity = Recommendation.builder()
-                            .history(newHistoryEntity)
-                            .perfumeName(chatRecommendation.getPerfumeName())
-                            .perfumeBrand(chatRecommendation.getPerfumeBrand())
-                            .perfumeGrade(chatRecommendation.getPerfumeGrade())
-                            .perfumeImageUrl(chatRecommendation.getPerfumeImageUrl())
-                            .reason(chatRecommendation.getReason())
-                            .situation(chatRecommendation.getSituation())
-                            .build();
-                    recommendationRepository.save(newRecommendationEntity);
-                    return newRecommendationEntity;
-                }).toList();
+            // 채팅 정보로 히스토리 생성하기
+            History newHistoryEntity = History.builder()
+                    .chatId(chatEntity.getId())
+                    .lineId(chatEntity.getLineId())
+                    .member(memberEntity)
+                    .build();
+            historyRepository.save(newHistoryEntity);
+
+            // 채팅의 추천 속 향수 정보로 추천 엔티티 생성하기
+            List<Recommendation> recommnedationEntityList = chatEntity.getRecommendations().stream()
+                    .map(chatRecommendation -> {
+                        Recommendation newRecommendationEntity = Recommendation.builder()
+                                .history(newHistoryEntity)
+                                .perfumeName(chatRecommendation.getPerfumeName())
+                                .perfumeBrand(chatRecommendation.getPerfumeBrand())
+                                .perfumeGrade(chatRecommendation.getPerfumeGrade())
+                                .perfumeImageUrl(chatRecommendation.getPerfumeImageUrl())
+                                .reason(chatRecommendation.getReason())
+                                .situation(chatRecommendation.getSituation())
+                                .build();
+                        recommendationRepository.save(newRecommendationEntity);
+                        return newRecommendationEntity;
+                    }).toList();
+        } else {
+            throw new NoSuchElementException("[History Service]히스토리 생성중 이미지 URL로 채팅 정보 조회에 실패했습니다.");
+        }
     }
 
     /**

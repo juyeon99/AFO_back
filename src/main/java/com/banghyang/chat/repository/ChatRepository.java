@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface ChatRepository extends MongoRepository<Chat, String> {
     List<Chat> findChatByMemberId(Long memberId);
+    Chat findByImageUrl(String imageUrl);
 }

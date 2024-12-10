@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/histories")
@@ -16,8 +17,9 @@ public class HistoryController {
     private final HistoryService historyService;
 
     @PostMapping
-    public ResponseEntity<?> createHistory(@RequestParam String chatId) {
-        historyService.createHistoryByChat(chatId);
+    public ResponseEntity<?> createHistory(@RequestBody Map<String, String> request) {
+        System.out.println("[History Controller] 히스토리 생성 컨트롤러 진입 / URL값 : " + request.get("chatId"));
+        historyService.createHistoryByChat(request.get("chatId"));
         return ResponseEntity.ok().build();
     }
 
