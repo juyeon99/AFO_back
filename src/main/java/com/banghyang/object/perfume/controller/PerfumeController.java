@@ -5,10 +5,10 @@ import com.banghyang.object.perfume.dto.PerfumeModifyRequest;
 import com.banghyang.object.perfume.dto.PerfumeResponse;
 import com.banghyang.object.perfume.service.PerfumeService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RequestMapping("/perfumes")
 @RestController
@@ -21,8 +21,8 @@ public class PerfumeController {
      * 모든 향수 조회하기
      */
     @GetMapping
-    public ResponseEntity<List<PerfumeResponse>> getAllPerfumes() {
-        return ResponseEntity.ok(perfumeService.getAllPerfumeResponses());
+    public ResponseEntity<Page<PerfumeResponse>> getAllPerfumes(Pageable pageable) {
+        return ResponseEntity.ok(perfumeService.getAllPerfumeResponses(pageable));
     }
 
     /**
