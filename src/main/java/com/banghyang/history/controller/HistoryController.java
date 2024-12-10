@@ -22,12 +22,12 @@ public class HistoryController {
     }
 
     @GetMapping("/{memberId}")
-    public ResponseEntity<List<HistoryResponse>> getMembersHistory(@RequestParam Long memberId) {
+    public ResponseEntity<List<HistoryResponse>> getMembersHistory(@PathVariable Long memberId) {
         return ResponseEntity.ok(historyService.getMembersHistory(memberId));
     }
 
     @DeleteMapping("/{historyId}")
-    public ResponseEntity<?> deleteHistory(@RequestParam Long historyId) {
+    public ResponseEntity<?> deleteHistory(@PathVariable Long historyId) {
         historyService.deleteHistory(historyId);
         return ResponseEntity.ok().build();
     }
