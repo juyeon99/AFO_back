@@ -19,6 +19,8 @@ import com.banghyang.object.perfume.repository.PerfumeImageRepository;
 import com.banghyang.object.perfume.repository.PerfumeRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
@@ -39,6 +41,7 @@ public class PerfumeService {
     /**
      * @return 모든 향수 response 리스트(name 기준 오름차순 정렬)
      */
+    @Cacheable(value = "perfumes") // 캐싱 사용
     public List<PerfumeResponse> getAllPerfumeResponses() {
         // perfume 엔티티 전체 가져와서 리스트에 담기
         List<Perfume> perfumeEntityList = perfumeRepository.findAll();
@@ -47,11 +50,24 @@ public class PerfumeService {
                 .map(Mapper::mapPerfumeEntityToResponse) // mapper 메소드를 이용하여 response 로 변환
                 .sorted(Comparator.comparing(PerfumeResponse::getName, String.CASE_INSENSITIVE_ORDER)) // 이름순 정렬하여
                 .toList(); // 리스트에 담아서 반환
+
+        // 페이징 처리에서 캐싱 사용으로 변경함(추후 개선 사항 - 페이징, 캐싱 둘다 사용)
+        // 페이지 번호 조정 및 정렬 설정
+//        pageable = PageRequest.of(
+//                pageable.getPageNumber() <= 0 ? 0 : pageable.getPageNumber() -1, // 0보다 크면 1 빼기 (1 시작을 위해)
+//                pageable.getPageSize(),
+//                Sort.by("name").ascending()
+//        );
+
+        // 페이징 된 엔티티 가져오기
+//        Page<Perfume> perfumeEntityPage = perfumeRepository.findAll(pageable);
+//        return perfumeEntityPage.map(Mapper::mapPerfumeEntityToResponse);
     }
 
     /**
      * 새로운 향수 정보 생성 메소드(향수, 향수이미지, 노트)
      */
+    @CacheEvict(value = "perfumes") // 수정 시 마다 캐시데이터 함께 업데이트
     public void createPerfume(PerfumeCreateRequest perfumeCreateRequest) {
         // 새로운 향수 정보 담을 perfume 엔티티 생성
         // Mapper 클래스의 request -> entity 변환 메소드로 정보 담아줌
@@ -123,6 +139,7 @@ public class PerfumeService {
     /**
      * 향수 정보 수정 메소드
      */
+    @CacheEvict(value = "perfumes") // 수정 시 마다 캐시데이터 함께 업데이트
     public void modifyPerfume(PerfumeModifyRequest perfumeModifyRequest) {
         // 수정할 perfume 엔티티 request 의 id 값으로 찾아오기
         Perfume targetPerfumeEntity = perfumeRepository.findById(perfumeModifyRequest.getId())
@@ -270,6 +287,7 @@ public class PerfumeService {
     /**
      * 향수 삭제 메소드
      */
+    @CacheEvict(value = "perfumes") // 수정 시 마다 캐시데이터 함께 업데이트
     public void deletePerfume(Long perfumeId) {
         Perfume targetPerfumeEntity = perfumeRepository.findById(perfumeId)
                 .orElseThrow(() -> new IllegalArgumentException("삭제하려는 향수의 정보를 찾을 수 업습니다."));
