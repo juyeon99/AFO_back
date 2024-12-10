@@ -1,5 +1,6 @@
 package com.banghyang.history.entity;
 
+import com.banghyang.member.entity.Member;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
@@ -18,33 +19,34 @@ public class History {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Lob
-    @Column(columnDefinition = "LONGTEXT")
-    private String content;
-
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "history_id")
-    private List<Recommendations> recommendations;
-
-    private String chatId;
     private Long lineId;
-    private Long memberId;
+    private String chatId;
     private LocalDateTime timeStamp;
+
+    @ManyToOne
+    @JoinColumn(name = "member_id")
+    private Member member;
+
+    @OneToMany(mappedBy = "history", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<Recommendation> recommendation;
+
+    @PrePersist
+    public void prePersist() {
+        if (this.timeStamp == null) {
+            this.timeStamp = LocalDateTime.now();
+        }
+    }
 
     @Builder
     public History(
-            String chatId,
-            String content,
             Long lineId,
-            Long memberId,
-            List<Recommendations> recommendations,
-            LocalDateTime timeStamp
+            String chatId,
+            Member member,
+            List<Recommendation> recommendation
     ) {
-        this.chatId = chatId;
-        this.content = content;
         this.lineId = lineId;
-        this.memberId = memberId;
-        this.recommendations = recommendations;
-        this.timeStamp = timeStamp;
+        this.chatId = chatId;
+        this.member = member;
+        this.recommendation = recommendation;
     }
 }

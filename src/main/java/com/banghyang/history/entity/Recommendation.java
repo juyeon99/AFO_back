@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Table
 @NoArgsConstructor
 @Getter
-public class Recommendations {
+public class Recommendation {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,15 +22,19 @@ public class Recommendations {
     private String reason;
     private String situation;
 
+    @ManyToOne
+    @JoinColumn(name = "history_id")
+    private History history;
 
     @Builder
-    public Recommendations(
+    public Recommendation(
             String perfumeName,
             String perfumeBrand,
             String perfumeGrade,
             String perfumeImageUrl,
             String reason,
-            String situation
+            String situation,
+            History history
     ) {
         this.perfumeName = perfumeName;
         this.perfumeBrand = perfumeBrand;
@@ -38,5 +42,6 @@ public class Recommendations {
         this.perfumeImageUrl = perfumeImageUrl;
         this.reason = reason;
         this.situation = situation;
+        this.history = history;
     }
 }

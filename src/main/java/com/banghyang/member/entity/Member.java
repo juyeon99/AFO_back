@@ -2,10 +2,12 @@ package com.banghyang.member.entity;
 
 import com.banghyang.common.type.MemberRoleType;
 import com.banghyang.auth.kakao.model.dto.OauthId;
+import com.banghyang.history.entity.History;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Builder
@@ -18,9 +20,7 @@ import java.time.LocalDateTime;
                 columnNames = {
                         "oauth_server_id",
                         "oauth_server"
-                }
-        ),
-})
+                })})
 public class Member {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -39,6 +39,9 @@ public class Member {
     @Enumerated(EnumType.STRING)
     private MemberRoleType role;   // 권한
 
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<History> history;
+
     /**
      * 권한, 가입일시 초기값 설정 메소드
      */
@@ -55,13 +58,6 @@ public class Member {
 
     /**
      * 회원정보 조회에 필요한 항목들만 포함한 생성자 메소드
-     *
-     * @param name
-     * @param email
-     * @param birthyear
-     * @param gender
-     * @param role
-     * @param createdAt
      */
     @Builder
     public Member(
@@ -80,6 +76,9 @@ public class Member {
         this.createdAt = createdAt;
     }
 
+    /**
+     * 회원 탈퇴 상태로 바꾸는 메소드
+     */
     public void setMemberLeave() {
         this.role = MemberRoleType.LEAVE;
         this.leavedAt = LocalDateTime.now();
