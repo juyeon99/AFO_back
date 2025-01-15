@@ -1,12 +1,15 @@
 package com.banghyang.object.note.entity;
 
 import com.banghyang.object.perfume.entity.Perfume;
+import com.banghyang.object.spice.entity.Spice;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Entity
 @Getter
@@ -17,7 +20,8 @@ public class MiddleNote {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String spices;
+    @OneToMany(mappedBy = "middle_note", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<Spice> spices;
 
     @OneToOne
     @JoinColumn(name = "perfume_id", unique = true, nullable = false)
@@ -25,7 +29,7 @@ public class MiddleNote {
     private Perfume perfume;
 
     @Builder
-    public MiddleNote(String spices, Perfume perfume) {
+    public MiddleNote(List<Spice> spices, Perfume perfume) {
         this.spices = spices;
         this.perfume = perfume;
     }
