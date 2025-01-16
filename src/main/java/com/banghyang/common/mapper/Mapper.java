@@ -33,30 +33,30 @@ public class Mapper {
     public static PerfumeResponse mapPerfumeEntityToResponse(Perfume perfumeEntity) {
         PerfumeResponse perfumeResponse = new PerfumeResponse(); // 내용 담을 response 생성
         perfumeResponse.setId(perfumeEntity.getId()); // 향수 id 담기
-        perfumeResponse.setName(perfumeEntity.getName()); // 향수 이름 담기
+        perfumeResponse.setName(perfumeEntity.getNameKr()); // 향수 이름 담기
         perfumeResponse.setDescription(perfumeEntity.getDescription()); // 향수 설명 담기
         perfumeResponse.setBrand(perfumeEntity.getBrand()); // 브랜드명 담기
         perfumeResponse.setGrade(perfumeEntity.getGrade()); // 부향률 담기
 
         // 이미지 존재시에 담고, 없을시 null
-        perfumeResponse.setImageUrl(perfumeEntity.getPerfumeImage() != null ?
-                perfumeEntity.getPerfumeImage().getUrl() : null);
+//        perfumeResponse.setImageUrl(perfumeEntity.getPerfumeImage() != null ?
+//                perfumeEntity.getPerfumeImage().getUrl() : null);
 
         // 싱글노트 존재시에 담고, 없을시 null
-        perfumeResponse.setSingleNote(perfumeEntity.getSingleNote() != null ?
-                perfumeEntity.getSingleNote().getSpices() : null);
+//        perfumeResponse.setSingleNote(perfumeEntity.getSingleNote() != null ?
+//                perfumeEntity.getSingleNote().getSpices().toString() : null);
 
         // 탑노트
-        perfumeResponse.setTopNote(perfumeEntity.getTopNote() != null ?
-                perfumeEntity.getTopNote().getSpices() : null);
+//        perfumeResponse.setTopNote(perfumeEntity.getTopNote() != null ?
+//                perfumeEntity.getTopNote().getSpices().toString() : null);
 
         // 미들노트
-        perfumeResponse.setMiddleNote(perfumeEntity.getMiddleNote() != null ?
-                perfumeEntity.getMiddleNote().getSpices() : null);
+//        perfumeResponse.setMiddleNote(perfumeEntity.getMiddleNote() != null ?
+//                perfumeEntity.getMiddleNote().getSpices().toString() : null);
 
         // 베이스노트
-        perfumeResponse.setBaseNote(perfumeEntity.getBaseNote() != null ?
-                perfumeEntity.getBaseNote().getSpices() : null);
+//        perfumeResponse.setBaseNote(perfumeEntity.getBaseNote() != null ?
+//                perfumeEntity.getBaseNote().getSpices().toString() : null);
 
         return perfumeResponse;
     }
@@ -71,8 +71,8 @@ public class Mapper {
                 ValidUtils.isNotBlank(perfumeCreateRequest.getGrade())) {
             // 이름, 설명, 브랜드, 등급 정보가 모두 있어야 perfume 반환
             return Perfume.builder()
-                    .name(perfumeCreateRequest.getName())
-                    .description(perfumeCreateRequest.getDescription())
+//                    .name(perfumeCreateRequest.getName())
+//                    .description(perfumeCreateRequest.getDescription())
                     .brand(perfumeCreateRequest.getBrand())
                     .grade(perfumeCreateRequest.getGrade())
                     .build();
@@ -88,15 +88,13 @@ public class Mapper {
     public static SpiceResponse mapSpiceEntityToResponse(Spice spiceEntity) {
         SpiceResponse spiceResponse = new SpiceResponse(); // 내용 담을 response 생성
         spiceResponse.setId(spiceEntity.getId()); // id
-        spiceResponse.setName(spiceEntity.getName()); // 영문명
+        spiceResponse.setName(spiceEntity.getNameEn()); // 영문명
         spiceResponse.setNameKr(spiceEntity.getNameKr()); // 한글명
-        spiceResponse.setDescription(spiceEntity.getDescription()); // 설명
-        spiceResponse.setLineName(spiceEntity.getLine().getName()); // 계열명
-        spiceResponse.setColor(spiceEntity.getLine().getColor()); // 색상코드
+        spiceResponse.setDescription(spiceEntity.getDescriptionEn()); // 설명
 
         // 이미지 존재시에 담고, 없을시 null
-        spiceResponse.setImageUrl(spiceEntity.getSpiceImage() != null ?
-                spiceEntity.getSpiceImage().getUrl() : null);
+//        spiceResponse.setImageUrl(spiceEntity.getSpiceImage() != null ?
+//                spiceEntity.getSpiceImage().getUrl() : null);
 
         return spiceResponse;
     }
@@ -110,9 +108,9 @@ public class Mapper {
                 ValidUtils.isNotBlank(spiceCreateRequest.getDescription())) {
             // 영문명, 한글명, 설명 모두 있어야 entity 반환
             return Spice.builder()
-                    .name(spiceCreateRequest.getName())
+//                    .name(spiceCreateRequest.getName())
                     .nameKr(spiceCreateRequest.getNameKr())
-                    .description(spiceCreateRequest.getDescription())
+//                    .description(spiceCreateRequest.getDescription())
                     .line(lineEntity)
                     .build();
         } else {
@@ -128,8 +126,8 @@ public class Mapper {
             String situation
     ) {
         Chat.Recommendation recommendation = new Chat.Recommendation();
-        recommendation.setPerfumeName(perfumeEntity.getName());
-        recommendation.setPerfumeImageUrl(perfumeEntity.getPerfumeImage().getUrl());
+//        recommendation.setPerfumeName(perfumeEntity.getName());
+//        recommendation.setPerfumeImageUrl(perfumeEntity.getPerfumeImage().getUrl());
         recommendation.setPerfumeBrand(perfumeEntity.getBrand());
         recommendation.setPerfumeGrade(perfumeEntity.getGrade());
         recommendation.setReason(reason);
