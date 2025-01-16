@@ -1,9 +1,9 @@
 package com.banghyang.object.spice.service;
 
+import com.banghyang.common.mapper.Mapper;
 import com.banghyang.common.util.ValidUtils;
 import com.banghyang.object.line.entity.Line;
 import com.banghyang.object.line.repository.LineRepository;
-import com.banghyang.common.mapper.Mapper;
 import com.banghyang.object.spice.dto.SpiceCreateRequest;
 import com.banghyang.object.spice.dto.SpiceModifyRequest;
 import com.banghyang.object.spice.dto.SpiceResponse;
@@ -86,9 +86,9 @@ public class SpiceService {
         if (lineEntity != null) {
             // 향료 엔티티 수정
             Spice modifySpiceEntity = Spice.builder()
-                    .name(spiceModifyRequest.getName())
+//                    .name(spiceModifyRequest.getName())
                     .nameKr(spiceModifyRequest.getNameKr())
-                    .description(spiceModifyRequest.getDescription())
+//                    .description(spiceModifyRequest.getDescription())
                     .line(lineEntity)
                     .build();
             // 향료 엔티티 클래스에 만들어둔 수정 메소드로 수정 진행
@@ -100,25 +100,25 @@ public class SpiceService {
         // 향료 이미지
         if (ValidUtils.isNotBlank(spiceModifyRequest.getImageUrl())) {
             // request 에 이미지 url 정보가 담겨있으면 이미지 수정 진행
-            SpiceImage targetSpiceImageEntity = targetSpiceEntity.getSpiceImage();
+//            SpiceImage targetSpiceImageEntity = targetSpiceEntity.getSpiceImage();
             // 수정 엔티티 생성
             SpiceImage modifySpiceImageEntity = SpiceImage.builder()
                     .url(spiceModifyRequest.getImageUrl())
                     .spice(targetSpiceEntity)
                     .build();
 
-            if (targetSpiceImageEntity != null) {
-                // 기존 이미지 엔티티가 존재하면 수정
-                targetSpiceImageEntity.modify(modifySpiceImageEntity);
-            } else {
-                // 기존 이미지 엔티티가 없으면 생성
-                spiceImageRepository.save(modifySpiceImageEntity);
-            }
-        } else {
-            // request 에 이미지 url 입력정보가 없을 시 기존 이미지 존재 유무 확인 후 삭제
-            if (targetSpiceEntity.getSpiceImage() != null) {
-                spiceImageRepository.delete(targetSpiceEntity.getSpiceImage());
-            }
+//            if (targetSpiceImageEntity != null) {
+//                // 기존 이미지 엔티티가 존재하면 수정
+//                targetSpiceImageEntity.modify(modifySpiceImageEntity);
+//            } else {
+//                // 기존 이미지 엔티티가 없으면 생성
+//                spiceImageRepository.save(modifySpiceImageEntity);
+//            }
+//        } else {
+//            // request 에 이미지 url 입력정보가 없을 시 기존 이미지 존재 유무 확인 후 삭제
+//            if (targetSpiceEntity.getSpiceImage() != null) {
+//                spiceImageRepository.delete(targetSpiceEntity.getSpiceImage());
+//            }
         }
     }
 
