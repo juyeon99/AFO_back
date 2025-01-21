@@ -58,7 +58,8 @@ public class ChatService {
      * 유저 채팅에 답변하는 서비스 메소드
      */
     public UserResponse answerToUserRequest(UserRequest userRequest) {
-        System.out.println(userRequest.toString());
+        System.out.println("[채팅 서비스] 유저 답변 생성 메소드 진입...");
+        System.out.println("[채팅 서비스] 유저 입력 정보 : " + userRequest.toString());
 
         if (userRequest.getImage() != null) {
             // 유저가 보낸 이미지가 있을 때의 처리

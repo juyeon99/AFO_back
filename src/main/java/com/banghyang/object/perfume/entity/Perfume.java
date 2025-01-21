@@ -30,7 +30,7 @@ public class Perfume {
     private List<PerfumeImage> perfumeImages;
 
     @OneToMany(mappedBy = "perfume", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Note> Notes;
+    private List<Note> notes;
 
     @Builder
     public Perfume(String nameEn, String nameKr, String brand, String grade, String sizeOption, String description, String mainAccord, String ingredients) {

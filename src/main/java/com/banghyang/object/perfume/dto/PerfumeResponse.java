@@ -2,6 +2,8 @@ package com.banghyang.object.perfume.dto;
 
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 public class PerfumeResponse {
     private Long id;
@@ -9,7 +11,7 @@ public class PerfumeResponse {
     private String description;
     private String brand;
     private String grade;
-    private String imageUrl;
+    private List<String> imageUrls;
     private String singleNote;
     private String topNote;
     private String middleNote;

@@ -1,6 +1,7 @@
 package com.banghyang.common.mapper;
 
 import com.banghyang.chat.entity.Chat;
+import com.banghyang.common.type.NoteType;
 import com.banghyang.common.util.ValidUtils;
 import com.banghyang.member.dto.MemberResponse;
 import com.banghyang.member.entity.Member;
@@ -8,9 +9,13 @@ import com.banghyang.object.line.entity.Line;
 import com.banghyang.object.perfume.dto.PerfumeCreateRequest;
 import com.banghyang.object.perfume.dto.PerfumeResponse;
 import com.banghyang.object.perfume.entity.Perfume;
+import com.banghyang.object.perfume.entity.PerfumeImage;
 import com.banghyang.object.spice.dto.SpiceCreateRequest;
 import com.banghyang.object.spice.dto.SpiceResponse;
 import com.banghyang.object.spice.entity.Spice;
+import com.banghyang.object.spice.entity.SpiceImage;
+
+import java.util.stream.Collectors;
 
 public class Mapper {
     /**
@@ -39,24 +44,52 @@ public class Mapper {
         perfumeResponse.setGrade(perfumeEntity.getGrade()); // 부향률 담기
 
         // 이미지 존재시에 담고, 없을시 null
-//        perfumeResponse.setImageUrl(perfumeEntity.getPerfumeImage() != null ?
-//                perfumeEntity.getPerfumeImage().getUrl() : null);
+        perfumeResponse.setImageUrls(perfumeEntity.getPerfumeImages() != null ?
+                perfumeEntity.getPerfumeImages().stream().map(PerfumeImage::getUrl).toList() : null);
 
         // 싱글노트 존재시에 담고, 없을시 null
-//        perfumeResponse.setSingleNote(perfumeEntity.getSingleNote() != null ?
-//                perfumeEntity.getSingleNote().getSpices().toString() : null);
+        perfumeResponse.setSingleNote(perfumeEntity.getNotes().stream()
+                .filter(note -> note.getNoteType() == NoteType.SINGLE)
+                .findFirst()
+                .map(note ->
+                        note.getNoteSpice().getSpices().stream()
+                                .map(Spice::getNameKr)
+                                .collect(Collectors.joining(", "))
+                ).orElse(null)
+        );
 
         // 탑노트
-//        perfumeResponse.setTopNote(perfumeEntity.getTopNote() != null ?
-//                perfumeEntity.getTopNote().getSpices().toString() : null);
+        perfumeResponse.setTopNote(perfumeEntity.getNotes().stream()
+                .filter(note -> note.getNoteType() == NoteType.TOP)
+                .findFirst()
+                .map(note ->
+                        note.getNoteSpice().getSpices().stream()
+                                .map(Spice::getNameKr)
+                                .collect(Collectors.joining(", "))
+                ).orElse(null)
+        );
 
         // 미들노트
-//        perfumeResponse.setMiddleNote(perfumeEntity.getMiddleNote() != null ?
-//                perfumeEntity.getMiddleNote().getSpices().toString() : null);
+        perfumeResponse.setMiddleNote(perfumeEntity.getNotes().stream()
+                .filter(note -> note.getNoteType() == NoteType.MIDDLE)
+                .findFirst()
+                .map(note ->
+                        note.getNoteSpice().getSpices().stream()
+                                .map(Spice::getNameKr)
+                                .collect(Collectors.joining(", "))
+                ).orElse(null)
+        );
 
         // 베이스노트
-//        perfumeResponse.setBaseNote(perfumeEntity.getBaseNote() != null ?
-//                perfumeEntity.getBaseNote().getSpices().toString() : null);
+        perfumeResponse.setBaseNote(perfumeEntity.getNotes().stream()
+                .filter(note -> note.getNoteType() == NoteType.BASE)
+                .findFirst()
+                .map(note ->
+                        note.getNoteSpice().getSpices().stream()
+                                .map(Spice::getNameKr)
+                                .collect(Collectors.joining(", "))
+                ).orElse(null)
+        );
 
         return perfumeResponse;
     }
@@ -65,20 +98,27 @@ public class Mapper {
      * 향수 생성 request 를 향수 엔티티로 변환하는 매퍼
      */
     public static Perfume mapPerfumeCreateRequestToEntity(PerfumeCreateRequest perfumeCreateRequest) {
-        if (ValidUtils.isNotBlank(perfumeCreateRequest.getName()) &&
-                ValidUtils.isNotBlank(perfumeCreateRequest.getDescription()) &&
+        if (ValidUtils.isNotBlank(perfumeCreateRequest.getNameKr()) &&
                 ValidUtils.isNotBlank(perfumeCreateRequest.getBrand()) &&
-                ValidUtils.isNotBlank(perfumeCreateRequest.getGrade())) {
+                ValidUtils.isNotBlank(perfumeCreateRequest.getGrade()) &&
+                ValidUtils.isNotBlank(perfumeCreateRequest.getSizeOption()) &&
+                ValidUtils.isNotBlank(perfumeCreateRequest.getDescription()) &&
+                ValidUtils.isNotBlank(perfumeCreateRequest.getMainAccord()) &&
+                ValidUtils.isNotBlank(perfumeCreateRequest.getIngredients())) {
             // 이름, 설명, 브랜드, 등급 정보가 모두 있어야 perfume 반환
             return Perfume.builder()
-//                    .name(perfumeCreateRequest.getName())
-//                    .description(perfumeCreateRequest.getDescription())
+                    .nameEn(perfumeCreateRequest.getNameEn())
+                    .nameKr(perfumeCreateRequest.getNameKr())
                     .brand(perfumeCreateRequest.getBrand())
                     .grade(perfumeCreateRequest.getGrade())
+                    .sizeOption(perfumeCreateRequest.getSizeOption())
+                    .description(perfumeCreateRequest.getDescription())
+                    .mainAccord(perfumeCreateRequest.getMainAccord())
+                    .ingredients(perfumeCreateRequest.getIngredients())
                     .build();
         } else {
             // 정보 누락되어있으면 exception 발생
-            throw new IllegalArgumentException("향수 등록에 필요한 필수 정보가 누락되었습니다. (이름, 설명, 브랜드, 등급)");
+            throw new IllegalArgumentException("향수 등록에 필요한 필수 정보가 누락되었습니다.");
         }
     }
 
@@ -88,13 +128,16 @@ public class Mapper {
     public static SpiceResponse mapSpiceEntityToResponse(Spice spiceEntity) {
         SpiceResponse spiceResponse = new SpiceResponse(); // 내용 담을 response 생성
         spiceResponse.setId(spiceEntity.getId()); // id
-        spiceResponse.setName(spiceEntity.getNameEn()); // 영문명
+        spiceResponse.setNameEn(spiceEntity.getNameEn()); // 영문명
         spiceResponse.setNameKr(spiceEntity.getNameKr()); // 한글명
-        spiceResponse.setDescription(spiceEntity.getDescriptionEn()); // 설명
+        spiceResponse.setDescriptionKr(spiceEntity.getDescriptionKr()); // 한글설명
+
+        spiceResponse.setLineId(spiceEntity.getLine().getId()); // 계열아이디(프론트에서 색깔 지정에 사용)
+        spiceResponse.setLineName(spiceEntity.getLine().getName()); // 계열명
 
         // 이미지 존재시에 담고, 없을시 null
-//        spiceResponse.setImageUrl(spiceEntity.getSpiceImage() != null ?
-//                spiceEntity.getSpiceImage().getUrl() : null);
+        spiceResponse.setImageUrl(spiceEntity.getSpiceImages() != null ?
+                spiceEntity.getSpiceImages().stream().map(SpiceImage::getUrl).toList() : null);
 
         return spiceResponse;
     }
