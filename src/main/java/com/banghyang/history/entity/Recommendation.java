@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Entity
 @Table
 @NoArgsConstructor
@@ -18,7 +20,7 @@ public class Recommendation {
     private String perfumeName;
     private String perfumeBrand;
     private String perfumeGrade;
-    private String perfumeImageUrl;
+    private List<String> perfumeImageUrls;
     private String reason;
     private String situation;
 
@@ -31,7 +33,7 @@ public class Recommendation {
             String perfumeName,
             String perfumeBrand,
             String perfumeGrade,
-            String perfumeImageUrl,
+            List<String> perfumeImageUrls,
             String reason,
             String situation,
             History history
@@ -39,7 +41,7 @@ public class Recommendation {
         this.perfumeName = perfumeName;
         this.perfumeBrand = perfumeBrand;
         this.perfumeGrade = perfumeGrade;
-        this.perfumeImageUrl = perfumeImageUrl;
+        this.perfumeImageUrls = perfumeImageUrls;
         this.reason = reason;
         this.situation = situation;
         this.history = history;

@@ -19,7 +19,7 @@ public class HistoryResponse {
         private String perfumeName;
         private String perfumeBrand;
         private String perfumeGrade;
-        private String perfumeImageUrl;
+        private List<String> perfumeImageUrls;
         private String reason;
         private String situation;
     }

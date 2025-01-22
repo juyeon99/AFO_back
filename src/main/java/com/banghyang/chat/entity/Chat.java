@@ -48,7 +48,7 @@ public class Chat {
         @Field("perfume_name")
         private String perfumeName;
         @Field("perfume_image_url")
-        private String perfumeImageUrl;
+        private List<String> perfumeImageUrls;
         @Field("perfume_brand")
         private String perfumeBrand;
         @Field("perfume_grade")

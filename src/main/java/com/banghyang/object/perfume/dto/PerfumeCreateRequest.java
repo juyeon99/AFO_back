@@ -15,8 +15,8 @@ public class PerfumeCreateRequest {
     private String mainAccord;
     private String ingredients;
     private List<String> imageUrls;
-    private String singleNote;
-    private String topNote;
-    private String middleNote;
-    private String baseNote;
+    private List<String> singleNote;
+    private List<String> topNote;
+    private List<String> middleNote;
+    private List<String> baseNote;
 }

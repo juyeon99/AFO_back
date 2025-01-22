@@ -38,7 +38,7 @@ public class Mapper {
     public static PerfumeResponse mapPerfumeEntityToResponse(Perfume perfumeEntity) {
         PerfumeResponse perfumeResponse = new PerfumeResponse(); // 내용 담을 response 생성
         perfumeResponse.setId(perfumeEntity.getId()); // 향수 id 담기
-        perfumeResponse.setName(perfumeEntity.getNameKr()); // 향수 이름 담기
+        perfumeResponse.setNameKr(perfumeEntity.getNameKr()); // 향수 이름 담기
         perfumeResponse.setDescription(perfumeEntity.getDescription()); // 향수 설명 담기
         perfumeResponse.setBrand(perfumeEntity.getBrand()); // 브랜드명 담기
         perfumeResponse.setGrade(perfumeEntity.getGrade()); // 부향률 담기
@@ -146,14 +146,16 @@ public class Mapper {
      * 향료 등록 request 를 엔티티로 변환하는 매퍼
      */
     public static Spice mapSpiceCreateRequestToEntity(SpiceCreateRequest spiceCreateRequest, Line lineEntity) {
-        if (ValidUtils.isNotBlank(spiceCreateRequest.getName()) &&
+        if (ValidUtils.isNotBlank(spiceCreateRequest.getNameEn()) &&
                 ValidUtils.isNotBlank(spiceCreateRequest.getNameKr()) &&
-                ValidUtils.isNotBlank(spiceCreateRequest.getDescription())) {
+                ValidUtils.isNotBlank(spiceCreateRequest.getDescriptionEn()) &&
+                ValidUtils.isNotBlank(spiceCreateRequest.getDescriptionKr())) {
             // 영문명, 한글명, 설명 모두 있어야 entity 반환
             return Spice.builder()
-//                    .name(spiceCreateRequest.getName())
+                    .nameEn(spiceCreateRequest.getNameEn())
                     .nameKr(spiceCreateRequest.getNameKr())
-//                    .description(spiceCreateRequest.getDescription())
+                    .descriptionEn(spiceCreateRequest.getDescriptionEn())
+                    .descriptionKr(spiceCreateRequest.getDescriptionKr())
                     .line(lineEntity)
                     .build();
         } else {
@@ -169,8 +171,8 @@ public class Mapper {
             String situation
     ) {
         Chat.Recommendation recommendation = new Chat.Recommendation();
-//        recommendation.setPerfumeName(perfumeEntity.getName());
-//        recommendation.setPerfumeImageUrl(perfumeEntity.getPerfumeImage().getUrl());
+        recommendation.setPerfumeName(perfumeEntity.getNameKr());
+        recommendation.setPerfumeImageUrls(perfumeEntity.getPerfumeImages().stream().map(PerfumeImage::getUrl).toList());
         recommendation.setPerfumeBrand(perfumeEntity.getBrand());
         recommendation.setPerfumeGrade(perfumeEntity.getGrade());
         recommendation.setReason(reason);

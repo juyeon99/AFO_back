@@ -34,13 +34,12 @@ public class HistoryService {
      * 히스토리 생성
      */
     public void createHistoryByChat(String chatImageUrl) {
-        System.out.println("[히스토리 생성 메소드 진입]");
         System.out.println("[전달 받은 채팅 아이디] : " + chatImageUrl);
+
         // 채팅 아이디로 채팅 정보 가져오기
         Chat chatEntity = chatRepository.findByImageUrl(chatImageUrl);
 
         if (chatEntity != null) {
-
             // 채팅 정보의 회원 아이디로 회원 정보 가져오기
             Member memberEntity = memberRepository.findById(chatEntity.getMemberId())
                     .orElseThrow(() -> new NoSuchElementException(
@@ -63,7 +62,7 @@ public class HistoryService {
                                 .perfumeName(chatRecommendation.getPerfumeName())
                                 .perfumeBrand(chatRecommendation.getPerfumeBrand())
                                 .perfumeGrade(chatRecommendation.getPerfumeGrade())
-                                .perfumeImageUrl(chatRecommendation.getPerfumeImageUrl())
+                                .perfumeImageUrls(chatRecommendation.getPerfumeImageUrls())
                                 .reason(chatRecommendation.getReason())
                                 .situation(chatRecommendation.getSituation())
                                 .build();
@@ -100,7 +99,7 @@ public class HistoryService {
                                 recommendationDto.setPerfumeName(recommendationEntity.getPerfumeName());
                                 recommendationDto.setPerfumeBrand(recommendationEntity.getPerfumeBrand());
                                 recommendationDto.setPerfumeGrade(recommendationEntity.getPerfumeGrade());
-                                recommendationDto.setPerfumeImageUrl(recommendationEntity.getPerfumeImageUrl());
+                                recommendationDto.setPerfumeImageUrls(recommendationEntity.getPerfumeImageUrls());
                                 recommendationDto.setReason(recommendationEntity.getReason());
                                 recommendationDto.setSituation(recommendationEntity.getSituation());
                                 return recommendationDto;

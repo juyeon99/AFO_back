@@ -1,7 +1,12 @@
 package com.banghyang.object.perfume.service;
 
 import com.banghyang.common.mapper.Mapper;
+import com.banghyang.common.type.NoteType;
 import com.banghyang.common.util.ValidUtils;
+import com.banghyang.object.note.entity.Note;
+import com.banghyang.object.note.repository.NoteRepository;
+import com.banghyang.object.noteSpice.entity.NoteSpice;
+import com.banghyang.object.noteSpice.repository.NoteSpiceRepository;
 import com.banghyang.object.perfume.dto.PerfumeCreateRequest;
 import com.banghyang.object.perfume.dto.PerfumeModifyRequest;
 import com.banghyang.object.perfume.dto.PerfumeResponse;
@@ -25,6 +30,8 @@ public class PerfumeService {
 
     private final PerfumeRepository perfumeRepository;
     private final PerfumeImageRepository perfumeImageRepository;
+    private final NoteRepository noteRepository;
+    private final NoteSpiceRepository noteSpiceRepository;
 
     /**
      * @return 모든 향수 response 리스트(name 기준 오름차순 정렬)
@@ -36,7 +43,7 @@ public class PerfumeService {
 
         return perfumeEntityList.stream() // 엔티티 리스트의 모든 항목에 stream 으로 접근
                 .map(Mapper::mapPerfumeEntityToResponse) // mapper 메소드를 이용하여 response 로 변환
-                .sorted(Comparator.comparing(PerfumeResponse::getName, String.CASE_INSENSITIVE_ORDER)) // 이름순 정렬하여
+                .sorted(Comparator.comparing(PerfumeResponse::getNameEn, String.CASE_INSENSITIVE_ORDER)) // 이름순 정렬하여
                 .toList(); // 리스트에 담아서 반환
 
         // 페이징 처리에서 캐싱 사용으로 변경함(추후 개선 사항 - 페이징, 캐싱 둘다 사용)
@@ -64,31 +71,49 @@ public class PerfumeService {
         perfumeRepository.save(newPerfumeEntity);
 
         // 향수 이미지
-        if (ValidUtils.isNotBlank(perfumeCreateRequest.getImageUrl())) {
+        if (!perfumeCreateRequest.getImageUrls().isEmpty()) {
             // 만약 request 에 이미지 url 정보가 담겨있다면 이미지 엔티티 생성 진행
-            PerfumeImage newPerfumeImageEntity = PerfumeImage.builder()
-                    .perfume(newPerfumeEntity)
-                    .url(perfumeCreateRequest.getImageUrl())
-                    .build();
-            perfumeImageRepository.save(newPerfumeImageEntity);
+            perfumeCreateRequest.getImageUrls().forEach(imageUrl -> {
+                PerfumeImage newPerfumeImageEntity = PerfumeImage.builder()
+                        .perfume(newPerfumeEntity)
+                        .url(imageUrl)
+                        .build();
+                perfumeImageRepository.save(newPerfumeImageEntity);
+            });
         }
 
         // 노트
-//        if (ValidUtils.isNotBlank(perfumeCreateRequest.getSingleNote())) { // 싱글노트가 존재하고,
-//            if (!ValidUtils.isNotBlank(perfumeCreateRequest.getTopNote()) &&
-//                    !ValidUtils.isNotBlank(perfumeCreateRequest.getMiddleNote()) &&
-//                    !ValidUtils.isNotBlank(perfumeCreateRequest.getBaseNote())) { // 나머지 노트들이 다 null 일때
+        if (!perfumeCreateRequest.getSingleNote().isEmpty()) { // 싱글노트가 존재하고,
+            if (perfumeCreateRequest.getTopNote().isEmpty() &&
+                    perfumeCreateRequest.getMiddleNote().isEmpty() &&
+                    perfumeCreateRequest.getBaseNote().isEmpty()) { // 나머지 노트들이 다 null 일때
+                // 새로운 조인 테이블 생성
+                NoteSpice newSingleSpice = NoteSpice.builder().build();
+                noteSpiceRepository.save(newSingleSpice);
+
+                // 싱글노트 엔티티 생성
+                Note newSingleNoteEntity = Note.builder()
+                        .noteType(NoteType.SINGLE)
+                        .perfume(newPerfumeEntity)
+                        .noteSpice(newSingleSpice)
+                        .build();
+                noteRepository.save(newSingleNoteEntity);
+
+                perfumeCreateRequest.getSingleNote().forEach(note -> {
+
+                })
+
 //                SingleNote newSingleNoteEntity = SingleNote.builder()
 //                        .perfume(newPerfumeEntity)
 //                        .spices(perfumeCreateRequest.getSingleNote())
 //                        .build();
 //                singleNoteRepository.save(newSingleNoteEntity); // 싱글노트 엔티티 생성하고 향수 엔티티와 연결
-//            } else {
-        // 만약 싱글 노트와 다른 노트가 동시에 존재하면 예외 발생시키기
-//                throw new IllegalArgumentException("싱글 노트와 다른 종류의 노트가 동시에 존재할 수 없습니다.");
-//            }
+            } else {
+                // 만약 싱글 노트와 다른 노트가 동시에 존재하면 예외 발생시키기
+                throw new IllegalArgumentException("싱글 노트와 다른 종류의 노트가 동시에 존재할 수 없습니다.");
+            }
 //        } else { // 싱글노트가 존재하지 않는 경우 탑, 미들, 베이스 노트 생성 진행
-        // 탑노트
+            // 탑노트
 //            if (ValidUtils.isNotBlank(perfumeCreateRequest.getTopNote())) {
 //                TopNote newTopNoteEntity = TopNote.builder()
 //                        .perfume(newPerfumeEntity)
@@ -97,7 +122,7 @@ public class PerfumeService {
 //                topNoteRepository.save(newTopNoteEntity);
 //            }
 
-        // 미들노트
+            // 미들노트
 //            if (ValidUtils.isNotBlank(perfumeCreateRequest.getMiddleNote())) {
 //                MiddleNote newMiddleNoteEntity = MiddleNote.builder()
 //                        .perfume(newPerfumeEntity)
@@ -106,7 +131,7 @@ public class PerfumeService {
 //                middleNoteRepository.save(newMiddleNoteEntity);
 //            }
 
-        // 베이스노트
+            // 베이스노트
 //            if (ValidUtils.isNotBlank(perfumeCreateRequest.getBaseNote())) {
 //                BaseNote newBaseNoteEntity = BaseNote.builder()
 //                        .perfume(newPerfumeEntity)
@@ -121,7 +146,7 @@ public class PerfumeService {
 //                // 노트가 아무것도 존재하지 않을 시 예외 발생시키기
 //                throw new IllegalArgumentException("노트 정보가 존재하지 않아 향수 등록을 실패했습니다.");
 //    }
-//    }
+        }
     }
 
     /**

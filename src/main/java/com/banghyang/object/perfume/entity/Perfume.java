@@ -21,8 +21,8 @@ public class Perfume {
     private String nameKr;
     private String brand;
     private String grade;
-    private String sizeOption;
     private String description;
+    private String sizeOption;
     private String mainAccord;
     private String ingredients;
 
