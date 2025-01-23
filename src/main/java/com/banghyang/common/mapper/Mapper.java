@@ -6,10 +6,10 @@ import com.banghyang.common.util.ValidUtils;
 import com.banghyang.member.dto.MemberResponse;
 import com.banghyang.member.entity.Member;
 import com.banghyang.object.line.entity.Line;
-import com.banghyang.object.perfume.dto.PerfumeCreateRequest;
-import com.banghyang.object.perfume.dto.PerfumeResponse;
-import com.banghyang.object.perfume.entity.Perfume;
-import com.banghyang.object.perfume.entity.PerfumeImage;
+import com.banghyang.object.product.dto.PerfumeCreateRequest;
+import com.banghyang.object.product.dto.PerfumeResponse;
+import com.banghyang.object.product.entity.Product;
+import com.banghyang.object.product.entity.ProductImage;
 import com.banghyang.object.spice.dto.SpiceCreateRequest;
 import com.banghyang.object.spice.dto.SpiceResponse;
 import com.banghyang.object.spice.entity.Spice;
@@ -35,20 +35,20 @@ public class Mapper {
     /**
      * 향수 엔티티에서 향수 조회 response 로 변환하는 매퍼
      */
-    public static PerfumeResponse mapPerfumeEntityToResponse(Perfume perfumeEntity) {
+    public static PerfumeResponse mapPerfumeEntityToResponse(Product productEntity) {
         PerfumeResponse perfumeResponse = new PerfumeResponse(); // 내용 담을 response 생성
-        perfumeResponse.setId(perfumeEntity.getId()); // 향수 id 담기
-        perfumeResponse.setNameKr(perfumeEntity.getNameKr()); // 향수 이름 담기
-        perfumeResponse.setDescription(perfumeEntity.getDescription()); // 향수 설명 담기
-        perfumeResponse.setBrand(perfumeEntity.getBrand()); // 브랜드명 담기
-        perfumeResponse.setGrade(perfumeEntity.getGrade()); // 부향률 담기
+        perfumeResponse.setId(productEntity.getId()); // 향수 id 담기
+        perfumeResponse.setNameKr(productEntity.getNameKr()); // 향수 이름 담기
+        perfumeResponse.setDescription(productEntity.getContent()); // 향수 설명 담기
+        perfumeResponse.setBrand(productEntity.getBrand()); // 브랜드명 담기
+        perfumeResponse.setGrade(productEntity.getGrade()); // 부향률 담기
 
         // 이미지 존재시에 담고, 없을시 null
-        perfumeResponse.setImageUrls(perfumeEntity.getPerfumeImages() != null ?
-                perfumeEntity.getPerfumeImages().stream().map(PerfumeImage::getUrl).toList() : null);
+        perfumeResponse.setImageUrls(productEntity.getProductImages() != null ?
+                productEntity.getProductImages().stream().map(ProductImage::getUrl).toList() : null);
 
         // 싱글노트 존재시에 담고, 없을시 null
-        perfumeResponse.setSingleNote(perfumeEntity.getNotes().stream()
+        perfumeResponse.setSingleNote(productEntity.getNotes().stream()
                 .filter(note -> note.getNoteType() == NoteType.SINGLE)
                 .findFirst()
                 .map(note ->
@@ -59,7 +59,7 @@ public class Mapper {
         );
 
         // 탑노트
-        perfumeResponse.setTopNote(perfumeEntity.getNotes().stream()
+        perfumeResponse.setTopNote(productEntity.getNotes().stream()
                 .filter(note -> note.getNoteType() == NoteType.TOP)
                 .findFirst()
                 .map(note ->
@@ -70,7 +70,7 @@ public class Mapper {
         );
 
         // 미들노트
-        perfumeResponse.setMiddleNote(perfumeEntity.getNotes().stream()
+        perfumeResponse.setMiddleNote(productEntity.getNotes().stream()
                 .filter(note -> note.getNoteType() == NoteType.MIDDLE)
                 .findFirst()
                 .map(note ->
@@ -81,7 +81,7 @@ public class Mapper {
         );
 
         // 베이스노트
-        perfumeResponse.setBaseNote(perfumeEntity.getNotes().stream()
+        perfumeResponse.setBaseNote(productEntity.getNotes().stream()
                 .filter(note -> note.getNoteType() == NoteType.BASE)
                 .findFirst()
                 .map(note ->
@@ -97,7 +97,7 @@ public class Mapper {
     /**
      * 향수 생성 request 를 향수 엔티티로 변환하는 매퍼
      */
-    public static Perfume mapPerfumeCreateRequestToEntity(PerfumeCreateRequest perfumeCreateRequest) {
+    public static Product mapPerfumeCreateRequestToEntity(PerfumeCreateRequest perfumeCreateRequest) {
         if (ValidUtils.isNotBlank(perfumeCreateRequest.getNameKr()) &&
                 ValidUtils.isNotBlank(perfumeCreateRequest.getBrand()) &&
                 ValidUtils.isNotBlank(perfumeCreateRequest.getGrade()) &&
@@ -106,7 +106,7 @@ public class Mapper {
                 ValidUtils.isNotBlank(perfumeCreateRequest.getMainAccord()) &&
                 ValidUtils.isNotBlank(perfumeCreateRequest.getIngredients())) {
             // 이름, 설명, 브랜드, 등급 정보가 모두 있어야 perfume 반환
-            return Perfume.builder()
+            return Product.builder()
                     .nameEn(perfumeCreateRequest.getNameEn())
                     .nameKr(perfumeCreateRequest.getNameKr())
                     .brand(perfumeCreateRequest.getBrand())
@@ -166,15 +166,15 @@ public class Mapper {
 
     // 향수 엔티티를 채팅기록의 추천향수정보로 변환하는 매퍼
     public static Chat.Recommendation mapPerfumeEntityToChatRecommendation(
-            Perfume perfumeEntity,
+            Product productEntity,
             String reason,
             String situation
     ) {
         Chat.Recommendation recommendation = new Chat.Recommendation();
-        recommendation.setPerfumeName(perfumeEntity.getNameKr());
-        recommendation.setPerfumeImageUrls(perfumeEntity.getPerfumeImages().stream().map(PerfumeImage::getUrl).toList());
-        recommendation.setPerfumeBrand(perfumeEntity.getBrand());
-        recommendation.setPerfumeGrade(perfumeEntity.getGrade());
+        recommendation.setPerfumeName(productEntity.getNameKr());
+        recommendation.setPerfumeImageUrls(productEntity.getProductImages().stream().map(ProductImage::getUrl).toList());
+        recommendation.setPerfumeBrand(productEntity.getBrand());
+        recommendation.setPerfumeGrade(productEntity.getGrade());
         recommendation.setReason(reason);
         recommendation.setSituation(situation);
         return recommendation;

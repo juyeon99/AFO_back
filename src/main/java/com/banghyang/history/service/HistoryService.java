@@ -99,7 +99,7 @@ public class HistoryService {
                                 recommendationDto.setPerfumeName(recommendationEntity.getPerfumeName());
                                 recommendationDto.setPerfumeBrand(recommendationEntity.getPerfumeBrand());
                                 recommendationDto.setPerfumeGrade(recommendationEntity.getPerfumeGrade());
-                                recommendationDto.setPerfumeImageUrls(recommendationEntity.getPerfumeImageUrls());
+                                recommendationDto.setPerfumeImageUrls(recommendationEntity.getPerfumeImageUrl());
                                 recommendationDto.setReason(recommendationEntity.getReason());
                                 recommendationDto.setSituation(recommendationEntity.getSituation());
                                 return recommendationDto;

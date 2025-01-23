@@ -1,9 +1,9 @@
-package com.banghyang.object.perfume.controller;
+package com.banghyang.object.product.controller;
 
-import com.banghyang.object.perfume.dto.PerfumeCreateRequest;
-import com.banghyang.object.perfume.dto.PerfumeModifyRequest;
-import com.banghyang.object.perfume.dto.PerfumeResponse;
-import com.banghyang.object.perfume.service.PerfumeService;
+import com.banghyang.object.product.dto.PerfumeCreateRequest;
+import com.banghyang.object.product.dto.PerfumeModifyRequest;
+import com.banghyang.object.product.dto.PerfumeResponse;
+import com.banghyang.object.product.service.PerfumeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

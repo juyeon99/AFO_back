@@ -88,7 +88,7 @@ public class SpiceService {
             Spice modifySpiceEntity = Spice.builder()
 //                    .name(spiceModifyRequest.getName())
                     .nameKr(spiceModifyRequest.getNameKr())
-//                    .description(spiceModifyRequest.getDescription())
+//                    .description(spiceModifyRequest.getContent())
                     .line(lineEntity)
                     .build();
             // 향료 엔티티 클래스에 만들어둔 수정 메소드로 수정 진행

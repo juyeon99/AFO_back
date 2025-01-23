@@ -1,4 +1,4 @@
-package com.banghyang.object.perfume.service;
+package com.banghyang.object.product.service;
 
 import com.banghyang.common.mapper.Mapper;
 import com.banghyang.common.type.NoteType;
@@ -7,13 +7,13 @@ import com.banghyang.object.note.entity.Note;
 import com.banghyang.object.note.repository.NoteRepository;
 import com.banghyang.object.noteSpice.entity.NoteSpice;
 import com.banghyang.object.noteSpice.repository.NoteSpiceRepository;
-import com.banghyang.object.perfume.dto.PerfumeCreateRequest;
-import com.banghyang.object.perfume.dto.PerfumeModifyRequest;
-import com.banghyang.object.perfume.dto.PerfumeResponse;
-import com.banghyang.object.perfume.entity.Perfume;
-import com.banghyang.object.perfume.entity.PerfumeImage;
-import com.banghyang.object.perfume.repository.PerfumeImageRepository;
-import com.banghyang.object.perfume.repository.PerfumeRepository;
+import com.banghyang.object.product.dto.PerfumeCreateRequest;
+import com.banghyang.object.product.dto.PerfumeModifyRequest;
+import com.banghyang.object.product.dto.PerfumeResponse;
+import com.banghyang.object.product.entity.Product;
+import com.banghyang.object.product.entity.ProductImage;
+import com.banghyang.object.product.repository.PerfumeImageRepository;
+import com.banghyang.object.product.repository.PerfumeRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
@@ -39,9 +39,9 @@ public class PerfumeService {
     @Cacheable(value = "perfumes") // 캐싱 사용
     public List<PerfumeResponse> getAllPerfumeResponses() {
         // perfume 엔티티 전체 가져와서 리스트에 담기
-        List<Perfume> perfumeEntityList = perfumeRepository.findAll();
+        List<Product> productEntityList = perfumeRepository.findAll();
 
-        return perfumeEntityList.stream() // 엔티티 리스트의 모든 항목에 stream 으로 접근
+        return productEntityList.stream() // 엔티티 리스트의 모든 항목에 stream 으로 접근
                 .map(Mapper::mapPerfumeEntityToResponse) // mapper 메소드를 이용하여 response 로 변환
                 .sorted(Comparator.comparing(PerfumeResponse::getNameEn, String.CASE_INSENSITIVE_ORDER)) // 이름순 정렬하여
                 .toList(); // 리스트에 담아서 반환
@@ -66,19 +66,19 @@ public class PerfumeService {
     public void createPerfume(PerfumeCreateRequest perfumeCreateRequest) {
         // 새로운 향수 정보 담을 perfume 엔티티 생성
         // Mapper 클래스의 request -> entity 변환 메소드로 정보 담아줌
-        Perfume newPerfumeEntity = Mapper.mapPerfumeCreateRequestToEntity(perfumeCreateRequest);
+        Product newProductEntity = Mapper.mapPerfumeCreateRequestToEntity(perfumeCreateRequest);
         // 정보 담은 엔티티 저장
-        perfumeRepository.save(newPerfumeEntity);
+        perfumeRepository.save(newProductEntity);
 
         // 향수 이미지
         if (!perfumeCreateRequest.getImageUrls().isEmpty()) {
             // 만약 request 에 이미지 url 정보가 담겨있다면 이미지 엔티티 생성 진행
             perfumeCreateRequest.getImageUrls().forEach(imageUrl -> {
-                PerfumeImage newPerfumeImageEntity = PerfumeImage.builder()
-                        .perfume(newPerfumeEntity)
+                ProductImage newProductImageEntity = ProductImage.builder()
+                        .perfume(newProductEntity)
                         .url(imageUrl)
                         .build();
-                perfumeImageRepository.save(newPerfumeImageEntity);
+                perfumeImageRepository.save(newProductImageEntity);
             });
         }
 
@@ -94,7 +94,7 @@ public class PerfumeService {
                 // 싱글노트 엔티티 생성
                 Note newSingleNoteEntity = Note.builder()
                         .noteType(NoteType.SINGLE)
-                        .perfume(newPerfumeEntity)
+                        .perfume(newProductEntity)
                         .noteSpice(newSingleSpice)
                         .build();
                 noteRepository.save(newSingleNoteEntity);
@@ -155,26 +155,26 @@ public class PerfumeService {
     @CacheEvict(value = "perfumes") // 수정 시 마다 캐시데이터 함께 업데이트
     public void modifyPerfume(PerfumeModifyRequest perfumeModifyRequest) {
         // 수정할 perfume 엔티티 request 의 id 값으로 찾아오기
-        Perfume targetPerfumeEntity = perfumeRepository.findById(perfumeModifyRequest.getId())
+        Product targetProductEntity = perfumeRepository.findById(perfumeModifyRequest.getId())
                 .orElseThrow(() -> new IllegalArgumentException("수정하려는 향수의 정보를 찾을 수 없습니다."));
         // 찾아온 perfume 엔티티 수정
-        Perfume modifyPerfumeEntity = Perfume.builder()
+        Product modifyProductEntity = Product.builder()
 //                .name(perfumeModifyRequest.getName())
                 .description(perfumeModifyRequest.getDescription())
                 .brand(perfumeModifyRequest.getBrand())
                 .grade(perfumeModifyRequest.getGrade())
                 .build();
         // 향수 엔티티 클래스에 만들어둔 수정 메소드로 수정 적용
-        targetPerfumeEntity.modify(modifyPerfumeEntity);
+        targetProductEntity.modify(modifyProductEntity);
 
         // 향수 이미지
         if (ValidUtils.isNotBlank(perfumeModifyRequest.getImageUrl())) {
             // request 에 이미지 URL 존재할 시 이미지 수정 진행
 //            PerfumeImage targetPerfumeImageEntity = targetPerfumeEntity.getPerfumeImage();
             // 수정 이미지 엔티티 생성
-            PerfumeImage modifyPerfumeImageEntity = PerfumeImage.builder()
+            ProductImage modifyProductImageEntity = ProductImage.builder()
                     .url(perfumeModifyRequest.getImageUrl())
-                    .perfume(targetPerfumeEntity)
+                    .perfume(targetProductEntity)
                     .build();
 
 //            if (targetPerfumeImageEntity != null) {
@@ -302,8 +302,8 @@ public class PerfumeService {
      */
     @CacheEvict(value = "perfumes") // 수정 시 마다 캐시데이터 함께 업데이트
     public void deletePerfume(Long perfumeId) {
-        Perfume targetPerfumeEntity = perfumeRepository.findById(perfumeId)
+        Product targetProductEntity = perfumeRepository.findById(perfumeId)
                 .orElseThrow(() -> new IllegalArgumentException("삭제하려는 향수의 정보를 찾을 수 업습니다."));
-        perfumeRepository.delete(targetPerfumeEntity);
+        perfumeRepository.delete(targetProductEntity);
     }
 }

@@ -8,8 +8,8 @@ import com.banghyang.chat.repository.ChatRepository;
 import com.banghyang.common.mapper.Mapper;
 import com.banghyang.common.type.ChatMode;
 import com.banghyang.common.type.ChatType;
-import com.banghyang.object.perfume.entity.Perfume;
-import com.banghyang.object.perfume.repository.PerfumeRepository;
+import com.banghyang.object.product.entity.Product;
+import com.banghyang.object.product.repository.PerfumeRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.ParameterizedTypeReference;
@@ -349,14 +349,14 @@ public class ChatService {
         return aiRecommendations.stream() // stream 으로 AI 의 향수 추천 리스트의 모든 항목에 접근
                 .map(aiRecommendation -> {
                     // 향수 추천 리스트의 향수 아이디로 향수 엔티티 가져오기
-                    Perfume recommendedPerfumeEntity = perfumeRepository
+                    Product recommendedProductEntity = perfumeRepository
                             .findById(Long.valueOf(aiRecommendation.getId()))
                             .orElseThrow(() -> new RuntimeException(
                                     "추천된 향수 아이디에 해당하는 향수 정보를 찾을 수 없습니다."));
 
                     // Mapper 클래스의 향수엔티티 -> 채팅추천정보 변환 매퍼로 정보 담아서 반환
                     return Mapper.mapPerfumeEntityToChatRecommendation(
-                            recommendedPerfumeEntity
+                            recommendedProductEntity
                             , aiRecommendation.getReason(),
                             aiRecommendation.getSituation());
                 }).toList(); // 변환한 객체들 리스트로 담아서 반환

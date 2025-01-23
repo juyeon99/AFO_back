@@ -1,8 +1,8 @@
 package com.banghyang.object.note.entity;
 
 import com.banghyang.common.type.NoteType;
-import com.banghyang.object.noteSpice.entity.NoteSpice;
-import com.banghyang.object.perfume.entity.Perfume;
+import com.banghyang.object.product.entity.Product;
+import com.banghyang.object.spice.entity.Spice;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -16,22 +16,24 @@ public class Note {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long id; // 노트 아이디
 
     @Enumerated(EnumType.STRING)
-    private NoteType noteType;
+    private NoteType noteType; // 노트 타입(SINGLE, TOP, MIDDLE, BASE)
 
     @ManyToOne
-    @JoinColumn(name = "perfume_id", nullable = false)
-    private Perfume perfume;
+    @JoinColumn(name = "product_id", nullable = false)
+    private Product product; // 노트 해당 제품 아이디
 
     @ManyToOne
-    @JoinColumn(name = "note_spice_id", nullable = false)
-    private NoteSpice noteSpice;
+    @JoinColumn(name = "spice_id", nullable = false)
+    private Spice spice; // 노트 해당 향료 아이디
 
+    // 빌더
     @Builder
-    public Note(NoteType noteType, Perfume perfume, NoteSpice noteSpice) {
+    public Note(NoteType noteType, Product product, Spice spice) {
         this.noteType = noteType;
-        this.perfume = perfume;
+        this.product = product;
+        this.spice = spice;
     }
 }

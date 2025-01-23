@@ -1,4 +1,4 @@
-package com.banghyang.object.perfume.dto;
+package com.banghyang.object.product.dto;
 
 import lombok.Data;
 
