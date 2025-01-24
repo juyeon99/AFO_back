@@ -130,7 +130,7 @@ public class Mapper {
         spiceResponse.setId(spiceEntity.getId()); // id
         spiceResponse.setNameEn(spiceEntity.getNameEn()); // 영문명
         spiceResponse.setNameKr(spiceEntity.getNameKr()); // 한글명
-        spiceResponse.setDescriptionKr(spiceEntity.getDescriptionKr()); // 한글설명
+        spiceResponse.setDescriptionKr(spiceEntity.getContentKr()); // 한글설명
 
         spiceResponse.setLineId(spiceEntity.getLine().getId()); // 계열아이디(프론트에서 색깔 지정에 사용)
         spiceResponse.setLineName(spiceEntity.getLine().getName()); // 계열명

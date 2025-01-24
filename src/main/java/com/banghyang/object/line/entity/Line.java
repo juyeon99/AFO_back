@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 public class Line {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    private String name;
-    private String description;
+    private Long id; // 계열 아이디
+    private String name; // 계열명
+    private String content; // 계열설명
 }

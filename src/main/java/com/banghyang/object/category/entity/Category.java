@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class CategoryEntity {
+public class Category {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,7 +20,7 @@ public class CategoryEntity {
     private String name; // 카테고리명
 
     @Builder
-    public CategoryEntity(String name) {
+    public Category(String name) {
         this.name = name;
     }
 }

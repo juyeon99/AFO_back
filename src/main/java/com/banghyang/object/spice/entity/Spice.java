@@ -18,27 +18,29 @@ public class Spice {
 
     private String nameEn; // 향료 영문명
     private String nameKr; // 향료 한글명
-    private String descriptionEn; // 향료 영문설명
-    private String descriptionKr; // 향료 한글설명
+    private String contentEn; // 향료 영문설명
+    private String contentKr; // 향료 한글설명
 
     @ManyToOne
     @JoinColumn(name = "line_id", nullable = false)
-    private Line line;
+    private Line line; // 향료의 개열 아이디
 
+    // 빌더
     @Builder
-    public Spice(String nameEn, String nameKr, String descriptionEn, String descriptionKr, Line line) {
+    public Spice(String nameEn, String nameKr, String contentEn, String contentKr, Line line) {
         this.nameEn = nameEn;
         this.nameKr = nameKr;
-        this.descriptionEn = descriptionEn;
-        this.descriptionKr = descriptionKr;
+        this.contentEn = contentEn;
+        this.contentKr = contentKr;
         this.line = line;
     }
 
+    // 향료 정보 수정 메소드
     public void modify(Spice modifySpiceEntity) {
         this.nameEn = modifySpiceEntity.getNameEn();
         this.nameKr = modifySpiceEntity.getNameKr();
-        this.descriptionEn = modifySpiceEntity.getDescriptionEn();
-        this.descriptionKr = modifySpiceEntity.getDescriptionKr();
+        this.contentEn = modifySpiceEntity.getContentEn();
+        this.contentKr = modifySpiceEntity.getContentKr();
         this.line = modifySpiceEntity.getLine();
     }
 }

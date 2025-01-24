@@ -13,13 +13,13 @@ public class SpiceImage {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long id; // 향료 이미지 아이디
 
-    private String url;
+    private String url; // 향료 이미지 URL
 
     @ManyToOne
     @JoinColumn(name = "spice_id", nullable = false)
-    private Spice spice;
+    private Spice spice; // 향료 아이디
 
     @Builder
     public SpiceImage(String url, Spice spice) {
