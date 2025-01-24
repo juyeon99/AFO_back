@@ -6,12 +6,13 @@ import java.util.List;
 
 @Data
 public class SpiceResponse {
+    // 향료 조회 DTO
     private Long id;
     private String nameEn;
     private String nameKr;
-    private String descriptionEn;
-    private String descriptionKr;
-    private List<String> imageUrl;
+    private String contentEn;
+    private String contentKr;
+    private List<String> imageUrls;
 
     private Long lineId;
     private String lineName;

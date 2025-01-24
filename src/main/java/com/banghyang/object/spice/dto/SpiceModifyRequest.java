@@ -2,12 +2,16 @@ package com.banghyang.object.spice.dto;
 
 import lombok.Data;
 
+import java.util.Set;
+
 @Data
 public class SpiceModifyRequest {
+    // 향료 수정 DTO
     private Long id;
-    private String name;
+    private String nameEn;
     private String nameKr;
-    private String description;
-    private String imageUrl;
+    private String contentEn;
+    private String contentKr;
+    private Set<String> imageUrls;
     private String lineName;
 }
