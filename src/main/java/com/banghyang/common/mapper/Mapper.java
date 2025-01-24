@@ -6,7 +6,7 @@ import com.banghyang.common.util.ValidUtils;
 import com.banghyang.member.dto.MemberResponse;
 import com.banghyang.member.entity.Member;
 import com.banghyang.object.line.entity.Line;
-import com.banghyang.object.product.dto.PerfumeCreateRequest;
+import com.banghyang.object.product.dto.ProductCreateRequest;
 import com.banghyang.object.product.dto.PerfumeResponse;
 import com.banghyang.object.product.entity.Product;
 import com.banghyang.object.product.entity.ProductImage;
@@ -97,24 +97,24 @@ public class Mapper {
     /**
      * 향수 생성 request 를 향수 엔티티로 변환하는 매퍼
      */
-    public static Product mapPerfumeCreateRequestToEntity(PerfumeCreateRequest perfumeCreateRequest) {
-        if (ValidUtils.isNotBlank(perfumeCreateRequest.getNameKr()) &&
-                ValidUtils.isNotBlank(perfumeCreateRequest.getBrand()) &&
-                ValidUtils.isNotBlank(perfumeCreateRequest.getGrade()) &&
-                ValidUtils.isNotBlank(perfumeCreateRequest.getSizeOption()) &&
-                ValidUtils.isNotBlank(perfumeCreateRequest.getDescription()) &&
-                ValidUtils.isNotBlank(perfumeCreateRequest.getMainAccord()) &&
-                ValidUtils.isNotBlank(perfumeCreateRequest.getIngredients())) {
+    public static Product mapPerfumeCreateRequestToEntity(ProductCreateRequest productCreateRequest) {
+        if (ValidUtils.isNotBlank(productCreateRequest.getNameKr()) &&
+                ValidUtils.isNotBlank(productCreateRequest.getBrand()) &&
+                ValidUtils.isNotBlank(productCreateRequest.getGrade()) &&
+                ValidUtils.isNotBlank(productCreateRequest.getSizeOption()) &&
+                ValidUtils.isNotBlank(productCreateRequest.getDescription()) &&
+                ValidUtils.isNotBlank(productCreateRequest.getMainAccord()) &&
+                ValidUtils.isNotBlank(productCreateRequest.getIngredients())) {
             // 이름, 설명, 브랜드, 등급 정보가 모두 있어야 perfume 반환
             return Product.builder()
-                    .nameEn(perfumeCreateRequest.getNameEn())
-                    .nameKr(perfumeCreateRequest.getNameKr())
-                    .brand(perfumeCreateRequest.getBrand())
-                    .grade(perfumeCreateRequest.getGrade())
-                    .sizeOption(perfumeCreateRequest.getSizeOption())
-                    .description(perfumeCreateRequest.getDescription())
-                    .mainAccord(perfumeCreateRequest.getMainAccord())
-                    .ingredients(perfumeCreateRequest.getIngredients())
+                    .nameEn(productCreateRequest.getNameEn())
+                    .nameKr(productCreateRequest.getNameKr())
+                    .brand(productCreateRequest.getBrand())
+                    .grade(productCreateRequest.getGrade())
+                    .sizeOption(productCreateRequest.getSizeOption())
+                    .description(productCreateRequest.getDescription())
+                    .mainAccord(productCreateRequest.getMainAccord())
+                    .ingredients(productCreateRequest.getIngredients())
                     .build();
         } else {
             // 정보 누락되어있으면 exception 발생

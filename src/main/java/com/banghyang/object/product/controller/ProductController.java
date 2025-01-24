@@ -1,36 +1,36 @@
 package com.banghyang.object.product.controller;
 
-import com.banghyang.object.product.dto.PerfumeCreateRequest;
-import com.banghyang.object.product.dto.PerfumeModifyRequest;
+import com.banghyang.object.product.dto.ProductCreateRequest;
+import com.banghyang.object.product.dto.ProductModifyRequest;
 import com.banghyang.object.product.dto.PerfumeResponse;
-import com.banghyang.object.product.service.PerfumeService;
+import com.banghyang.object.product.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RequestMapping("/perfumes")
+@RequestMapping("/products")
 @RestController
 @RequiredArgsConstructor
-public class PerfumeController {
+public class ProductController {
 
-    private final PerfumeService perfumeService;
+    private final ProductService productService;
 
     /**
      * 모든 향수 조회하기
      */
     @GetMapping
     public ResponseEntity<List<PerfumeResponse>> getAllPerfumes() {
-        return ResponseEntity.ok(perfumeService.getAllPerfumeResponses());
+        return ResponseEntity.ok(productService.getAllPerfumeResponses());
     }
 
     /**
-     * 새로운 향수 등록허가
+     * 새로운 향수 등록하기
      */
     @PostMapping
-    public ResponseEntity<?> createPerfume(@RequestBody PerfumeCreateRequest perfumeCreateRequest) {
-        perfumeService.createPerfume(perfumeCreateRequest);
+    public ResponseEntity<?> createPerfume(@RequestBody ProductCreateRequest productCreateRequest) {
+        productService.createPerfume(productCreateRequest);
         return ResponseEntity.ok().build();
     }
 
@@ -38,8 +38,8 @@ public class PerfumeController {
      * 기존 향수 정보 수정하기
      */
     @PutMapping
-    public ResponseEntity<?> modifyPerfume(@RequestBody PerfumeModifyRequest perfumeModifyRequest) {
-        perfumeService.modifyPerfume(perfumeModifyRequest);
+    public ResponseEntity<?> modifyPerfume(@RequestBody ProductModifyRequest productModifyRequest) {
+        productService.modifyPerfume(productModifyRequest);
         return ResponseEntity.ok().build();
     }
 
@@ -48,7 +48,7 @@ public class PerfumeController {
      */
     @DeleteMapping("/{perfumeId}")
     public ResponseEntity<?> deletePerfume(@PathVariable Long perfumeId) {
-        perfumeService.deletePerfume(perfumeId);
+        productService.deletePerfume(perfumeId);
         return ResponseEntity.ok().build();
     }
 }

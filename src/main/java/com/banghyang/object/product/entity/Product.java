@@ -1,5 +1,6 @@
 package com.banghyang.object.product.entity;
 
+import com.banghyang.object.category.entity.Category;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -26,6 +27,10 @@ public class Product {
     private String ingredients; // 제품 성분
     private LocalDateTime timeStamp;    // 제품 등록일시
 
+    @ManyToOne
+    @JoinColumn(name = "category_id")
+    private Category category; // 제품 카테고리
+
     // 생성시간 자동 입력
     @PrePersist
     protected void onCreate() {
@@ -34,7 +39,7 @@ public class Product {
 
     // 빌더
     @Builder
-    public Product(String nameEn, String nameKr, String brand, String grade, String content, String sizeOption, String mainAccord, String ingredients) {
+    public Product(String nameEn, String nameKr, String brand, String grade, String content, String sizeOption, String mainAccord, String ingredients, Category category) {
         this.nameEn = nameEn;
         this.nameKr = nameKr;
         this.brand = brand;
@@ -43,6 +48,7 @@ public class Product {
         this.sizeOption = sizeOption;
         this.mainAccord = mainAccord;
         this.ingredients = ingredients;
+        this.category = category;
     }
 
     // 제품 정보 수정 메소드
@@ -55,5 +61,6 @@ public class Product {
         this.sizeOption = modifyProductEntity.getSizeOption();
         this.mainAccord = modifyProductEntity.getMainAccord();
         this.ingredients = modifyProductEntity.getIngredients();
+        this.category = modifyProductEntity.getCategory();
     }
 }

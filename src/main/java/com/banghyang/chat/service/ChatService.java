@@ -9,7 +9,7 @@ import com.banghyang.common.mapper.Mapper;
 import com.banghyang.common.type.ChatMode;
 import com.banghyang.common.type.ChatType;
 import com.banghyang.object.product.entity.Product;
-import com.banghyang.object.product.repository.PerfumeRepository;
+import com.banghyang.object.product.repository.ProductRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.ParameterizedTypeReference;
@@ -34,7 +34,7 @@ public class ChatService {
     private final ChatRepository chatRepository;
     private final WebClient webClient;
     private final S3Service s3Service;
-    private final PerfumeRepository perfumeRepository;
+    private final ProductRepository productRepository;
 
     public List<UserResponse> getAllChats(Long memberId) {
         // memberId 에 해당하는 모든 채팅 기록 가져오기
@@ -349,7 +349,7 @@ public class ChatService {
         return aiRecommendations.stream() // stream 으로 AI 의 향수 추천 리스트의 모든 항목에 접근
                 .map(aiRecommendation -> {
                     // 향수 추천 리스트의 향수 아이디로 향수 엔티티 가져오기
-                    Product recommendedProductEntity = perfumeRepository
+                    Product recommendedProductEntity = productRepository
                             .findById(Long.valueOf(aiRecommendation.getId()))
                             .orElseThrow(() -> new RuntimeException(
                                     "추천된 향수 아이디에 해당하는 향수 정보를 찾을 수 없습니다."));
