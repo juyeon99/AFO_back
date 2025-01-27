@@ -12,6 +12,6 @@ public class SpiceModifyRequest {
     private String nameKr;
     private String contentEn;
     private String contentKr;
-    private Set<String> imageUrls;
+    private Set<String> imageUrlList;
     private String lineName;
 }

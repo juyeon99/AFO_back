@@ -2,7 +2,7 @@ package com.banghyang.object.product.dto;
 
 import lombok.Data;
 
-import java.util.List;
+import java.util.Set;
 
 @Data
 public class ProductModifyRequest {
@@ -11,13 +11,13 @@ public class ProductModifyRequest {
     private String nameKr;
     private String brand;
     private String grade;
-    private String description;
+    private String content;
     private String sizeOption;
     private String mainAccord;
     private String ingredients;
-    private List<String> imageUrls;
-    private List<String> singleNote;
-    private List<String> topNote;
-    private List<String> middleNote;
-    private List<String> baseNote;
+    private Set<String> imageUrlSet;
+    private Set<String> singleNoteSet;
+    private Set<String> topNoteSet;
+    private Set<String> middleNoteSet;
+    private Set<String> baseNoteSet;
 }

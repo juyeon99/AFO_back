@@ -26,29 +26,29 @@ public class ProductController {
     }
 
     /**
-     * 새로운 향수 등록하기
+     * 새로운 제품 등록하기
      */
     @PostMapping
-    public ResponseEntity<?> createPerfume(@RequestBody ProductCreateRequest productCreateRequest) {
-        productService.createPerfume(productCreateRequest);
+    public ResponseEntity<?> createProduct(@RequestBody ProductCreateRequest productCreateRequest) {
+        productService.createProduct(productCreateRequest);
         return ResponseEntity.ok().build();
     }
 
     /**
-     * 기존 향수 정보 수정하기
+     * 기존 제품 정보 수정하기
      */
     @PutMapping
-    public ResponseEntity<?> modifyPerfume(@RequestBody ProductModifyRequest productModifyRequest) {
+    public ResponseEntity<?> modifyProduct(@RequestBody ProductModifyRequest productModifyRequest) {
         productService.modifyPerfume(productModifyRequest);
         return ResponseEntity.ok().build();
     }
 
     /**
-     * 기존 향수 삭제하기
+     * 기존 제품 삭제하기
      */
-    @DeleteMapping("/{perfumeId}")
-    public ResponseEntity<?> deletePerfume(@PathVariable Long perfumeId) {
-        productService.deletePerfume(perfumeId);
+    @DeleteMapping("/{productId}")
+    public ResponseEntity<?> deleteProduct(@PathVariable Long productId) {
+        productService.deletePerfume(productId);
         return ResponseEntity.ok().build();
     }
 }

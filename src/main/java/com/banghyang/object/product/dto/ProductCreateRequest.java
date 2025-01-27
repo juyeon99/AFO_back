@@ -11,12 +11,12 @@ public class ProductCreateRequest {
     private String brand;
     private String grade;
     private String sizeOption;
-    private String description;
+    private String content;
     private String mainAccord;
     private String ingredients;
-    private List<String> imageUrls;
-    private List<String> singleNote;
-    private List<String> topNote;
-    private List<String> middleNote;
-    private List<String> baseNote;
+    private List<String> imageUrlList;
+    private List<String> singleNoteList;
+    private List<String> topNoteList;
+    private List<String> middleNoteList;
+    private List<String> baseNoteList;
 }

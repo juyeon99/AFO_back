@@ -15,7 +15,7 @@ public class PerfumeResponse {
     private String sizeOption;
     private String mainAccord;
     private String ingredients;
-    private List<String> imageUrls;
+    private List<String> imageUrlList;
     private String singleNote;
     private String topNote;
     private String middleNote;

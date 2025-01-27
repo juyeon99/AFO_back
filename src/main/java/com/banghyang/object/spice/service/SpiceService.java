@@ -52,7 +52,7 @@ public class SpiceService {
                 List<String> imageUrls = spiceImageEntityList.stream()
                         .map(SpiceImage::getUrl)
                         .toList();
-                spiceResponse.setImageUrls(imageUrls);
+                spiceResponse.setImageUrlList(imageUrls);
             }
             return spiceResponse;
         }).sorted(Comparator.comparing(SpiceResponse::getNameKr)).toList();
@@ -79,8 +79,8 @@ public class SpiceService {
                 spiceRepository.save(newSpiceEntity);
 
                 // 이미지 처리
-                if (!spiceCreateRequest.getImageUrls().isEmpty()) {
-                    spiceCreateRequest.getImageUrls().forEach(imageUrl -> {
+                if (!spiceCreateRequest.getImageUrlList().isEmpty()) {
+                    spiceCreateRequest.getImageUrlList().forEach(imageUrl -> {
                         SpiceImage newSpiceImageEntity = SpiceImage.builder()
                                 .spice(newSpiceEntity)
                                 .url(imageUrl)
@@ -126,27 +126,27 @@ public class SpiceService {
         // 향료에 해당하는 모든 이미지 엔티티 가져오기
         List<SpiceImage> targetSpiceImageEntityList = spiceImageRepository.findBySpice(targetSpiceEntity);
         // 이미지 엔티티 리스트의 항목들에 접근하여 url 만 모아 set 으로 만들기
-        Set<String> targetSpiceImageUrlList = targetSpiceImageEntityList.stream()
+        Set<String> targetSpiceImageUrlSet = targetSpiceImageEntityList.stream()
                 .map(SpiceImage::getUrl)
                 .collect(Collectors.toSet());
         // 삭제할 이미지 리스트
         List<SpiceImage> spiceImagesToDelete = targetSpiceImageEntityList.stream()
                 .filter(spiceImageEntity ->
                         // 기존에 존재하는 이미지들 중 수정요청 정보에 없는 이미지들 골라내기
-                        !spiceModifyRequest.getImageUrls().contains(spiceImageEntity.getUrl()))
+                        !spiceModifyRequest.getImageUrlList().contains(spiceImageEntity.getUrl()))
                 .toList();
         spiceImageRepository.deleteAll(spiceImagesToDelete);
         // 추가할 이미지 리스트
-        List<SpiceImage> spiceImagesToCreate = spiceModifyRequest.getImageUrls().stream()
+        List<SpiceImage> spiceImagesToAdd = spiceModifyRequest.getImageUrlList().stream()
                 // 수정요청 정보에서 기존 이미지에 해당하지 않는 url 만 골라내기
-                .filter(url -> !targetSpiceImageUrlList.contains(url))
+                .filter(url -> !targetSpiceImageUrlSet.contains(url))
                 // 골라낸 url 로 새로운 이미지 엔티티 생성
                 .map(url -> SpiceImage.builder()
                         .spice(targetSpiceEntity)
                         .url(url)
                         .build())
                 .toList();
-        spiceImageRepository.saveAll(spiceImagesToCreate);
+        spiceImageRepository.saveAll(spiceImagesToAdd);
         // 기존 이미지와 동일한 수정 요청 정보는 별도의 처리없이 그대로 유지
     }
 
@@ -164,5 +164,12 @@ public class SpiceService {
         spiceImageRepository.deleteAll(targetSpiceImageEntityList);
         // 해당하는 향료 삭제
         spiceRepository.delete(targetSpiceEntity);
+    }
+
+    /**
+     * 향료 한글명으로 향료 엔티티 찾아서 반환하는 메소드
+     */
+    public Spice findSpiceByNameKr(String spiceNameKr) {
+        return spiceRepository.findByNameKr(spiceNameKr);
     }
 }

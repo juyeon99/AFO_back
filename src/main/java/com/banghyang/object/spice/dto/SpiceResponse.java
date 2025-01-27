@@ -12,7 +12,7 @@ public class SpiceResponse {
     private String nameKr;
     private String contentEn;
     private String contentKr;
-    private List<String> imageUrls;
+    private List<String> imageUrlList;
 
     private Long lineId;
     private String lineName;
