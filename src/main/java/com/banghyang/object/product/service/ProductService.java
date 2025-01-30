@@ -279,6 +279,7 @@ public class ProductService {
             throw new IllegalArgumentException("싱글 타입과 다른 타입의 노트가 동시에 존재할 수 없습니다.");
         }
         // 나머지 노트 처리
+        // 탑노트
         if (!productModifyRequest.getTopNoteSet().isEmpty()) {
 
         }
