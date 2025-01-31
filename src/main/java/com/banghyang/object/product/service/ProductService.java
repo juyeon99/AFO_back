@@ -191,10 +191,10 @@ public class ProductService {
     }
 
     /**
-     * 향수 정보 수정 메소드
+     * 제품 정보 수정 메소드
      */
-    @CacheEvict(value = "perfumes") // 수정 시 마다 캐시데이터 함께 업데이트
-    public void modifyPerfume(ProductModifyRequest productModifyRequest) {
+    @CacheEvict(value = "products") // 수정 시 마다 캐시데이터 함께 업데이트
+    public void modifyProduct(ProductModifyRequest productModifyRequest) {
         // 수정할 제품 엔티티 request 의 id 값으로 찾아오기
         Product targetProductEntity = productRepository.findById(productModifyRequest.getId())
                 .orElseThrow(() -> new EntityNotFoundException("수정하려는 제품의 정보를 찾을 수 없습니다."));
@@ -244,6 +244,7 @@ public class ProductService {
                 productModifyRequest.getMiddleNoteSet().isEmpty() &&
                 productModifyRequest.getBaseNoteSet().isEmpty()) {
             // request 에 싱글노트만 있고 나머지 노트는 없을때만 싱글노트 처리 진행
+            // 기존의 싱글노트 엔티티들 이름만 가져와서 Set 으로 만들기
             Set<String> targetSingleSpiceNameKrSet = targetNoteEntityList.stream()
                     .filter(noteEntity -> noteEntity.getNoteType().equals(NoteType.SINGLE))
                     .map(noteEntity -> noteEntity.getSpice().getNameKr())
@@ -281,17 +282,141 @@ public class ProductService {
         // 나머지 노트 처리
         // 탑노트
         if (!productModifyRequest.getTopNoteSet().isEmpty()) {
-
+            // 기존의 탑노트 엔티티들 이름만 가져와서 Set 만들기
+            Set<String> targetTopSpiceNameKrSet = targetNoteEntityList.stream()
+                    .filter(noteEntity -> noteEntity.getNoteType().equals(NoteType.TOP))
+                    .map(noteEntity -> noteEntity.getSpice().getNameKr())
+                    .collect(Collectors.toSet());
+            // 기존엔 존재하지만 request 에 없는 노트 리스트
+            List<Note> topNotesToDelete = targetNoteEntityList.stream()
+                    .filter(noteEntity -> noteEntity.getNoteType().equals(NoteType.TOP))
+                    .filter(noteEntity ->
+                            !productModifyRequest.getTopNoteSet().contains(noteEntity.getSpice().getNameKr()))
+                    .toList();
+            // 기존의 싱글 노트 엔티티 리스트
+            List<Note> singleNotesToDelete = targetNoteEntityList.stream()
+                    .filter(noteEntity -> noteEntity.getNoteType().equals(NoteType.SINGLE))
+                    .toList();
+            if (singleNotesToDelete.isEmpty()) {
+                // 기존 싱글노트가 없다면 삭제할 탑노트만 처리
+                noteService.deleteAll(topNotesToDelete);
+            } else {
+                // 기존 싱글노트가 존재한다면 함꼐 삭제 처리
+                List<Note> notesToDelete = new ArrayList<>();
+                notesToDelete.addAll(topNotesToDelete);
+                notesToDelete.addAll(singleNotesToDelete);
+                noteService.deleteAll(notesToDelete);
+            }
+            // 리퀘스트에는 있지만 기존엔 없는 향료 리스트(추가해야할 노트)
+            productModifyRequest.getTopNoteSet().stream()
+                    .filter(spiceNameKr -> !targetTopSpiceNameKrSet.contains(spiceNameKr))
+                    .forEach(spiceNameKr -> {
+                        Spice targetSpice = spiceService.findSpiceByNameKr(spiceNameKr);
+                        if (targetSpice != null) {
+                            noteService.createNote(targetProductEntity, targetSpice, NoteType.TOP);
+                        } else {
+                            // 향료 임시 등록 메소드 추가하기
+                            throw new EntityNotFoundException("제품 등록 중 향료 정보를 찾을 수 없습니다. (기능 추가 예정)");
+                        }
+                    });
+        }
+        // 미들노트
+        if (!productModifyRequest.getMiddleNoteSet().isEmpty()) {
+            // 기존의 미들노트 엔티티들 이름만 가져와서 Set 만들기
+            Set<String> targetMiddleSpiceNameKrSet = targetNoteEntityList.stream()
+                    .filter(noteEntity -> noteEntity.getNoteType().equals(NoteType.MIDDLE))
+                    .map(noteEntity -> noteEntity.getSpice().getNameKr())
+                    .collect(Collectors.toSet());
+            // 기존엔 존재하지만 request 에 없는 노트 리스트
+            List<Note> middleNotesToDelete = targetNoteEntityList.stream()
+                    .filter(noteEntity -> noteEntity.getNoteType().equals(NoteType.MIDDLE))
+                    .filter(noteEntity ->
+                            !productModifyRequest.getTopNoteSet().contains(noteEntity.getSpice().getNameKr()))
+                    .toList();
+            // 기존의 싱글 노트 엔티티 리스트
+            List<Note> singleNotesToDelete = targetNoteEntityList.stream()
+                    .filter(noteEntity -> noteEntity.getNoteType().equals(NoteType.SINGLE))
+                    .toList();
+            if (singleNotesToDelete.isEmpty()) {
+                // 기존 싱글노트가 없다면 삭제할 미들노트만 처리
+                noteService.deleteAll(middleNotesToDelete);
+            } else {
+                // 기존 싱글노트가 존재한다면 함꼐 삭제 처리
+                List<Note> notesToDelete = new ArrayList<>();
+                notesToDelete.addAll(middleNotesToDelete);
+                notesToDelete.addAll(singleNotesToDelete);
+                noteService.deleteAll(notesToDelete);
+            }
+            // 리퀘스트에는 있지만 기존엔 없는 향료 리스트(추가해야할 노트)
+            productModifyRequest.getTopNoteSet().stream()
+                    .filter(spiceNameKr -> !targetMiddleSpiceNameKrSet.contains(spiceNameKr))
+                    .forEach(spiceNameKr -> {
+                        Spice targetSpice = spiceService.findSpiceByNameKr(spiceNameKr);
+                        if (targetSpice != null) {
+                            noteService.createNote(targetProductEntity, targetSpice, NoteType.MIDDLE);
+                        } else {
+                            // 향료 임시 등록 메소드 추가하기
+                            throw new EntityNotFoundException("제품 등록 중 향료 정보를 찾을 수 없습니다. (기능 추가 예정)");
+                        }
+                    });
+        }
+        // 베이스노트
+        if (!productModifyRequest.getBaseNoteSet().isEmpty()) {
+            // 기존의 탑노트 엔티티들 이름만 가져와서 Set 만들기
+            Set<String> targetBaseSpiceNameKrSet = targetNoteEntityList.stream()
+                    .filter(noteEntity -> noteEntity.getNoteType().equals(NoteType.BASE))
+                    .map(noteEntity -> noteEntity.getSpice().getNameKr())
+                    .collect(Collectors.toSet());
+            // 기존엔 존재하지만 request 에 없는 노트 리스트
+            List<Note> baseNotesToDelete = targetNoteEntityList.stream()
+                    .filter(noteEntity -> noteEntity.getNoteType().equals(NoteType.BASE))
+                    .filter(noteEntity ->
+                            !productModifyRequest.getTopNoteSet().contains(noteEntity.getSpice().getNameKr()))
+                    .toList();
+            // 기존의 싱글 노트 엔티티 리스트
+            List<Note> singleNotesToDelete = targetNoteEntityList.stream()
+                    .filter(noteEntity -> noteEntity.getNoteType().equals(NoteType.SINGLE))
+                    .toList();
+            if (singleNotesToDelete.isEmpty()) {
+                // 기존 싱글노트가 없다면 삭제할 베이스노트만 처리
+                noteService.deleteAll(baseNotesToDelete);
+            } else {
+                // 기존 싱글노트가 존재한다면 함꼐 삭제 처리
+                List<Note> notesToDelete = new ArrayList<>();
+                notesToDelete.addAll(baseNotesToDelete);
+                notesToDelete.addAll(singleNotesToDelete);
+                noteService.deleteAll(notesToDelete);
+            }
+            // 리퀘스트에는 있지만 기존엔 없는 향료 리스트(추가해야할 노트)
+            productModifyRequest.getTopNoteSet().stream()
+                    .filter(spiceNameKr -> !targetBaseSpiceNameKrSet.contains(spiceNameKr))
+                    .forEach(spiceNameKr -> {
+                        Spice targetSpice = spiceService.findSpiceByNameKr(spiceNameKr);
+                        if (targetSpice != null) {
+                            noteService.createNote(targetProductEntity, targetSpice, NoteType.TOP);
+                        } else {
+                            // 향료 임시 등록 메소드 추가하기
+                            throw new EntityNotFoundException("제품 등록 중 향료 정보를 찾을 수 없습니다. (기능 추가 예정)");
+                        }
+                    });
         }
     }
 
     /**
      * 향수 삭제 메소드
      */
-    @CacheEvict(value = "perfumes") // 수정 시 마다 캐시데이터 함께 업데이트
+    @CacheEvict(value = "products") // 수정 시 마다 캐시데이터 함께 업데이트
     public void deletePerfume(Long perfumeId) {
+        // 삭제할 제품 엔티티
         Product targetProductEntity = productRepository.findById(perfumeId)
                 .orElseThrow(() -> new IllegalArgumentException("삭제하려는 향수의 정보를 찾을 수 업습니다."));
+        // 삭제할 제품 이미지들
+        List<ProductImage> imagesToDelete = productImageRepository.findByProduct(targetProductEntity);
+        // 삭제할 노트들
+        List<Note> notesToDelete = noteService.findNoteByProduct(targetProductEntity);
+
+        productImageRepository.deleteAll(imagesToDelete);
+        noteService.deleteAll(notesToDelete);
         productRepository.delete(targetProductEntity);
     }
 }

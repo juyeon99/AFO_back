@@ -39,7 +39,7 @@ public class ProductController {
      */
     @PutMapping
     public ResponseEntity<?> modifyProduct(@RequestBody ProductModifyRequest productModifyRequest) {
-        productService.modifyPerfume(productModifyRequest);
+        productService.modifyProduct(productModifyRequest);
         return ResponseEntity.ok().build();
     }
 
