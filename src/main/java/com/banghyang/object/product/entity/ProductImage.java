@@ -17,7 +17,7 @@ public class ProductImage {
     private String url; // 제품 이미지 url
 
     @ManyToOne
-    @JoinColumn(name = "perfume_id", nullable = false)
+    @JoinColumn(name = "product_id", nullable = false)
     private Product product; // 제품 아이디
 
     // 빌더
