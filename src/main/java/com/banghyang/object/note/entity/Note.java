@@ -19,7 +19,7 @@ public class Note {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id; // 노트 아이디
-    private LocalDateTime timeStamp;
+    private LocalDateTime timeStamp; // 노트 등록일시
 
     @Enumerated(EnumType.STRING)
     private NoteType noteType; // 노트 타입(SINGLE, TOP, MIDDLE, BASE)

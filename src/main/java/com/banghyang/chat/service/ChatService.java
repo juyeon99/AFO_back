@@ -59,12 +59,12 @@ public class ChatService {
      * 유저 채팅에 답변하는 서비스 메소드
      */
     public UserResponse answerToUserRequest(UserRequest userRequest) {
-        System.out.println("[채팅 서비스] 유저 답변 생성 메소드 진입...");
-        System.out.println("[채팅 서비스] 유저 입력 정보 : " + userRequest.toString());
+//        System.out.println("[채팅 서비스] 유저 답변 생성 메소드 진입...");
+//        System.out.println("[채팅 서비스] 유저 입력 정보 : " + userRequest.toString());
 
         if (userRequest.getImage() != null) {
             // 유저가 보낸 이미지가 있을 때의 처리
-            System.out.println("이미지 포함 입력 처리 진입");
+//            System.out.println("이미지 포함 입력 처리 진입");
 
             // 유저가 입력한 이미지를 S3 에 저장하고 S3 URL 받기
             String userInputImageS3Url = s3Service.uploadImage(userRequest.getImage());

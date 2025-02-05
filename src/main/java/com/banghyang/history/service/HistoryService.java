@@ -14,6 +14,7 @@ import com.banghyang.object.line.service.LineService;
 import com.banghyang.object.product.entity.Product;
 import com.banghyang.object.product.entity.ProductImage;
 import com.banghyang.object.product.service.ProductService;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -42,40 +43,35 @@ public class HistoryService {
      * 히스토리 생성
      */
     public void createHistoryByChat(String chatId) {
-        System.out.println("[전달 받은 채팅 아이디] : " + chatId);
-
         // 채팅 아이디로 채팅 정보 가져오기
-        Chat chatEntity = chatService.getChatById(chatId);
+        Chat targetChatEntity = chatService.getChatById(chatId);
 
-        if (chatEntity != null) {
+        if (targetChatEntity != null) {
             // 채팅 정보의 회원 아이디로 회원 정보 가져오기
-            Member memberEntity = memberService.getMemberById(chatEntity.getMemberId());
+            Member targetMemberEntity = memberService.getMemberById(targetChatEntity.getMemberId());
             // 채팅 정보의 라인 아이디로 라인 정보 가져오기
-            Line targetLineEntity = lineService.getLineById(chatEntity.getLineId());
-
+            Line targetLineEntity = lineService.getLineById(targetChatEntity.getLineId());
             // 채팅 정보로 히스토리 생성하기
             History newHistoryEntity = History.builder()
-                    .chatId(chatEntity.getId())
+                    .chatId(targetChatEntity.getId())
                     .line(targetLineEntity)
-                    .member(memberEntity)
+                    .member(targetMemberEntity)
                     .build();
             historyRepository.save(newHistoryEntity);
 
             // 채팅의 추천 속 향수 정보로 추천 엔티티 생성하기
-            List<Recommendation> recommnedationEntityList = chatEntity.getRecommendations().stream()
-                    .map(chatRecommendation -> {
-                        Product targetProduct = productService.getProductByNameKr(chatRecommendation.getProductNameKr());
-                        Recommendation newRecommendationEntity = Recommendation.builder()
-                                .history(newHistoryEntity)
-                                .product(targetProduct)
-                                .reason(chatRecommendation.getReason())
-                                .situation(chatRecommendation.getSituation())
-                                .build();
-                        recommendationRepository.save(newRecommendationEntity);
-                        return newRecommendationEntity;
-                    }).toList();
+            targetChatEntity.getRecommendations().forEach(chatRecommendation -> {
+                Product targetProductEntity = productService.getProductByNameKr(chatRecommendation.getProductNameKr());
+                Recommendation newRecommendationEntity = Recommendation.builder()
+                        .history(newHistoryEntity)
+                        .product(targetProductEntity)
+                        .reason(chatRecommendation.getReason())
+                        .situation(chatRecommendation.getSituation())
+                        .build();
+                recommendationRepository.save(newRecommendationEntity);
+            });
         } else {
-            throw new NoSuchElementException("[History Service] 히스토리 생성중 이미지 URL로 채팅 정보 조회에 실패했습니다.");
+            throw new EntityNotFoundException("[History Service] 히스토리 생성중 채팅 정보 조회에 실패했습니다.");
         }
     }
 
@@ -93,6 +89,7 @@ public class HistoryService {
                     historyResponse.setChatId(historyEntity.getChatId()); // 채팅 아이디
                     historyResponse.setLineId(historyEntity.getLine().getId()); // 계열 아이디
                     historyResponse.setTimeStamp(historyEntity.getTimeStamp()); // 히스토리 생성일시
+                    // 추천 정보 처리
                     historyResponse.setRecommendations(
                             // 히스토리에 해당하는 추천정보 가져오기
                             recommendationRepository.findByHistory(historyEntity).stream()

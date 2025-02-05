@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table
 @NoArgsConstructor
@@ -18,6 +20,7 @@ public class Recommendation {
 
     private String reason; // 추천하는 이유
     private String situation; // 추천하는 상황
+    private LocalDateTime timeStamp; // 추천정보 생성일시
 
     @ManyToOne
     @JoinColumn(name = "history_id")
@@ -26,6 +29,11 @@ public class Recommendation {
     @ManyToOne
     @JoinColumn(name = "product_id")
     private Product product; // 추천할 제품 아이디
+
+    @PrePersist
+    protected void onCreate() {
+        this.timeStamp = LocalDateTime.now();
+    }
 
     @Builder
     public Recommendation(

@@ -24,9 +24,11 @@ public class Product {
     private String content;     // 제품 설명
     private String sizeOption;  // 제품 용량
     private String mainAccord;  // 제품 메인향
+
     @Lob
     @Column(columnDefinition = "TEXT") // mysql 에서 text 로 저장하게하여 길이 늘리기
     private String ingredients; // 제품 성분
+
     private LocalDateTime timeStamp;    // 제품 등록일시
 
     @ManyToOne

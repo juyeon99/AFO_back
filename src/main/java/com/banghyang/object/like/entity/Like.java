@@ -1,7 +1,7 @@
 package com.banghyang.object.like.entity;
 
 import com.banghyang.member.entity.Member;
-import com.banghyang.object.product.entity.Product;
+import com.banghyang.object.review.entity.Review;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -25,8 +25,8 @@ public class Like {
     private Member member; // 좋아요 생성자 아이디
 
     @ManyToOne
-    @JoinColumn(name = "product_id", nullable = false)
-    private Product product; // 좋아요 한 제품 아이디
+    @JoinColumn(name = "review_id", nullable = false)
+    private Review review; // 좋아요 한 리뷰
 
     // 좋아요 생성일시 자동 생성
     @PrePersist
@@ -36,8 +36,8 @@ public class Like {
 
     // 빌더
     @Builder
-    public Like(Member member, Product product) {
+    public Like(Member member, Review review) {
         this.member = member;
-        this.product = product;
+        this.review = review;
     }
 }
