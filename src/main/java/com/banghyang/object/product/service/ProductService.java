@@ -403,13 +403,15 @@ public class ProductService {
     }
 
     /**
-     * 향수 삭제 메소드
+     * 제품 삭제 메소드
      */
     @CacheEvict(value = "products") // 수정 시 마다 캐시데이터 함께 업데이트
     public void deletePerfume(Long perfumeId) {
         // 삭제할 제품 엔티티
         Product targetProductEntity = productRepository.findById(perfumeId)
-                .orElseThrow(() -> new IllegalArgumentException("삭제하려는 향수의 정보를 찾을 수 업습니다."));
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "[ProductService]삭제하려는 제품의 정보를 찾을 수 업습니다.")
+                );
         // 삭제할 제품 이미지들
         List<ProductImage> imagesToDelete = productImageRepository.findByProduct(targetProductEntity);
         // 삭제할 노트들
@@ -418,5 +420,25 @@ public class ProductService {
         productImageRepository.deleteAll(imagesToDelete);
         noteService.deleteAll(notesToDelete);
         productRepository.delete(targetProductEntity);
+    }
+
+    /**
+     * 한글제품명으로 제품 엔티티 반환
+     */
+    public Product getProductByNameKr(String productNameKr) {
+        Product product = productRepository.findByNameKr(productNameKr);
+        if (product == null) {
+            throw new EntityNotFoundException(
+                    "[ProductService:getProductByNameKr] 한글명에 해당하는 제품 정보를 찾을 수 없습니다.");
+        } else {
+            return product;
+        }
+    }
+
+    /**
+     * 제품에 해당하는 이미지 반환
+     */
+    public List<ProductImage> getProductImagesByProduct(Product product) {
+        return productImageRepository.findByProduct(product);
     }
 }

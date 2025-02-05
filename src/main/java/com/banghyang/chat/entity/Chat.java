@@ -45,14 +45,14 @@ public class Chat {
 
     @Data
     public static class Recommendation {
-        @Field("perfume_name")
-        private String perfumeName;
-        @Field("perfume_image_url")
-        private List<String> perfumeImageUrls;
-        @Field("perfume_brand")
-        private String perfumeBrand;
-        @Field("perfume_grade")
-        private String perfumeGrade;
+        @Field("product_name_kr")
+        private String productNameKr;
+        @Field("product_image_url")
+        private List<String> productImageUrls;
+        @Field("product_brand")
+        private String productBrand;
+        @Field("product_grade")
+        private String productGrade;
         @Field("reason")
         private String reason;
         @Field("situation")

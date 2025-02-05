@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -18,8 +20,21 @@ public class Spice {
 
     private String nameEn; // 향료 영문명
     private String nameKr; // 향료 한글명
+
+    @Lob
+    @Column(columnDefinition = "TEXT")
     private String contentEn; // 향료 영문설명
+
+    @Lob
+    @Column(columnDefinition = "TEXT")
     private String contentKr; // 향료 한글설명
+
+    private LocalDateTime timeStamp; // 향료 등록일시
+
+    @PrePersist
+    public void prePersist() {
+        timeStamp = LocalDateTime.now();
+    }
 
     @ManyToOne
     @JoinColumn(name = "line_id", nullable = false)
