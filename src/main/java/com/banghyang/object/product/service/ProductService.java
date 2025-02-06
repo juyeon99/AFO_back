@@ -423,13 +423,22 @@ public class ProductService {
     }
 
     /**
+     * 아이디로 제품 엔티티 반환
+     */
+    public Product getProductById(Long productId) {
+        return productRepository.findById(productId).orElseThrow(() -> new EntityNotFoundException(
+                "[ProductService:getProductById]아이디에 해당하는 제품 엔티티를 찾을 수 없습니다."
+        ));
+    }
+
+    /**
      * 한글제품명으로 제품 엔티티 반환
      */
     public Product getProductByNameKr(String productNameKr) {
         Product product = productRepository.findByNameKr(productNameKr);
         if (product == null) {
             throw new EntityNotFoundException(
-                    "[ProductService:getProductByNameKr] 한글명에 해당하는 제품 정보를 찾을 수 없습니다.");
+                    "[ProductService:getProductByNameKr]한글명에 해당하는 제품 엔티티를 찾을 수 없습니다.");
         } else {
             return product;
         }

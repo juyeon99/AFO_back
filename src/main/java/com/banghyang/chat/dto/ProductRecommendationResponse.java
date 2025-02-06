@@ -14,7 +14,7 @@ public class ProductRecommendationResponse {
 
     @Data
     public static class Recommendation {
-        private String id;
+        private Long id;
         private String reason;
         private String situation;
     }
