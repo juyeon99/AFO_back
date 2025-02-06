@@ -17,28 +17,23 @@ public class Spice {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id; // 향료 아이디
-
     private String nameEn; // 향료 영문명
     private String nameKr; // 향료 한글명
-
     @Lob
     @Column(columnDefinition = "TEXT")
     private String contentEn; // 향료 영문설명
-
     @Lob
     @Column(columnDefinition = "TEXT")
     private String contentKr; // 향료 한글설명
-
     private LocalDateTime timeStamp; // 향료 등록일시
+    @ManyToOne
+    @JoinColumn(name = "line_id", nullable = false)
+    private Line line; // 향료의 계열 아이디
 
     @PrePersist
     public void prePersist() {
         timeStamp = LocalDateTime.now();
     }
-
-    @ManyToOne
-    @JoinColumn(name = "line_id", nullable = false)
-    private Line line; // 향료의 개열 아이디
 
     // 빌더
     @Builder

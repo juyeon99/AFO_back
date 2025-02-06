@@ -18,16 +18,21 @@ public class Review {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id; // 리뷰 아이디
+    @Lob
+    @Column(columnDefinition = "TEXT")
     private String content; // 리뷰 본문
-    private LocalDateTime timeStamp; // 리뷰 작성일시
-
     @ManyToOne
     @JoinColumn(name = "member_id", nullable = false)
     private Member member; // 리뷰 작성자 아이디
-
     @ManyToOne
     @JoinColumn(name = "product_id", nullable = false)
     private Product product; // 리뷰 상품
+    private LocalDateTime timeStamp; // 리뷰 작성일시
+
+    @PrePersist
+    protected void onCreate() {
+        this.timeStamp = LocalDateTime.now();
+    }
 
     // 빌더
     @Builder
