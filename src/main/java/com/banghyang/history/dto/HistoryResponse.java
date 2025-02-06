@@ -16,10 +16,10 @@ public class HistoryResponse {
 
     @Data
     public static class RecommendationDto {
-        private String perfumeName;
-        private String perfumeBrand;
-        private String perfumeGrade;
-        private String perfumeImageUrl;
+        private String productNameKr;
+        private String productBrand;
+        private String productGrade;
+        private List<String> productImageUrls;
         private String reason;
         private String situation;
     }

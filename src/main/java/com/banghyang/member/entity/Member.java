@@ -1,13 +1,11 @@
 package com.banghyang.member.entity;
 
-import com.banghyang.common.type.MemberRoleType;
 import com.banghyang.auth.kakao.model.dto.OauthId;
-import com.banghyang.history.entity.History;
+import com.banghyang.common.type.MemberRoleType;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Entity
 @Builder
@@ -38,9 +36,6 @@ public class Member {
 
     @Enumerated(EnumType.STRING)
     private MemberRoleType role;   // 권한
-
-    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<History> history;
 
     /**
      * 권한, 가입일시 초기값 설정 메소드

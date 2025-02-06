@@ -1,4 +1,4 @@
-package com.banghyang.object.line.entity;
+package com.banghyang.object.category.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -9,17 +9,15 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Entity
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-public class Line {
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class Category {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id; // 계열 아이디
-
-    private String name; // 계열명
-    private String content; // 계열설명
-    private LocalDateTime timeStamp; // 계열 등록일시
+    private Long id; // 카테고리 아이디
+    private String name; // 카테고리명
+    private LocalDateTime timeStamp; // 카테고리 등록일시
 
     @PrePersist
     protected void onCreate() {
@@ -27,8 +25,7 @@ public class Line {
     }
 
     @Builder
-    public Line(String name, String content) {
+    public Category(String name) {
         this.name = name;
-        this.content = content;
     }
 }

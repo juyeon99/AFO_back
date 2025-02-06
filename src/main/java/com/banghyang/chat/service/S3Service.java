@@ -67,9 +67,7 @@ public class S3Service {
 
     // 파일 이름 생성 메소드
     private String createFileName(String fileName) {
-
         Long currentTime = System.currentTimeMillis();
-
         return currentTime + fileName;
     }
 
