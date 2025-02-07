@@ -5,6 +5,7 @@ import com.banghyang.member.service.MemberService;
 import com.banghyang.object.like.service.LikeService;
 import com.banghyang.object.product.entity.Product;
 import com.banghyang.object.product.service.ProductService;
+import com.banghyang.object.review.dto.ReviewModifyRequest;
 import com.banghyang.object.review.dto.ReviewRequest;
 import com.banghyang.object.review.entity.Review;
 import com.banghyang.object.review.repository.ReviewRepository;
@@ -12,6 +13,8 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @Transactional
@@ -41,6 +44,17 @@ public class ReviewService {
     }
 
     /**
+     * 리뷰 수정 메소드
+     */
+    public void modifyReview(ReviewModifyRequest reviewModifyRequest) {
+        // 수정한 리뷰 찾아오기
+        Review targetReviewEntity = reviewRepository.findById(reviewModifyRequest.getReviewId()).orElseThrow(() ->
+                new EntityNotFoundException("[ReviewService:modifyReview]아이디에 해당하는 리뷰 엔티티를 찾을 수 없습니다."));
+        // request 의 content 값으로 수정할 리뷰 내용 바꾸기
+        targetReviewEntity.modify(reviewModifyRequest.getContent());
+    }
+
+    /**
      * 리뷰 삭제 메소드
      */
     public void deleteReview(Long reviewId) {
@@ -59,5 +73,19 @@ public class ReviewService {
         return reviewRepository.findById(reviewId).orElseThrow(() -> new EntityNotFoundException(
                 "[ReviewService:getReviewById]아이디에 해당하는 리뷰 엔티티를 찾을 수 없습니다."
         ));
+    }
+
+    /**
+     * 제품에 해당하는 모든 리뷰 반환하는 메소드
+     */
+    public List<Review> getReviewByProduct(Product product) {
+        return reviewRepository.findByProduct(product);
+    }
+
+    /**
+     * 요청한 사용자가 작성한 모든 리뷰를 반환하는 메소드
+     */
+    public List<Review> getReviewByMember(Member member) {
+        return reviewRepository.findByMember(member);
     }
 }
