@@ -2,7 +2,7 @@ package com.banghyang.object.review.service;
 
 import com.banghyang.member.entity.Member;
 import com.banghyang.member.service.MemberService;
-import com.banghyang.object.like.service.LikeService;
+import com.banghyang.object.like.service.HeartService;
 import com.banghyang.object.product.entity.Product;
 import com.banghyang.object.product.service.ProductService;
 import com.banghyang.object.review.dto.ReviewModifyRequest;
@@ -24,7 +24,7 @@ public class ReviewService {
     private final ReviewRepository reviewRepository;
     private final MemberService memberService;
     private final ProductService productService;
-    private final LikeService likeService;
+    private final HeartService heartService;
 
     /**
      * 리뷰 생성 메소드
@@ -61,7 +61,7 @@ public class ReviewService {
         // 삭제할 리뷰 엔티티 찾아오기
         Review targetReviewEntity = getReviewById(reviewId);
         // 삭제할 리뷰에 해당하는 좋아요부터 삭제하기
-        likeService.deleteLikesByReview(targetReviewEntity);
+        heartService.deleteLikesByReview(targetReviewEntity);
         // 리뷰 삭제하기
         reviewRepository.delete(targetReviewEntity);
     }

@@ -27,7 +27,7 @@ public class ReviewController {
      */
     @PutMapping
     public ResponseEntity<?> updateReview(@RequestBody ReviewRequest reviewRequest) {
-        reviewService.modifyReview(reviewRequest);
+//        reviewService.modifyReview(reviewRequest);
         return ResponseEntity.ok().build();
     }
 

@@ -1,7 +1,7 @@
 package com.banghyang.object.like.controller;
 
-import com.banghyang.object.like.dto.LikeRequest;
-import com.banghyang.object.like.service.LikeService;
+import com.banghyang.object.like.dto.HeartRequest;
+import com.banghyang.object.like.service.HeartService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -9,16 +9,16 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/likes")
 @RestController
 @RequiredArgsConstructor
-public class LikeController {
+public class HeartController {
 
-    private final LikeService likeService;
+    private final HeartService heartService;
 
     /**
      * 좋아요 생성
      */
     @PostMapping
-    public ResponseEntity<?> createLike(@RequestBody LikeRequest likeRequest) {
-        likeService.createLike(likeRequest);
+    public ResponseEntity<?> createLike(@RequestBody HeartRequest heartRequest) {
+        heartService.createLike(heartRequest);
         return ResponseEntity.ok().build();
     }
 
@@ -27,7 +27,7 @@ public class LikeController {
      */
     @DeleteMapping("/{likeId}")
     public ResponseEntity<?> deleteLike(@PathVariable Long likeId) {
-        likeService.deleteLike(likeId);
+        heartService.deleteLike(likeId);
         return ResponseEntity.ok().build();
     }
 }
