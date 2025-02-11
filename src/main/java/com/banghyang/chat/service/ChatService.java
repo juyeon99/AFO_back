@@ -9,8 +9,8 @@ import com.banghyang.common.type.ChatMode;
 import com.banghyang.common.type.ChatType;
 import com.banghyang.object.product.entity.Product;
 import com.banghyang.object.product.entity.ProductImage;
+import com.banghyang.object.product.repository.ProductImageRepository;
 import com.banghyang.object.product.repository.ProductRepository;
-import com.banghyang.object.product.service.ProductService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -37,11 +37,14 @@ public class ChatService {
     private final WebClient webClient;
     private final S3Service s3Service;
     private final ProductRepository productRepository;
-    private final ProductService productService;
+    private final ProductImageRepository productImageRepository;
 
+    /**
+     * 회원 채팅기록 조회
+     */
     public List<UserResponse> getAllChats(Long memberId) {
         // memberId 에 해당하는 모든 채팅 기록 가져오기
-        List<Chat> chatEntityList = chatRepository.findChatByMemberId(memberId);
+        List<Chat> chatEntityList = chatRepository.findByMemberId(memberId);
         return chatEntityList.stream().map(chatEntity -> {
             UserResponse userResponse = new UserResponse();
             userResponse.setId(chatEntity.getId());
@@ -86,9 +89,10 @@ public class ChatService {
             List<Chat.Recommendation> recommendations = productRecommendationResponse.getRecommendations()
                     .stream().map(aiRecommendation -> {
                         // ai 추천 정보의 아이디로 제품 엔티티 찾아오기
-                        Product targetProduct = productService.getProductById(aiRecommendation.getId());
+                        Product targetProduct = productRepository.findById(aiRecommendation.getId()).orElseThrow(() ->
+                                new EntityNotFoundException("[채팅-서비스-답변]아이디에 해당하는 제품 엔티티를 찾을 수 없습니다."));
                         // 찾아온 제품 정보로 제품 이미지 엔티티 리스트를 가져온 후 URL 만 추출하여 문자열 리스트로 변환
-                        List<String> productImageUrlList = productService.getProductImagesByProduct(targetProduct)
+                        List<String> productImageUrlList = productImageRepository.findByProduct(targetProduct)
                                 .stream().map(ProductImage::getUrl).toList();
                         // 채팅에 저장될 추천 DTO 로 변환하여 반환
                         Chat.Recommendation recommendation = new Chat.Recommendation();
@@ -158,9 +162,11 @@ public class ChatService {
                     List<Chat.Recommendation> recommendations = productRecommendationResponse.getRecommendations()
                             .stream().map(aiRecommendation -> {
                                 // ai 추천 정보의 아이디로 제품 엔티티 찾아오기
-                                Product targetProduct = productService.getProductById(aiRecommendation.getId());
+                                Product targetProduct = productRepository.findById(aiRecommendation.getId())
+                                        .orElseThrow(() -> new EntityNotFoundException(
+                                                "[채팅-서비스-답변]아이디에 해당하는 제품 엔티티를 찾을 수 없습니다."));
                                 // 찾아온 제품 정보로 제품 이미지 엔티티 리스트를 가져온 후 URL 만 추출하여 문자열 리스트로 변환
-                                List<String> productImageUrlList = productService.getProductImagesByProduct(targetProduct)
+                                List<String> productImageUrlList = productImageRepository.findByProduct(targetProduct)
                                         .stream().map(ProductImage::getUrl).toList();
                                 // 채팅에 저장될 추천 DTO 로 변환하여 반환
                                 Chat.Recommendation recommendation = new Chat.Recommendation();

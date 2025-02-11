@@ -20,14 +20,22 @@ public class MemberService {
     /**
      * 멤버 전체 조회 서비스 메소드
      */
-//    public List<MemberResponse> getAllMembers() {
-//        // 멤버 전체 엔티티 리스트에 담기
-//        List<Member> memberList = memberRepository.findAll();
-//
-//        return memberList.stream() // stream 으로 엔티티 리스트 모든 항목에 접근
-//                .map(Mapper::mapMemberEntityToResponse) // 매퍼 클래스의 메소드로 response 로 변환
-//                .toList();
-//    }
+    public List<MemberResponse> getAllMembers() {
+        // 멤버 전체 엔티티 리스트에 담기
+        List<Member> memberList = memberRepository.findAll();
+        // 엔티티 리스트를 response 리스트로 변환
+        return memberList.stream() // stream 으로 엔티티 리스트 모든 항목에 접근
+                .map(member -> { // 엔티티의 회원 정보를  dto 에 담기
+                    MemberResponse memberResponse = new MemberResponse();
+                    memberResponse.setEmail(member.getEmail());
+                    memberResponse.setName(member.getName());
+                    memberResponse.setGender(member.getGender());
+                    memberResponse.setBirthyear(member.getBirthyear());
+                    memberResponse.setRole(member.getRole());
+                    memberResponse.setCreatedAt(member.getCreatedAt());
+                    return memberResponse;
+                }).toList();
+    }
 
     /**
      * 멤버 타입 탈퇴로 변경하는 서비스 메소드

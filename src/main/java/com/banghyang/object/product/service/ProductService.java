@@ -2,7 +2,7 @@ package com.banghyang.object.product.service;
 
 import com.banghyang.common.type.NoteType;
 import com.banghyang.object.note.entity.Note;
-import com.banghyang.object.note.service.NoteService;
+import com.banghyang.object.note.repository.NoteRepository;
 import com.banghyang.object.product.dto.PerfumeResponse;
 import com.banghyang.object.product.dto.ProductCreateRequest;
 import com.banghyang.object.product.dto.ProductModifyRequest;
@@ -11,7 +11,7 @@ import com.banghyang.object.product.entity.ProductImage;
 import com.banghyang.object.product.repository.ProductImageRepository;
 import com.banghyang.object.product.repository.ProductRepository;
 import com.banghyang.object.spice.entity.Spice;
-import com.banghyang.object.spice.service.SpiceService;
+import com.banghyang.object.spice.repository.SpiceRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -30,12 +30,10 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ProductService {
 
-    private final NoteService noteService;
-    private final SpiceService spiceService;
-
     private final ProductRepository productRepository;
     private final ProductImageRepository productImageRepository;
-
+    private final NoteRepository noteRepository;
+    private final SpiceRepository spiceRepository;
 
     /**
      * @return 모든 향수 response 리스트(name 기준 오름차순 정렬)
@@ -49,8 +47,8 @@ public class ProductService {
         return perfumeEntityList.stream().map(perfumeEntity -> {
                     PerfumeResponse perfumeResponse = new PerfumeResponse();
                     perfumeResponse.setId(perfumeEntity.getId()); // 아이디
-                    perfumeResponse.setNameEn(perfumeResponse.getNameEn()); // 영문명
-                    perfumeResponse.setNameKr(perfumeResponse.getNameKr()); // 한글명
+                    perfumeResponse.setNameEn(perfumeEntity.getNameEn()); // 영문명
+                    perfumeResponse.setNameKr(perfumeEntity.getNameKr()); // 한글명
                     perfumeResponse.setBrand(perfumeEntity.getBrand()); // 브랜드
                     perfumeResponse.setGrade(perfumeEntity.getGrade()); // 부향률
                     perfumeResponse.setContent(perfumeEntity.getContent()); // 설명
@@ -66,7 +64,7 @@ public class ProductService {
                     );
 
                     // 노트
-                    List<Note> noteEntityList = noteService.findNoteByProduct(perfumeEntity); // 모든 노트 조회
+                    List<Note> noteEntityList = noteRepository.findByProduct(perfumeEntity); // 모든 노트 조회
                     // 싱글노트
                     perfumeResponse.setSingleNote(
                             noteEntityList.stream()
@@ -139,52 +137,113 @@ public class ProductService {
             // request 에 싱글노트만 존재하고 나머지 노트는 존재하지 않을 때
             productCreateRequest.getSingleNoteList().forEach(spiceNameKr -> {
                 // 향료명으로 향료 엔티티 찾아오기
-                Spice targetSpice = spiceService.findSpiceByNameKr(spiceNameKr);
+                Spice targetSpice = spiceRepository.findByNameKr(spiceNameKr);
                 if (targetSpice != null) {
-                    // 향료 정보가 존재할 때의 처리
-                    noteService.createNote(newProductEntity, targetSpice, NoteType.SINGLE);
+                    // 향료 정보가 존재할 때는 바로 노트 생성 후 저장
+                    Note newNoteEntity = Note.builder()
+                            .product(newProductEntity)
+                            .spice(targetSpice)
+                            .noteType(NoteType.SINGLE)
+                            .build();
+                    noteRepository.save(newNoteEntity);
                 } else {
-                    // 향료 임시 등록 메소드 추가하기
-                    throw new EntityNotFoundException("제품 등록 중 향료 정보를 찾을 수 없습니다. (기능 추가 예정)");
+                    // 향료 임시 등록
+                    Spice newSpiceEntity = Spice.builder()
+                            .nameKr(spiceNameKr)
+                            .build();
+                    spiceRepository.save(newSpiceEntity);
+                    // 임시 생성한 향료 정보로 노트까지 생성
+                    Note newNoteEntity = Note.builder()
+                            .product(newProductEntity)
+                            .spice(newSpiceEntity)
+                            .noteType(NoteType.SINGLE)
+                            .build();
+                    noteRepository.save(newNoteEntity);
                 }
             });
         } else {
-            throw new IllegalArgumentException("싱글 타입과 다른 타입의 노트가 함께 존재할 수 없습니다.");
+            throw new IllegalArgumentException("[제품-서비스-생성]싱글 타입과 다른 타입의 노트가 함께 존재할 수 없습니다.");
         }
         // 나머지 노트 처리
         if (!productCreateRequest.getTopNoteList().isEmpty()) {
             // 탑노트
             productCreateRequest.getTopNoteList().forEach(spiceNameKr -> {
-                Spice targetSpice = spiceService.findSpiceByNameKr(spiceNameKr);
+                Spice targetSpice = spiceRepository.findByNameKr(spiceNameKr);
                 if (targetSpice != null) {
-                    // 향료 정보가 존재할 때의 처리
-                    noteService.createNote(newProductEntity, targetSpice, NoteType.TOP);
+                    // 향료 정보가 존재할 때는 바로 노트 생성 후 저장
+                    Note newNoteEntity = Note.builder()
+                            .product(newProductEntity)
+                            .spice(targetSpice)
+                            .noteType(NoteType.TOP)
+                            .build();
+                    noteRepository.save(newNoteEntity);
                 } else {
-                    // 향료 임시 등록 메소드 추가하기
-                    throw new EntityNotFoundException("제품 등록 중 향료 정보를 찾을 수 없습니다. (기능 추가 예정)");
+                    // 향료 임시 등록
+                    Spice newSpiceEntity = Spice.builder()
+                            .nameKr(spiceNameKr)
+                            .build();
+                    spiceRepository.save(newSpiceEntity);
+                    // 임시 생성한 향료 정보로 노트까지 생성
+                    Note newNoteEntity = Note.builder()
+                            .product(newProductEntity)
+                            .spice(newSpiceEntity)
+                            .noteType(NoteType.TOP)
+                            .build();
+                    noteRepository.save(newNoteEntity);
                 }
             });
         } else if (!productCreateRequest.getMiddleNoteList().isEmpty()) {
             // 미들노트
             productCreateRequest.getMiddleNoteList().forEach(spiceNameKr -> {
-                        Spice targetSpice = spiceService.findSpiceByNameKr(spiceNameKr);
-                        if (targetSpice != null) {
-                            noteService.createNote(newProductEntity, targetSpice, NoteType.MIDDLE);
-                        } else {
-                            // 향료 임시 등록 메소드 추가하기
-                            throw new EntityNotFoundException("제품 등록 중 향료 정보를 찾을 수 없습니다. (기능 추가 예정)");
-                        }
-                    }
-            );
+                Spice targetSpice = spiceRepository.findByNameKr(spiceNameKr);
+                if (targetSpice != null) {
+                    // 향료 정보가 존재할 때는 바로 노트 생성 후 저장
+                    Note newNoteEntity = Note.builder()
+                            .product(newProductEntity)
+                            .spice(targetSpice)
+                            .noteType(NoteType.MIDDLE)
+                            .build();
+                    noteRepository.save(newNoteEntity);
+                } else {
+                    // 향료 임시 등록
+                    Spice newSpiceEntity = Spice.builder()
+                            .nameKr(spiceNameKr)
+                            .build();
+                    spiceRepository.save(newSpiceEntity);
+                    // 임시 생성한 향료 정보로 노트까지 생성
+                    Note newNoteEntity = Note.builder()
+                            .product(newProductEntity)
+                            .spice(newSpiceEntity)
+                            .noteType(NoteType.MIDDLE)
+                            .build();
+                    noteRepository.save(newNoteEntity);
+                }
+            });
         } else if (!productCreateRequest.getBaseNoteList().isEmpty()) {
             // 베이스노트
             productCreateRequest.getBaseNoteList().forEach(spiceNameKr -> {
-                Spice targetSpice = spiceService.findSpiceByNameKr(spiceNameKr);
+                Spice targetSpice = spiceRepository.findByNameKr(spiceNameKr);
                 if (targetSpice != null) {
-                    noteService.createNote(newProductEntity, targetSpice, NoteType.BASE);
+                    // 향료 정보가 존재할 때는 바로 노트 생성 후 저장
+                    Note newNoteEntity = Note.builder()
+                            .product(newProductEntity)
+                            .spice(targetSpice)
+                            .noteType(NoteType.BASE)
+                            .build();
+                    noteRepository.save(newNoteEntity);
                 } else {
-                    // 향료 임시 등록 메소드 추가하기
-                    throw new EntityNotFoundException("제품 등록 중 향료 정보를 찾을 수 없습니다. (기능 추가 예정)");
+                    // 향료 임시 등록
+                    Spice newSpiceEntity = Spice.builder()
+                            .nameKr(spiceNameKr)
+                            .build();
+                    spiceRepository.save(newSpiceEntity);
+                    // 임시 생성한 향료 정보로 노트까지 생성
+                    Note newNoteEntity = Note.builder()
+                            .product(newProductEntity)
+                            .spice(newSpiceEntity)
+                            .noteType(NoteType.BASE)
+                            .build();
+                    noteRepository.save(newNoteEntity);
                 }
             });
         }
@@ -196,8 +255,8 @@ public class ProductService {
     @CacheEvict(value = "products") // 수정 시 마다 캐시데이터 함께 업데이트
     public void modifyProduct(ProductModifyRequest productModifyRequest) {
         // 수정할 제품 엔티티 request 의 id 값으로 찾아오기
-        Product targetProductEntity = productRepository.findById(productModifyRequest.getId())
-                .orElseThrow(() -> new EntityNotFoundException("수정하려는 제품의 정보를 찾을 수 없습니다."));
+        Product targetProductEntity = productRepository.findById(productModifyRequest.getId()).orElseThrow(() ->
+                new EntityNotFoundException("[제품-서비스-수정]아이디에 해당하는 제품 엔티티를 찾을 수 없습니다."));
         // request 정보 담기
         Product modifyProductEntity = Product.builder()
                 .nameEn(productModifyRequest.getNameEn())
@@ -237,7 +296,7 @@ public class ProductService {
         // 기존에 존재하고 request 에도 존재하는 이미지는 별도의 처리없이 그대로 유지
 
         // 전체 노트 찾아오기
-        List<Note> targetNoteEntityList = noteService.findNoteByProduct(targetProductEntity);
+        List<Note> targetNoteEntityList = noteRepository.findByProduct(targetProductEntity);
         // 싱글노트
         if (!productModifyRequest.getSingleNoteSet().isEmpty() &&
                 productModifyRequest.getTopNoteSet().isEmpty() &&
@@ -263,21 +322,37 @@ public class ProductService {
             List<Note> notesToDelete = new ArrayList<>();
             notesToDelete.addAll(singleNotesToDelete); // 리퀘스트에 없는 싱글노트 담기
             notesToDelete.addAll(otherTypeNotesList); // 다른 타입의 노트들 담기
-            noteService.deleteAll(notesToDelete); // 모두 삭제 처리
+            noteRepository.deleteAll(notesToDelete); // 모두 삭제 처리
             // 기존엔 없지만 request 엔 있는 노트 정보 리스트
             productModifyRequest.getSingleNoteSet().stream()
                     .filter(spiceNameKr -> !targetSingleSpiceNameKrSet.contains(spiceNameKr))
                     .forEach(spiceNameKr -> {
-                        Spice targetSpice = spiceService.findSpiceByNameKr(spiceNameKr);
+                        Spice targetSpice = spiceRepository.findByNameKr(spiceNameKr);
                         if (targetSpice != null) {
-                            noteService.createNote(targetProductEntity, targetSpice, NoteType.SINGLE);
+                            // 향료 정보가 존재할 때는 바로 노트 생성 후 저장
+                            Note newNoteEntity = Note.builder()
+                                    .product(targetProductEntity)
+                                    .spice(targetSpice)
+                                    .noteType(NoteType.SINGLE)
+                                    .build();
+                            noteRepository.save(newNoteEntity);
                         } else {
-                            // 향료 임시 등록 메소드 추가하기
-                            throw new EntityNotFoundException("제품 등록 중 향료 정보를 찾을 수 없습니다. (기능 추가 예정)");
+                            // 향료 임시 등록
+                            Spice newSpiceEntity = Spice.builder()
+                                    .nameKr(spiceNameKr)
+                                    .build();
+                            spiceRepository.save(newSpiceEntity);
+                            // 임시 생성한 향료 정보로 노트까지 생성
+                            Note newNoteEntity = Note.builder()
+                                    .product(targetProductEntity)
+                                    .spice(newSpiceEntity)
+                                    .noteType(NoteType.SINGLE)
+                                    .build();
+                            noteRepository.save(newNoteEntity);
                         }
                     });
         } else {
-            throw new IllegalArgumentException("싱글 타입과 다른 타입의 노트가 동시에 존재할 수 없습니다.");
+            throw new IllegalArgumentException("[제품-서비스-수정]싱글 타입과 다른 타입의 노트가 동시에 존재할 수 없습니다.");
         }
         // 나머지 노트 처리
         // 탑노트
@@ -299,24 +374,40 @@ public class ProductService {
                     .toList();
             if (singleNotesToDelete.isEmpty()) {
                 // 기존 싱글노트가 없다면 삭제할 탑노트만 처리
-                noteService.deleteAll(topNotesToDelete);
+                noteRepository.deleteAll(topNotesToDelete);
             } else {
                 // 기존 싱글노트가 존재한다면 함꼐 삭제 처리
                 List<Note> notesToDelete = new ArrayList<>();
                 notesToDelete.addAll(topNotesToDelete);
                 notesToDelete.addAll(singleNotesToDelete);
-                noteService.deleteAll(notesToDelete);
+                noteRepository.deleteAll(notesToDelete);
             }
             // 리퀘스트에는 있지만 기존엔 없는 향료 리스트(추가해야할 노트)
             productModifyRequest.getTopNoteSet().stream()
                     .filter(spiceNameKr -> !targetTopSpiceNameKrSet.contains(spiceNameKr))
                     .forEach(spiceNameKr -> {
-                        Spice targetSpice = spiceService.findSpiceByNameKr(spiceNameKr);
+                        Spice targetSpice = spiceRepository.findByNameKr(spiceNameKr);
                         if (targetSpice != null) {
-                            noteService.createNote(targetProductEntity, targetSpice, NoteType.TOP);
+                            // 향료 정보가 존재할 때는 바로 노트 생성 후 저장
+                            Note newNoteEntity = Note.builder()
+                                    .product(targetProductEntity)
+                                    .spice(targetSpice)
+                                    .noteType(NoteType.TOP)
+                                    .build();
+                            noteRepository.save(newNoteEntity);
                         } else {
-                            // 향료 임시 등록 메소드 추가하기
-                            throw new EntityNotFoundException("제품 등록 중 향료 정보를 찾을 수 없습니다. (기능 추가 예정)");
+                            // 향료 임시 등록
+                            Spice newSpiceEntity = Spice.builder()
+                                    .nameKr(spiceNameKr)
+                                    .build();
+                            spiceRepository.save(newSpiceEntity);
+                            // 임시 생성한 향료 정보로 노트까지 생성
+                            Note newNoteEntity = Note.builder()
+                                    .product(targetProductEntity)
+                                    .spice(newSpiceEntity)
+                                    .noteType(NoteType.TOP)
+                                    .build();
+                            noteRepository.save(newNoteEntity);
                         }
                     });
         }
@@ -339,24 +430,40 @@ public class ProductService {
                     .toList();
             if (singleNotesToDelete.isEmpty()) {
                 // 기존 싱글노트가 없다면 삭제할 미들노트만 처리
-                noteService.deleteAll(middleNotesToDelete);
+                noteRepository.deleteAll(middleNotesToDelete);
             } else {
                 // 기존 싱글노트가 존재한다면 함꼐 삭제 처리
                 List<Note> notesToDelete = new ArrayList<>();
                 notesToDelete.addAll(middleNotesToDelete);
                 notesToDelete.addAll(singleNotesToDelete);
-                noteService.deleteAll(notesToDelete);
+                noteRepository.deleteAll(notesToDelete);
             }
             // 리퀘스트에는 있지만 기존엔 없는 향료 리스트(추가해야할 노트)
             productModifyRequest.getTopNoteSet().stream()
                     .filter(spiceNameKr -> !targetMiddleSpiceNameKrSet.contains(spiceNameKr))
                     .forEach(spiceNameKr -> {
-                        Spice targetSpice = spiceService.findSpiceByNameKr(spiceNameKr);
+                        Spice targetSpice = spiceRepository.findByNameKr(spiceNameKr);
                         if (targetSpice != null) {
-                            noteService.createNote(targetProductEntity, targetSpice, NoteType.MIDDLE);
+                            // 향료 정보가 존재할 때는 바로 노트 생성 후 저장
+                            Note newNoteEntity = Note.builder()
+                                    .product(targetProductEntity)
+                                    .spice(targetSpice)
+                                    .noteType(NoteType.MIDDLE)
+                                    .build();
+                            noteRepository.save(newNoteEntity);
                         } else {
-                            // 향료 임시 등록 메소드 추가하기
-                            throw new EntityNotFoundException("제품 등록 중 향료 정보를 찾을 수 없습니다. (기능 추가 예정)");
+                            // 향료 임시 등록
+                            Spice newSpiceEntity = Spice.builder()
+                                    .nameKr(spiceNameKr)
+                                    .build();
+                            spiceRepository.save(newSpiceEntity);
+                            // 임시 생성한 향료 정보로 노트까지 생성
+                            Note newNoteEntity = Note.builder()
+                                    .product(targetProductEntity)
+                                    .spice(newSpiceEntity)
+                                    .noteType(NoteType.MIDDLE)
+                                    .build();
+                            noteRepository.save(newNoteEntity);
                         }
                     });
         }
@@ -379,24 +486,40 @@ public class ProductService {
                     .toList();
             if (singleNotesToDelete.isEmpty()) {
                 // 기존 싱글노트가 없다면 삭제할 베이스노트만 처리
-                noteService.deleteAll(baseNotesToDelete);
+                noteRepository.deleteAll(baseNotesToDelete);
             } else {
                 // 기존 싱글노트가 존재한다면 함꼐 삭제 처리
                 List<Note> notesToDelete = new ArrayList<>();
                 notesToDelete.addAll(baseNotesToDelete);
                 notesToDelete.addAll(singleNotesToDelete);
-                noteService.deleteAll(notesToDelete);
+                noteRepository.deleteAll(notesToDelete);
             }
             // 리퀘스트에는 있지만 기존엔 없는 향료 리스트(추가해야할 노트)
             productModifyRequest.getTopNoteSet().stream()
                     .filter(spiceNameKr -> !targetBaseSpiceNameKrSet.contains(spiceNameKr))
                     .forEach(spiceNameKr -> {
-                        Spice targetSpice = spiceService.findSpiceByNameKr(spiceNameKr);
+                        Spice targetSpice = spiceRepository.findByNameKr(spiceNameKr);
                         if (targetSpice != null) {
-                            noteService.createNote(targetProductEntity, targetSpice, NoteType.TOP);
+                            // 향료 정보가 존재할 때는 바로 노트 생성 후 저장
+                            Note newNoteEntity = Note.builder()
+                                    .product(targetProductEntity)
+                                    .spice(targetSpice)
+                                    .noteType(NoteType.BASE)
+                                    .build();
+                            noteRepository.save(newNoteEntity);
                         } else {
-                            // 향료 임시 등록 메소드 추가하기
-                            throw new EntityNotFoundException("제품 등록 중 향료 정보를 찾을 수 없습니다. (기능 추가 예정)");
+                            // 향료 임시 등록
+                            Spice newSpiceEntity = Spice.builder()
+                                    .nameKr(spiceNameKr)
+                                    .build();
+                            spiceRepository.save(newSpiceEntity);
+                            // 임시 생성한 향료 정보로 노트까지 생성
+                            Note newNoteEntity = Note.builder()
+                                    .product(targetProductEntity)
+                                    .spice(newSpiceEntity)
+                                    .noteType(NoteType.BASE)
+                                    .build();
+                            noteRepository.save(newNoteEntity);
                         }
                     });
         }
@@ -408,46 +531,15 @@ public class ProductService {
     @CacheEvict(value = "products") // 수정 시 마다 캐시데이터 함께 업데이트
     public void deletePerfume(Long perfumeId) {
         // 삭제할 제품 엔티티
-        Product targetProductEntity = productRepository.findById(perfumeId)
-                .orElseThrow(() -> new EntityNotFoundException(
-                        "[ProductService]삭제하려는 제품의 정보를 찾을 수 업습니다.")
-                );
+        Product targetProductEntity = productRepository.findById(perfumeId).orElseThrow(() ->
+                new EntityNotFoundException("[제품-서비스-삭제]삭제하려는 제품의 정보를 찾을 수 업습니다."));
         // 삭제할 제품 이미지들
         List<ProductImage> imagesToDelete = productImageRepository.findByProduct(targetProductEntity);
         // 삭제할 노트들
-        List<Note> notesToDelete = noteService.findNoteByProduct(targetProductEntity);
+        List<Note> notesToDelete = noteRepository.findByProduct(targetProductEntity);
 
         productImageRepository.deleteAll(imagesToDelete);
-        noteService.deleteAll(notesToDelete);
+        noteRepository.deleteAll(notesToDelete);
         productRepository.delete(targetProductEntity);
-    }
-
-    /**
-     * 아이디로 제품 엔티티 반환
-     */
-    public Product getProductById(Long productId) {
-        return productRepository.findById(productId).orElseThrow(() -> new EntityNotFoundException(
-                "[ProductService:getProductById]아이디에 해당하는 제품 엔티티를 찾을 수 없습니다."
-        ));
-    }
-
-    /**
-     * 한글제품명으로 제품 엔티티 반환
-     */
-    public Product getProductByNameKr(String productNameKr) {
-        Product product = productRepository.findByNameKr(productNameKr);
-        if (product == null) {
-            throw new EntityNotFoundException(
-                    "[ProductService:getProductByNameKr]한글명에 해당하는 제품 엔티티를 찾을 수 없습니다.");
-        } else {
-            return product;
-        }
-    }
-
-    /**
-     * 제품에 해당하는 이미지 반환
-     */
-    public List<ProductImage> getProductImagesByProduct(Product product) {
-        return productImageRepository.findByProduct(product);
     }
 }

@@ -1,19 +1,20 @@
 package com.banghyang.history.service;
 
 import com.banghyang.chat.entity.Chat;
-import com.banghyang.chat.service.ChatService;
+import com.banghyang.chat.repository.ChatRepository;
 import com.banghyang.history.dto.HistoryResponse;
 import com.banghyang.history.entity.History;
 import com.banghyang.history.entity.Recommendation;
 import com.banghyang.history.repository.HistoryRepository;
 import com.banghyang.history.repository.RecommendationRepository;
 import com.banghyang.member.entity.Member;
-import com.banghyang.member.service.MemberService;
+import com.banghyang.member.repository.MemberRepository;
 import com.banghyang.object.line.entity.Line;
-import com.banghyang.object.line.service.LineService;
+import com.banghyang.object.line.repository.LineRepository;
 import com.banghyang.object.product.entity.Product;
 import com.banghyang.object.product.entity.ProductImage;
-import com.banghyang.object.product.service.ProductService;
+import com.banghyang.object.product.repository.ProductImageRepository;
+import com.banghyang.object.product.repository.ProductRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -31,26 +32,29 @@ import java.util.NoSuchElementException;
 @RequiredArgsConstructor
 public class HistoryService {
 
-    private final LineService lineService;
-    private final ChatService chatService;
-    private final MemberService memberService;
-    private final ProductService productService;
-
     private final HistoryRepository historyRepository;
+    private final LineRepository lineRepository;
+    private final ChatRepository chatRepository;
+    private final MemberRepository memberRepository;
+    private final ProductRepository productRepository;
     private final RecommendationRepository recommendationRepository;
+    private final ProductImageRepository productImageRepository;
 
     /**
      * 히스토리 생성
      */
     public void createHistoryByChat(String chatId) {
         // 채팅 아이디로 채팅 정보 가져오기
-        Chat targetChatEntity = chatService.getChatById(chatId);
+        Chat targetChatEntity = chatRepository.findById(chatId).orElseThrow(() ->
+                new EntityNotFoundException("[히스토리-서비스-생성]아이디에 해당하는 채팅 엔티티를 찾을 수 없습니다."));
 
         if (targetChatEntity != null) {
             // 채팅 정보의 회원 아이디로 회원 정보 가져오기
-            Member targetMemberEntity = memberService.getMemberById(targetChatEntity.getMemberId());
+            Member targetMemberEntity = memberRepository.findById(targetChatEntity.getMemberId()).orElseThrow(() ->
+                    new EntityNotFoundException("[히스토리-서비스-생성]아이디에 해당하는 멤버 엔티티를 찾을 수 없습니다."));
             // 채팅 정보의 라인 아이디로 라인 정보 가져오기
-            Line targetLineEntity = lineService.getLineById(targetChatEntity.getLineId());
+            Line targetLineEntity = lineRepository.findById(targetChatEntity.getLineId()).orElseThrow(() ->
+                    new EntityNotFoundException("[히스토리-서비스-생성]아이디에 해당하는 계열 엔티티를 찾을 수 없습니다."));
             // 채팅 정보로 히스토리 생성하기
             History newHistoryEntity = History.builder()
                     .chatId(targetChatEntity.getId())
@@ -61,7 +65,7 @@ public class HistoryService {
 
             // 채팅의 추천 속 향수 정보로 추천 엔티티 생성하기
             targetChatEntity.getRecommendations().forEach(chatRecommendation -> {
-                Product targetProductEntity = productService.getProductByNameKr(chatRecommendation.getProductNameKr());
+                Product targetProductEntity = productRepository.findByNameKr(chatRecommendation.getProductNameKr());
                 Recommendation newRecommendationEntity = Recommendation.builder()
                         .history(newHistoryEntity)
                         .product(targetProductEntity)
@@ -71,7 +75,7 @@ public class HistoryService {
                 recommendationRepository.save(newRecommendationEntity);
             });
         } else {
-            throw new EntityNotFoundException("[History Service] 히스토리 생성중 채팅 정보 조회에 실패했습니다.");
+            throw new EntityNotFoundException("[히스토리-서비스-생성]아이디에 해당하는 채팅 엔티티를 찾을 수 없습니다.");
         }
     }
 
@@ -80,7 +84,8 @@ public class HistoryService {
      */
     public List<HistoryResponse> getMembersHistory(Long memberId) {
         // 조회 신청한 사용자 정보
-        Member targetMemberEntity = memberService.getMemberById(memberId);
+        Member targetMemberEntity = memberRepository.findById(memberId).orElseThrow(() ->
+                new EntityNotFoundException("[히스토리-서비스-조회]아이디에 해당하는 멤버 엔티티를 찾을 수 없습니다."));
         return historyRepository.findByMember(targetMemberEntity).stream() // 사용자에 해당하는 모든 히스토리 조회
                 .map(historyEntity -> {
                     HistoryResponse historyResponse = new HistoryResponse();
@@ -104,11 +109,11 @@ public class HistoryService {
                                         // 추천 제품 부향률 담기
                                         recommendationDto.setProductGrade(recommendationEntity.getProduct().getGrade());
                                         // 추천 제품 이미지 URL 담기
-                                        recommendationDto.setProductImageUrls(productService
-                                                .getProductImagesByProduct(recommendationEntity.getProduct())
-                                                .stream()
-                                                .map(ProductImage::getUrl)
-                                                .toList()
+                                        recommendationDto.setProductImageUrls(
+                                                productImageRepository.findByProduct(recommendationEntity.getProduct())
+                                                        .stream()
+                                                        .map(ProductImage::getUrl)
+                                                        .toList()
                                         );
                                         // 추천 이유 담기
                                         recommendationDto.setReason(recommendationEntity.getReason());
@@ -127,7 +132,7 @@ public class HistoryService {
         // 삭제할 히스토리 정보 찾아오기
         History historyEntity = historyRepository.findById(historyId)
                 .orElseThrow(() -> new NoSuchElementException(
-                        "[HistoryService]삭제하려는 히스토리 정보를 찾을 수 없습니다.")
+                        "[히스토리-서비스-삭제]아이디에 해당하는 히스토리 엔티티를 찾을 수 없습니다.")
                 );
         // 삭제할 추천 정보 찾아오기
         List<Recommendation> recommendationsToDelete = recommendationRepository.findByHistory(historyEntity);
