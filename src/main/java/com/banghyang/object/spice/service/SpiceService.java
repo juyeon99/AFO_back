@@ -90,11 +90,11 @@ public class SpiceService {
                 }
             } else {
                 // 계열 엔티티 찾아오지 못했을 시 예외 발생시키기
-                throw new IllegalArgumentException("입력하신 계열명에 해당하는 계열 정보를 찾을 수 없습니다.");
+                throw new IllegalArgumentException("[향료-서비스-생성]계열명에 해당하는 계열 엔티티를 찾을 수 없습니다.");
             }
         } else {
             // 계열 정보가 존재하지 않는다면 예외 발생시키기
-            throw new IllegalArgumentException("향료 등록에 필요한 계열 정보가 존재하지 않습니다.");
+            throw new IllegalArgumentException("[향료-서비스-생성]향료 등록에 필요한 계열 정보가 존재하지 않습니다.");
         }
     }
 
@@ -103,8 +103,8 @@ public class SpiceService {
      */
     public void modifySpice(SpiceModifyRequest spiceModifyRequest) {
         // 수정할 향료 엔티티 찾아오기
-        Spice targetSpiceEntity = spiceRepository.findById(spiceModifyRequest.getId())
-                .orElseThrow(() -> new EntityNotFoundException("수정하려는 향료의 정보를 찾을 수 없습니다."));
+        Spice targetSpiceEntity = spiceRepository.findById(spiceModifyRequest.getId()).orElseThrow(() ->
+                new EntityNotFoundException("[향료-서비스-수정]아이디에 해당하는 향료 엔티티를 찾을 수 없습니다."));
         // 입력된 계열 이름으로 계열 엔티티 찾아오기
         Line lineEntity = lineRepository.findByName(spiceModifyRequest.getLineName());
         if (lineEntity != null) {
@@ -119,7 +119,7 @@ public class SpiceService {
             // 향료 엔티티 클래스에 만들어둔 수정 메소드로 수정 진행
             targetSpiceEntity.modify(modifySpiceEntity);
         } else {
-            throw new IllegalArgumentException("입력하신 계열명에 해당하는 계열 정보를 찾을 수 없습니다.");
+            throw new IllegalArgumentException("[향료-서비스-수정]계열명에 해당하는 계열 엔티티를 찾을 수 없습니다.");
         }
 
         // 이미지 처리
@@ -156,20 +156,13 @@ public class SpiceService {
      */
     public void deleteSpice(Long spiceId) {
         // 삭제하려는 향료 엔티티 찾아오기
-        Spice targetSpiceEntity = spiceRepository.findById(spiceId)
-                .orElseThrow(() -> new EntityNotFoundException("삭제하려는 향료의 정보를 찾을 수 없습니다."));
+        Spice targetSpiceEntity = spiceRepository.findById(spiceId).orElseThrow(() ->
+                new EntityNotFoundException("[향료-서비스-삭제]아이디에 해당하는 향료 엔티티를 찾을 수 없습니다."));
         // 삭제하려는 향료의 이미지 엔티티 찾아오기
         List<SpiceImage> targetSpiceImageEntityList = spiceImageRepository.findBySpice(targetSpiceEntity);
         // 해당하는 향료 이미지 삭제
         spiceImageRepository.deleteAll(targetSpiceImageEntityList);
         // 해당하는 향료 삭제
         spiceRepository.delete(targetSpiceEntity);
-    }
-
-    /**
-     * 향료 한글명으로 향료 엔티티 찾아서 반환하는 메소드
-     */
-    public Spice findSpiceByNameKr(String spiceNameKr) {
-        return spiceRepository.findByNameKr(spiceNameKr);
     }
 }

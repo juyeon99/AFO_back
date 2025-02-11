@@ -8,4 +8,5 @@ import java.util.List;
 
 public interface HeartRepository extends CrudRepository<Heart, Long> {
     List<Heart> findByReview(Review review);
+    void deleteByReview(Review review);
 }

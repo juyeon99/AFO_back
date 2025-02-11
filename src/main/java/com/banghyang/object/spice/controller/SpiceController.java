@@ -5,6 +5,7 @@ import com.banghyang.object.spice.dto.SpiceModifyRequest;
 import com.banghyang.object.spice.dto.SpiceResponse;
 import com.banghyang.object.spice.service.SpiceService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,6 +14,7 @@ import java.util.List;
 @RequestMapping("/spices")
 @RestController
 @RequiredArgsConstructor
+@Slf4j
 public class SpiceController {
 
     private final SpiceService spiceService;
