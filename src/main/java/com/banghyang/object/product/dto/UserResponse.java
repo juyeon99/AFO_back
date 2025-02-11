@@ -1,5 +1,6 @@
 package com.banghyang.object.product.dto;
 
+import com.banghyang.object.product.entity.ProductImage;
 import lombok.Data;
 
 import java.util.List;
@@ -9,5 +10,6 @@ public class UserResponse {
 
     private List<DiffuserResponse.Recommendation> recommendations;
     private String usageRoutine;
-    private String imageUrl;
+    private List<String> imageUrls;
+
 }

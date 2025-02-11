@@ -9,8 +9,8 @@ import java.util.List;
 public class DiffuserResponse {
 
     private List<Recommendation> recommendations;
+    @JsonProperty("usage_routine")
     private String usageRoutine;
-
 
     @Data
     public static class Recommendation {
@@ -18,8 +18,6 @@ public class DiffuserResponse {
         private long productId;
         private String name;
         private String brand;
-        @JsonProperty("usage_routine")
-        private String usageRoutine;
     }
 
 }

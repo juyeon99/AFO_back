@@ -53,7 +53,7 @@ public class ProductController {
     }
 
     /**
-     * 디퓨저 추천 기능
+     * 테라피 목적 디퓨저 추천 기능
      */
     @PostMapping("/diffuser")
     public ResponseEntity<UserResponse> recommendDiffusers(@RequestBody UserRequest request) {

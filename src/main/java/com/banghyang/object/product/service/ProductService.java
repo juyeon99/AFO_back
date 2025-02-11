@@ -546,11 +546,11 @@ public class ProductService {
         productRepository.delete(targetProductEntity);
     }
 
+    /**
+     * 테라피 목적 디퓨저 추천
+     */
     public UserResponse recommendDiffusers(UserRequest request) {
         try {
-            // FastAPI 서버에서 추천 받기
-            log.info("@@@@@@@@@@@@@@@@추천 받기 전");
-
             DiffuserResponse diffuserResponse = webClient
                     .post()
                     .uri("http://localhost:8000/diffuser/recommend")
@@ -560,29 +560,37 @@ public class ProductService {
                     .bodyToMono(DiffuserResponse.class)
                     .block();
 
-            log.info("FastAPI response: {}", diffuserResponse);  // 응답 내용 확인
+            log.info("FastAPI response: {}", diffuserResponse);
 
             UserResponse userResponse = new UserResponse();
 
-            if (diffuserResponse != null) {
-                // 추천 정보와 사용 방법 설정
+            if (diffuserResponse != null && diffuserResponse.getRecommendations() != null
+                    && !diffuserResponse.getRecommendations().isEmpty()) {
+
                 userResponse.setRecommendations(diffuserResponse.getRecommendations());
                 userResponse.setUsageRoutine(diffuserResponse.getUsageRoutine());
 
-                // 첫 번째 추천 제품의 이미지 URL 설정
-                if (diffuserResponse.getRecommendations() != null && !diffuserResponse.getRecommendations().isEmpty()) {
-                    Product product = productRepository.findById(diffuserResponse.getRecommendations().get(0).getProductId())
-                            .orElseThrow(() -> new RuntimeException("Product not found with id: " +
-                                    diffuserResponse.getRecommendations().get(0).getProductId()));
+                // 모든 추천 제품의 이미지 URL들을 가져오기
+                List<String> imageUrls = new ArrayList<>();
 
-                    userResponse.setImageUrl(
-                            productImageRepository.findByProduct(product).stream()
-                                    .map(ProductImage::getUrl)
-                                    .toList()
-                                    .get(0)
-                    );
+                for (DiffuserResponse.Recommendation recommendation : diffuserResponse.getRecommendations()) {
+                    Product product = productRepository.findById(recommendation.getProductId())
+                            .orElseThrow(() -> new RuntimeException("Product not found with id: " +
+                                    recommendation.getProductId()));
+
+                    List<String> productImageUrls = productImageRepository.findByProduct(product)
+                            .stream()
+                            .map(ProductImage::getUrl)
+                            .toList();
+
+                    if (!productImageUrls.isEmpty()) {
+                        imageUrls.addAll(productImageUrls);
+                    }
                 }
+
+                userResponse.setImageUrls(imageUrls);
             }
+
             return userResponse;
         } catch (Exception e) {
             throw new RuntimeException("디퓨저 추천 처리 중 오류 발생: " + e.getMessage());
