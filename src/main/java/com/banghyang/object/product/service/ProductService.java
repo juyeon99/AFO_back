@@ -3,9 +3,7 @@ package com.banghyang.object.product.service;
 import com.banghyang.common.type.NoteType;
 import com.banghyang.object.note.entity.Note;
 import com.banghyang.object.note.repository.NoteRepository;
-import com.banghyang.object.product.dto.PerfumeResponse;
-import com.banghyang.object.product.dto.ProductCreateRequest;
-import com.banghyang.object.product.dto.ProductModifyRequest;
+import com.banghyang.object.product.dto.*;
 import com.banghyang.object.product.entity.Product;
 import com.banghyang.object.product.entity.ProductImage;
 import com.banghyang.object.product.repository.ProductImageRepository;
@@ -15,9 +13,12 @@ import com.banghyang.object.spice.repository.SpiceRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -28,12 +29,14 @@ import java.util.stream.Collectors;
 @Service
 @Transactional
 @RequiredArgsConstructor
+@Slf4j
 public class ProductService {
 
     private final ProductRepository productRepository;
     private final ProductImageRepository productImageRepository;
     private final NoteRepository noteRepository;
     private final SpiceRepository spiceRepository;
+    private final WebClient webClient;
 
     /**
      * @return 모든 향수 response 리스트(name 기준 오름차순 정렬)
@@ -541,5 +544,48 @@ public class ProductService {
         productImageRepository.deleteAll(imagesToDelete);
         noteRepository.deleteAll(notesToDelete);
         productRepository.delete(targetProductEntity);
+    }
+
+    public UserResponse recommendDiffusers(UserRequest request) {
+        try {
+            // FastAPI 서버에서 추천 받기
+            log.info("@@@@@@@@@@@@@@@@추천 받기 전");
+
+            DiffuserResponse diffuserResponse = webClient
+                    .post()
+                    .uri("http://localhost:8000/diffuser/recommend")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .bodyValue(request)
+                    .retrieve()
+                    .bodyToMono(DiffuserResponse.class)
+                    .block();
+
+            log.info("FastAPI response: {}", diffuserResponse);  // 응답 내용 확인
+
+            UserResponse userResponse = new UserResponse();
+
+            if (diffuserResponse != null) {
+                // 추천 정보와 사용 방법 설정
+                userResponse.setRecommendations(diffuserResponse.getRecommendations());
+                userResponse.setUsageRoutine(diffuserResponse.getUsageRoutine());
+
+                // 첫 번째 추천 제품의 이미지 URL 설정
+                if (diffuserResponse.getRecommendations() != null && !diffuserResponse.getRecommendations().isEmpty()) {
+                    Product product = productRepository.findById(diffuserResponse.getRecommendations().get(0).getProductId())
+                            .orElseThrow(() -> new RuntimeException("Product not found with id: " +
+                                    diffuserResponse.getRecommendations().get(0).getProductId()));
+
+                    userResponse.setImageUrl(
+                            productImageRepository.findByProduct(product).stream()
+                                    .map(ProductImage::getUrl)
+                                    .toList()
+                                    .get(0)
+                    );
+                }
+            }
+            return userResponse;
+        } catch (Exception e) {
+            throw new RuntimeException("디퓨저 추천 처리 중 오류 발생: " + e.getMessage());
+        }
     }
 }

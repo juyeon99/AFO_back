@@ -1,10 +1,9 @@
 package com.banghyang.object.product.controller;
 
-import com.banghyang.object.product.dto.ProductCreateRequest;
-import com.banghyang.object.product.dto.ProductModifyRequest;
-import com.banghyang.object.product.dto.PerfumeResponse;
+import com.banghyang.object.product.dto.*;
 import com.banghyang.object.product.service.ProductService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,6 +12,7 @@ import java.util.List;
 @RequestMapping("/products")
 @RestController
 @RequiredArgsConstructor
+@Slf4j
 public class ProductController {
 
     private final ProductService productService;
@@ -50,5 +50,14 @@ public class ProductController {
     public ResponseEntity<?> deleteProduct(@PathVariable Long productId) {
         productService.deletePerfume(productId);
         return ResponseEntity.ok().build();
+    }
+
+    /**
+     * 디퓨저 추천 기능
+     */
+    @PostMapping("/diffuser")
+    public ResponseEntity<UserResponse> recommendDiffusers(@RequestBody UserRequest request) {
+        log.info("Received diffuser recommendation request: {}", request.getUserInput());
+        return ResponseEntity.ok(productService.recommendDiffusers(request));
     }
 }
