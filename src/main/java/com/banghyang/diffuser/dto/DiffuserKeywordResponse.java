@@ -1,12 +1,11 @@
-package com.banghyang.object.product.dto;
+package com.banghyang.diffuser.dto;
 
-import com.banghyang.object.product.entity.ProductImage;
 import lombok.Data;
 
 import java.util.List;
 
 @Data
-public class UserResponse {
+public class DiffuserKeywordResponse {
 
     private List<DiffuserResponse.Recommendation> recommendations;
     private String usageRoutine;

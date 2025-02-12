@@ -4,7 +4,7 @@ import lombok.Data;
 import org.springframework.web.multipart.MultipartFile;
 
 @Data
-public class UserRequest {
+public class UserChatRequest {
     private Long memberId;
     private String content;
     private MultipartFile image;
