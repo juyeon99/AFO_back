@@ -1,10 +1,10 @@
-package com.banghyang.object.product.dto;
+package com.banghyang.diffuser.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 @Data
-public class UserRequest {
+public class DiffuserKeywordRequest {
 
     @JsonProperty("user_input")
     private String userInput;

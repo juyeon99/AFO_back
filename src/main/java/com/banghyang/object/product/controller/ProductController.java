@@ -51,13 +51,4 @@ public class ProductController {
         productService.deletePerfume(productId);
         return ResponseEntity.ok().build();
     }
-
-    /**
-     * 테라피 목적 디퓨저 추천 기능
-     */
-    @PostMapping("/diffuser")
-    public ResponseEntity<UserResponse> recommendDiffusers(@RequestBody UserRequest request) {
-        log.info("Received diffuser recommendation request: {}", request.getUserInput());
-        return ResponseEntity.ok(productService.recommendDiffusers(request));
-    }
 }

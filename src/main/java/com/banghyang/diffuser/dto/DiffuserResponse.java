@@ -1,4 +1,4 @@
-package com.banghyang.object.product.dto;
+package com.banghyang.diffuser.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;

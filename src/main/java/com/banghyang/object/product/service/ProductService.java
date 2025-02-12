@@ -3,7 +3,9 @@ package com.banghyang.object.product.service;
 import com.banghyang.common.type.NoteType;
 import com.banghyang.object.note.entity.Note;
 import com.banghyang.object.note.repository.NoteRepository;
-import com.banghyang.object.product.dto.*;
+import com.banghyang.object.product.dto.PerfumeResponse;
+import com.banghyang.object.product.dto.ProductCreateRequest;
+import com.banghyang.object.product.dto.ProductModifyRequest;
 import com.banghyang.object.product.entity.Product;
 import com.banghyang.object.product.entity.ProductImage;
 import com.banghyang.object.product.repository.ProductImageRepository;
@@ -16,7 +18,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -544,67 +545,5 @@ public class ProductService {
         productImageRepository.deleteAll(imagesToDelete);
         noteRepository.deleteAll(notesToDelete);
         productRepository.delete(targetProductEntity);
-    }
-
-    /**
-     * 테라피 목적 디퓨저 추천
-     */
-    public UserResponse recommendDiffusers(UserRequest request) {
-        try {
-            // FastAPI 서버에 POST 요청을 보내 디퓨저 추천 정보를 받아옴
-            DiffuserResponse diffuserResponse = webClient
-                    .post()
-                    .uri("http://localhost:8000/diffuser/recommend")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .bodyValue(request)
-                    .retrieve()
-                    .bodyToMono(DiffuserResponse.class)
-                    .block();
-
-            // 받아온 FastAPI 응답 로깅
-            log.info("FastAPI response: {}", diffuserResponse);
-
-            // 클라이언트에게 반환할 응답 객체 생성
-            UserResponse userResponse = new UserResponse();
-
-            // FastAPI로부터 받은 응답이 존재하고, 추천 목록이 비어있지 않은 경우 처리
-            if (diffuserResponse != null && diffuserResponse.getRecommendations() != null
-                    && !diffuserResponse.getRecommendations().isEmpty()) {
-
-                // 추천 정보와 사용 방법을 응답 객체에 설정
-                userResponse.setRecommendations(diffuserResponse.getRecommendations());
-                userResponse.setUsageRoutine(diffuserResponse.getUsageRoutine());
-
-                // 모든 추천 제품의 이미지 URL들을 가져오기
-                List<String> imageUrls = new ArrayList<>();
-
-                // 각 추천 제품에 대한 이미지 URL 수집
-                for (DiffuserResponse.Recommendation recommendation : diffuserResponse.getRecommendations()) {
-                    // 추천된 제품 ID로 제품 정보 조회
-                    Product product = productRepository.findById(recommendation.getProductId())
-                            .orElseThrow(() -> new RuntimeException("Product not found with id: " +
-                                    recommendation.getProductId()));
-
-                    // 해당 제품의 모든 이미지 URL을 추출
-                    List<String> productImageUrls = productImageRepository.findByProduct(product)
-                            .stream()
-                            .map(ProductImage::getUrl)
-                            .toList();
-
-                    // 이미지 URL이 존재하는 경우 전체 URL 리스트에 추가
-                    if (!productImageUrls.isEmpty()) {
-                        imageUrls.addAll(productImageUrls);
-                    }
-                }
-
-                // 수집된 모든 이미지 URL을 응답 객체에 설정
-                userResponse.setImageUrls(imageUrls);
-            }
-
-            return userResponse;
-        } catch (Exception e) {
-            // 처리 중 발생한 모든 예외를 RuntimeException으로 감싸서 던짐
-            throw new RuntimeException("디퓨저 추천 처리 중 오류 발생: " + e.getMessage());
-        }
     }
 }

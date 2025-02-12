@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
-public class UserResponse {
+public class UserChatResponse {
     private String id;
     private Long memberId;
     private ChatMode mode;
