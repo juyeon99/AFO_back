@@ -55,6 +55,7 @@ public class DiffuserKeywordService {
                 // 추천 정보와 사용 방법을 응답 객체에 설정
                 diffuserKeywordResponse.setRecommendations(diffuserResponse.getRecommendations());
                 diffuserKeywordResponse.setUsageRoutine(diffuserResponse.getUsageRoutine());
+                diffuserKeywordResponse.setTherapyTitle(diffuserResponse.getTherapyTitle());
 
                 // 모든 추천 제품의 이미지 URL 들을 가져오기
                 List<String> imageUrls = new ArrayList<>();
