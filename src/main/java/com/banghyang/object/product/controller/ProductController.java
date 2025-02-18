@@ -63,12 +63,4 @@ public class ProductController {
         return ResponseEntity.ok().build();
     }
 
-    /**
-     * 특정 향수의 유사 향수 목록 조회
-     */
-    @GetMapping("/{productId}/similar")
-    public ResponseEntity<Map<String, List<SimilarPerfumeResponse>>> getSimilarPerfumes(@PathVariable Long productId) {
-        return ResponseEntity.ok(similarPerfumeService.getSimilarPerfumes(productId));
-    }
-
 }

@@ -7,6 +7,8 @@ import com.banghyang.object.product.repository.ProductImageRepository;
 import com.banghyang.object.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -20,6 +22,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@EnableCaching
 public class SimilarPerfumeService {
 
     private final ProductRepository productRepository;
@@ -29,6 +32,7 @@ public class SimilarPerfumeService {
     /**
      * 특정 향수의 유사 향수 목록 조회 (FastAPI와 연동)
      */
+    @Cacheable(value = "similarPerfumes", key = "'reviews_' + #productId")
     public Map<String, List<SimilarPerfumeResponse>> getSimilarPerfumes(Long productId) {
         try {
             String url = "http://localhost:8000/similar/" + productId;  // FastAPI 엔드포인트
