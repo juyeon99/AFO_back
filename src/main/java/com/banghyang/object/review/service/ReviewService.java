@@ -7,12 +7,16 @@ import com.banghyang.object.product.entity.Product;
 import com.banghyang.object.product.repository.ProductRepository;
 import com.banghyang.object.review.dto.ReviewModifyRequest;
 import com.banghyang.object.review.dto.ReviewRequest;
+import com.banghyang.object.review.dto.ReviewResponse;
 import com.banghyang.object.review.entity.Review;
 import com.banghyang.object.review.repository.ReviewRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -66,4 +70,21 @@ public class ReviewService {
         // 리뷰 삭제하기
         reviewRepository.delete(targetReviewEntity);
     }
+
+    /**
+     * 특정 향수의 리뷰 목록 조회
+     */
+    public List<ReviewResponse> getReviewsByProductId(Long productId) {
+        // 해당 향수에 대한 리뷰 리스트 조회
+        List<Review> reviews = reviewRepository.findByProductId(productId);
+
+        // 엔티티 리스트를 DTO 리스트로 변환
+        return reviews.stream().map(review -> new ReviewResponse(
+                review.getId(),
+                review.getMember().getName(),
+                review.getContent(),
+                review.getTimeStamp()
+        )).collect(Collectors.toList());
+    }
+
 }
