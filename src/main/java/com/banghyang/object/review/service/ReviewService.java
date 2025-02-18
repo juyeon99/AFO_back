@@ -13,12 +13,17 @@ import com.banghyang.object.review.repository.ReviewRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
+@EnableCaching
 @Transactional
 @RequiredArgsConstructor
 public class ReviewService {
@@ -74,11 +79,16 @@ public class ReviewService {
     /**
      * 특정 향수의 리뷰 목록 조회
      */
+    @Cacheable(value = "productReviews", key = "'product_' + #productId")
     public List<ReviewResponse> getReviewsByProductId(Long productId) {
-        // 해당 향수에 대한 리뷰 리스트 조회
+        log.info("Fetching reviews for productId: {}", productId);
+
+        // 현재 사용 중인 메소드
         List<Review> reviews = reviewRepository.findByProductId(productId);
 
-        // 엔티티 리스트를 DTO 리스트로 변환
+        log.info("Found {} reviews", reviews.size());
+
+        // 2. DTO 변환
         return reviews.stream().map(review -> new ReviewResponse(
                 review.getId(),
                 review.getMember().getName(),

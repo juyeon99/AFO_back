@@ -547,17 +547,14 @@ public class ProductService {
     }
 
     /**
-     * 특정 향수의 유사 향수 + 리뷰 목록 조회
+     * 특정 향수의 유사 향수 조회
      */
     public ProductDetailResponse getProductDetail(Long productId) {
         // 유사 향수 데이터 가져오기 (note_based, design_based)
         Map<String, List<SimilarPerfumeResponse>> similarPerfumes = similarPerfumeService.getSimilarPerfumes(productId);
 
-        // 리뷰 데이터 가져오기
-        List<ReviewResponse> reviews = reviewService.getReviewsByProductId(productId);
-
         // Map 타입 그대로 전달
-        return new ProductDetailResponse(similarPerfumes, reviews);
+        return new ProductDetailResponse(similarPerfumes);
     }
 
 }

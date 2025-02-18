@@ -4,6 +4,7 @@ import com.banghyang.object.review.dto.ReviewRequest;
 import com.banghyang.object.review.dto.ReviewResponse;
 import com.banghyang.object.review.service.ReviewService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,6 +12,7 @@ import java.util.List;
 
 @RequestMapping("/reviews")
 @RestController
+@Slf4j
 @RequiredArgsConstructor
 public class ReviewController {
 

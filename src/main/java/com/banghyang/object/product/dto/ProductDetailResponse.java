@@ -8,10 +8,8 @@ import java.util.Map;
 @Data
 public class ProductDetailResponse {
     private Map<String, List<SimilarPerfumeResponse>> similarPerfumes;
-    private List<ReviewResponse> reviews;
 
-    public ProductDetailResponse(Map<String, List<SimilarPerfumeResponse>> similarPerfumes, List<ReviewResponse> reviews) {
+    public ProductDetailResponse(Map<String, List<SimilarPerfumeResponse>> similarPerfumes) {
         this.similarPerfumes = similarPerfumes;
-        this.reviews = reviews;
     }
 }
