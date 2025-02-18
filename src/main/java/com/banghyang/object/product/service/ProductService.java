@@ -3,13 +3,13 @@ package com.banghyang.object.product.service;
 import com.banghyang.common.type.NoteType;
 import com.banghyang.object.note.entity.Note;
 import com.banghyang.object.note.repository.NoteRepository;
-import com.banghyang.object.product.dto.PerfumeResponse;
-import com.banghyang.object.product.dto.ProductCreateRequest;
-import com.banghyang.object.product.dto.ProductModifyRequest;
+import com.banghyang.object.product.dto.*;
 import com.banghyang.object.product.entity.Product;
 import com.banghyang.object.product.entity.ProductImage;
 import com.banghyang.object.product.repository.ProductImageRepository;
 import com.banghyang.object.product.repository.ProductRepository;
+import com.banghyang.object.review.dto.ReviewResponse;
+import com.banghyang.object.review.service.ReviewService;
 import com.banghyang.object.spice.entity.Spice;
 import com.banghyang.object.spice.repository.SpiceRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -21,10 +21,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -38,6 +35,8 @@ public class ProductService {
     private final NoteRepository noteRepository;
     private final SpiceRepository spiceRepository;
     private final WebClient webClient;
+    private final SimilarPerfumeService similarPerfumeService;
+    private final ReviewService reviewService;
 
     /**
      * @return 모든 향수 response 리스트(name 기준 오름차순 정렬)
@@ -63,7 +62,7 @@ public class ProductService {
                     // 이미지
                     perfumeResponse.setImageUrlList(
                             productImageRepository.findByProduct(perfumeEntity).stream()
-                                    .map(ProductImage::getUrl)
+                                    .map(ProductImage::getNoBgUrl)
                                     .toList()
                     );
 
@@ -546,4 +545,19 @@ public class ProductService {
         noteRepository.deleteAll(notesToDelete);
         productRepository.delete(targetProductEntity);
     }
+
+    /**
+     * 특정 향수의 유사 향수 + 리뷰 목록 조회
+     */
+    public ProductDetailResponse getProductDetail(Long productId) {
+        // 유사 향수 데이터 가져오기 (note_based, design_based)
+        Map<String, List<SimilarPerfumeResponse>> similarPerfumes = similarPerfumeService.getSimilarPerfumes(productId);
+
+        // 리뷰 데이터 가져오기
+        List<ReviewResponse> reviews = reviewService.getReviewsByProductId(productId);
+
+        // Map 타입 그대로 전달
+        return new ProductDetailResponse(similarPerfumes, reviews);
+    }
+
 }

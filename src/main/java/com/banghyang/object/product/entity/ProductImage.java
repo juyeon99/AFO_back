@@ -15,6 +15,7 @@ public class ProductImage {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id; // 제품 이미지 아이디
     private String url; // 제품 이미지 url
+    private String noBgUrl;
 
     @ManyToOne
     @JoinColumn(name = "product_id", nullable = false)
