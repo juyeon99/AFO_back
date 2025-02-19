@@ -4,139 +4,140 @@ import com.banghyang.chat.entity.Chat;
 import com.banghyang.chat.repository.ChatRepository;
 import com.banghyang.history.dto.HistoryResponse;
 import com.banghyang.history.entity.History;
-import com.banghyang.history.entity.Recommendations;
+import com.banghyang.history.entity.Recommendation;
 import com.banghyang.history.repository.HistoryRepository;
+import com.banghyang.history.repository.RecommendationRepository;
+import com.banghyang.member.entity.Member;
+import com.banghyang.member.repository.MemberRepository;
+import com.banghyang.object.line.entity.Line;
+import com.banghyang.object.line.repository.LineRepository;
+import com.banghyang.object.product.entity.Product;
+import com.banghyang.object.product.entity.ProductImage;
+import com.banghyang.object.product.repository.ProductImageRepository;
+import com.banghyang.object.product.repository.ProductRepository;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.stream.Collectors;
 
 /**
  * 채팅 히스토리를 관리하는 서비스 클래스
  * 채팅 내역을 히스토리로 저장하고 조회하는 기능을 제공합니다.
  */
 @Service
-@RequiredArgsConstructor
 @Transactional
+@RequiredArgsConstructor
 public class HistoryService {
 
     private final HistoryRepository historyRepository;
+    private final LineRepository lineRepository;
     private final ChatRepository chatRepository;
+    private final MemberRepository memberRepository;
+    private final ProductRepository productRepository;
+    private final RecommendationRepository recommendationRepository;
+    private final ProductImageRepository productImageRepository;
 
     /**
-     * 채팅 ID를 기반으로 새로운 히스토리를 생성합니다.
-     *
-     * @param chatId 히스토리로 저장할 채팅의 ID
-     * @return 생성된 히스토리의 응답 DTO
+     * 히스토리 생성
      */
-    @Transactional
-    public HistoryResponse createHistory(String chatId) {
-        Chat chat = findChatById(chatId);
-        History history = createHistoryFromChat(chat);
-        History savedHistory = historyRepository.save(history);
-        return convertToHistoryResponse(savedHistory);
+    public void createHistoryByChat(String chatId) {
+        // 채팅 아이디로 채팅 정보 가져오기
+        Chat targetChatEntity = chatRepository.findById(chatId).orElseThrow(() ->
+                new EntityNotFoundException("[히스토리-서비스-생성]아이디에 해당하는 채팅 엔티티를 찾을 수 없습니다."));
+
+        if (targetChatEntity != null) {
+            // 채팅 정보의 회원 아이디로 회원 정보 가져오기
+            Member targetMemberEntity = memberRepository.findById(targetChatEntity.getMemberId()).orElseThrow(() ->
+                    new EntityNotFoundException("[히스토리-서비스-생성]아이디에 해당하는 멤버 엔티티를 찾을 수 없습니다."));
+            // 채팅 정보의 라인 아이디로 라인 정보 가져오기
+            Line targetLineEntity = lineRepository.findById(targetChatEntity.getLineId()).orElseThrow(() ->
+                    new EntityNotFoundException("[히스토리-서비스-생성]아이디에 해당하는 계열 엔티티를 찾을 수 없습니다."));
+            // 채팅 정보로 히스토리 생성하기
+            History newHistoryEntity = History.builder()
+                    .chatId(targetChatEntity.getId())
+                    .line(targetLineEntity)
+                    .member(targetMemberEntity)
+                    .build();
+            historyRepository.save(newHistoryEntity);
+
+            // 채팅의 추천 속 향수 정보로 추천 엔티티 생성하기
+            targetChatEntity.getRecommendations().forEach(chatRecommendation -> {
+                Product targetProductEntity = (Product) productRepository.findByNameKr(chatRecommendation.getProductNameKr());
+                Recommendation newRecommendationEntity = Recommendation.builder()
+                        .history(newHistoryEntity)
+                        .product(targetProductEntity)
+                        .reason(chatRecommendation.getReason())
+                        .situation(chatRecommendation.getSituation())
+                        .build();
+                recommendationRepository.save(newRecommendationEntity);
+            });
+        } else {
+            throw new EntityNotFoundException("[히스토리-서비스-생성]아이디에 해당하는 채팅 엔티티를 찾을 수 없습니다.");
+        }
     }
 
     /**
-     * 채팅 ID로 채팅을 조회합니다.
-     *
-     * @param chatId 조회할 채팅의 ID
-     * @return 조회된 채팅 엔티티
-     * @throws NoSuchElementException 채팅을 찾을 수 없는 경우 발생
+     * 해당 멤버의 모든 히스토리 조회
      */
-    private Chat findChatById(String chatId) {
-        return chatRepository.findById(chatId)
-                .orElseThrow(() -> new NoSuchElementException("채팅을 찾을 수 없습니다."));
-    }
-
-    /**1
-     * 채팅 엔티티로부터 히스토리 엔티티를 생성합니다.
-     *
-     * @param chat 원본 채팅 엔티티
-     * @return 생성된 히스토리 엔티티
-     */
-    private History createHistoryFromChat(Chat chat) {
-        return History.builder()
-                .chatId(chat.getId())
-                .memberId(chat.getMemberId())
-                .type(chat.getType())
-                .imageUrl(chat.getImageUrl())
-                .content(chat.getContent())
-                .mode(chat.getMode())
-                .lineId(chat.getLineId())
-                .recommendations(convertToHistoryRecommendations(chat.getRecommendations()))
-                .timeStamp(chat.getTimeStamp())
-                .build();
-    }
-
-    /**
-     * 채팅의 추천 정보를 히스토리의 추천 정보로 변환합니다.
-     *
-     * @param chatRecommendations 채팅 엔티티의 추천 정보 리스트
-     * @return 히스토리 엔티티의 추천 정보 리스트
-     */
-    private List<Recommendations> convertToHistoryRecommendations(List<Chat.Recommendation> chatRecommendations) {
-        return chatRecommendations.stream()
-                .map(chatRec -> Recommendations.builder()
-                        .perfumeName(chatRec.getPerfumeName())
-                        .perfumeBrand(chatRec.getPerfumeBrand())
-                        .perfumeGrade(chatRec.getPerfumeGrade())
-                        .perfumeImageUrl(chatRec.getPerfumeImageUrl())
-                        .reason(chatRec.getReason())
-                        .situation(chatRec.getSituation())
-                        .build())
-                .collect(Collectors.toList());
+    public List<HistoryResponse> getMembersHistory(Long memberId) {
+        // 조회 신청한 사용자 정보
+        Member targetMemberEntity = memberRepository.findById(memberId).orElseThrow(() ->
+                new EntityNotFoundException("[히스토리-서비스-조회]아이디에 해당하는 멤버 엔티티를 찾을 수 없습니다."));
+        return historyRepository.findByMember(targetMemberEntity).stream() // 사용자에 해당하는 모든 히스토리 조회
+                .map(historyEntity -> {
+                    HistoryResponse historyResponse = new HistoryResponse();
+                    historyResponse.setMemberId(memberId); // 회원 아이디
+                    historyResponse.setId(historyEntity.getId()); // 히스토리 아이디
+                    historyResponse.setChatId(historyEntity.getChatId()); // 채팅 아이디
+                    historyResponse.setLineId(historyEntity.getLine().getId()); // 계열 아이디
+                    historyResponse.setTimeStamp(historyEntity.getTimeStamp()); // 히스토리 생성일시
+                    // 추천 정보 처리
+                    historyResponse.setRecommendations(
+                            // 히스토리에 해당하는 추천정보 가져오기
+                            recommendationRepository.findByHistory(historyEntity).stream()
+                                    .map(recommendationEntity -> {
+                                        // 추천정보 담을 response 생성
+                                        HistoryResponse.RecommendationDto recommendationDto =
+                                                new HistoryResponse.RecommendationDto();
+                                        // 추천 제품 한글명 담기
+                                        recommendationDto.setProductNameKr(recommendationEntity.getProduct().getNameKr());
+                                        // 추천 제품 브랜드 담기
+                                        recommendationDto.setProductBrand(recommendationEntity.getProduct().getBrand());
+                                        // 추천 제품 부향률 담기
+                                        recommendationDto.setProductGrade(recommendationEntity.getProduct().getGrade());
+                                        // 추천 제품 이미지 URL 담기
+                                        recommendationDto.setProductImageUrls(
+                                                productImageRepository.findByProduct(recommendationEntity.getProduct())
+                                                        .stream()
+                                                        .map(ProductImage::getUrl)
+                                                        .toList()
+                                        );
+                                        // 추천 이유 담기
+                                        recommendationDto.setReason(recommendationEntity.getReason());
+                                        // 추천 상황 담기
+                                        recommendationDto.setSituation(recommendationEntity.getSituation());
+                                        return recommendationDto;
+                                    }).toList());
+                    return historyResponse;
+                }).toList();
     }
 
     /**
-     * 히스토리 엔티티를 응답 DTO로 변환합니다.
-     *
-     * @param history 변환할 히스토리 엔티티
-     * @return 변환된 히스토리 응답 DTO
+     * 히스토리 삭제
      */
-    private HistoryResponse convertToHistoryResponse(History history) {
-        return HistoryResponse.builder()
-                .chatId(history.getChatId())
-                .memberId(history.getMemberId())
-                .type(history.getType())
-                .imageUrl(history.getImageUrl())
-                .content(history.getContent())
-                .mode(history.getMode())
-                .lineId(history.getLineId())
-                .timeStamp(history.getTimeStamp())
-                .recommendations(convertToRecommendationDtos(history))
-                .build();
-    }
+    public void deleteHistory(Long historyId) {
+        // 삭제할 히스토리 정보 찾아오기
+        History historyEntity = historyRepository.findById(historyId)
+                .orElseThrow(() -> new NoSuchElementException(
+                        "[히스토리-서비스-삭제]아이디에 해당하는 히스토리 엔티티를 찾을 수 없습니다.")
+                );
+        // 삭제할 추천 정보 찾아오기
+        List<Recommendation> recommendationsToDelete = recommendationRepository.findByHistory(historyEntity);
 
-    /**
-     * 히스토리의 추천 정보를 DTO로 변환합니다.
-     *
-     * @param history 추천 정보를 포함한 히스토리 엔티티
-     * @return 변환된 추천 정보 DTO 리스트
-     */
-    private List<HistoryResponse.RecommendationDto> convertToRecommendationDtos(History history) {
-        return history.getRecommendations().stream()
-                .map(rec -> HistoryResponse.RecommendationDto.builder()
-                        .perfumeName(rec.getPerfumeName())
-                        .perfumeBrand(rec.getPerfumeBrand())
-                        .perfumeGrade(rec.getPerfumeGrade())
-                        .perfumeImageUrl(rec.getPerfumeImageUrl())
-                        .reason(rec.getReason())
-                        .situation(rec.getSituation())
-                        .build())
-                .collect(Collectors.toList());
-    }
-
-    /**
-     * 회원의 카드 히스토리를 조회하는 메서드
-     *
-     * @param memberId 조회할 회원의 ID
-     * @return 시간 역순으로 정렬된 채팅 히스토리 목록
-     */
-    public List<History> getCardHistory(Long memberId) {
-        return historyRepository.findByMemberIdOrderByTimeStampDesc(memberId);
+        recommendationRepository.deleteAll(recommendationsToDelete);
+        historyRepository.delete(historyEntity);
     }
 }

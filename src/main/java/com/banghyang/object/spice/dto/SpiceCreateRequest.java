@@ -2,11 +2,15 @@ package com.banghyang.object.spice.dto;
 
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 public class SpiceCreateRequest {
-    private String name;
+    // 향료 생성 DTO
+    private String nameEn;
     private String nameKr;
-    private String description;
-    private String imageUrl;
+    private String contentEn;
+    private String contentKr;
+    private List<String> imageUrlList;
     private String lineName;
 }

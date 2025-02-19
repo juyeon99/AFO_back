@@ -1,15 +1,17 @@
 package com.banghyang.chat.service;
 
-import com.banghyang.chat.dto.PerfumeRecommendResponse;
-import com.banghyang.chat.dto.UserRequest;
-import com.banghyang.chat.dto.UserResponse;
+import com.banghyang.chat.dto.ProductRecommendationResponse;
+import com.banghyang.chat.dto.UserChatRequest;
+import com.banghyang.chat.dto.UserChatResponse;
 import com.banghyang.chat.entity.Chat;
 import com.banghyang.chat.repository.ChatRepository;
-import com.banghyang.common.mapper.Mapper;
 import com.banghyang.common.type.ChatMode;
 import com.banghyang.common.type.ChatType;
-import com.banghyang.object.perfume.entity.Perfume;
-import com.banghyang.object.perfume.repository.PerfumeRepository;
+import com.banghyang.object.product.entity.Product;
+import com.banghyang.object.product.entity.ProductImage;
+import com.banghyang.object.product.repository.ProductImageRepository;
+import com.banghyang.object.product.repository.ProductRepository;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.ParameterizedTypeReference;
@@ -34,132 +36,151 @@ public class ChatService {
     private final ChatRepository chatRepository;
     private final WebClient webClient;
     private final S3Service s3Service;
-    private final PerfumeRepository perfumeRepository;
+    private final ProductRepository productRepository;
+    private final ProductImageRepository productImageRepository;
 
-    public List<UserResponse> getAllChats(Long memberId) {
+    /**
+     * 회원 채팅기록 조회
+     */
+    public List<UserChatResponse> getAllChats(Long memberId) {
         // memberId 에 해당하는 모든 채팅 기록 가져오기
-        List<Chat> chatEntityList = chatRepository.findChatByMemberId(memberId);
+        List<Chat> chatEntityList = chatRepository.findByMemberId(memberId);
         return chatEntityList.stream().map(chatEntity -> {
-            UserResponse userResponse = new UserResponse();
-            userResponse.setId(chatEntity.getId());
-            userResponse.setMemberId(chatEntity.getMemberId());
-            userResponse.setType(chatEntity.getType());
-            userResponse.setMode(chatEntity.getMode());
-            userResponse.setContent(chatEntity.getContent());
-            userResponse.setLineId(chatEntity.getLineId());
-            userResponse.setImageUrl(chatEntity.getImageUrl());
-            userResponse.setRecommendations(chatEntity.getRecommendations());
-            userResponse.setTimeStamp(chatEntity.getTimeStamp());
-            return userResponse;
+            UserChatResponse userChatResponse = new UserChatResponse();
+            userChatResponse.setId(chatEntity.getId());
+            userChatResponse.setMemberId(chatEntity.getMemberId());
+            userChatResponse.setType(chatEntity.getType());
+            userChatResponse.setMode(chatEntity.getMode());
+            userChatResponse.setContent(chatEntity.getContent());
+            userChatResponse.setLineId(chatEntity.getLineId());
+            userChatResponse.setImageUrl(chatEntity.getImageUrl());
+            userChatResponse.setRecommendations(chatEntity.getRecommendations());
+            userChatResponse.setTimeStamp(chatEntity.getTimeStamp());
+            return userChatResponse;
         }).toList();
     }
 
     /**
      * 유저 채팅에 답변하는 서비스 메소드
      */
-    public UserResponse answerToUserRequest(UserRequest userRequest) {
-        System.out.println(userRequest.toString());
-
-        if (userRequest.getImage() != null) {
+    public UserChatResponse answerToUserRequest(UserChatRequest userChatRequest) {
+        if (userChatRequest.getImage() != null) {
             // 유저가 보낸 이미지가 있을 때의 처리
-            System.out.println("이미지 포함 입력 처리 진입");
-
             // 유저가 입력한 이미지를 S3 에 저장하고 S3 URL 받기
-            String userInputImageS3Url = s3Service.uploadImage(userRequest.getImage());
-            System.out.println("[이미지입력향수]사용자 입력 이미지 저장 S3 url : " + userInputImageS3Url);
+            String userInputImageS3Url = s3Service.uploadImage(userChatRequest.getImage());
 
             // image to text model 로 전송하여 이미지 분석 결과 받기
-            String imageProcessResult = getImageToTextProcessResult(userRequest.getImage());
-            System.out.println("[이미지입력향수]BLIP 모델 이미지 분석 결과 : " + imageProcessResult);
+            String imageProcessResult = getImageToTextProcessResult(userChatRequest.getImage());
 
             // 유저가 보낸 request 를 MongoDB 에 채팅기록으로 저장
             Chat userChat = Chat.builder()
                     .type(ChatType.USER)
-                    .memberId(userRequest.getMemberId())
-                    .content(userRequest.getContent())
+                    .memberId(userChatRequest.getMemberId())
+                    .content(userChatRequest.getContent())
                     .imageUrl(userInputImageS3Url)
                     .build();
             chatRepository.save(userChat);
 
-            // LLM 모델로 전송할 userInput 만들기(유저 입력 텍스트 + 유저 입력 이미지 분석 결과)
-            String userInput = imageProcessResult + " " + userRequest.getContent();
-            System.out.println("[이미지입력향수]LLM 모델로 전송할 최종 userInput : " + userInput);
-
-            //  유저 텍스트 입력값과 이미지 분석 결과를 LLM 모델로 전송하여 향수 추천 받기
-            PerfumeRecommendResponse perfumeRecommendResponse = getPerfumeRecommendFromLLM(userInput);
-            System.out.println("[이미지입력향수]LLM 모델의 향수 추천 답변 내용 : " + perfumeRecommendResponse.toString());
+            //  이미지 분석 결과와 사용자 채팅 내용을 LLM 모델로 전송하여 향수 추천 받기
+            ProductRecommendationResponse productRecommendationResponse = getPerfumeRecommendFromLLM(
+                    imageProcessResult, userChatRequest.getContent());
 
             // 향수 추천 결과의 recommendation -> 채팅기록 저장 엔티티의 recommendation 으로 변환하는 메소드
-            List<Chat.Recommendation> recommendations = mapAiRecommendationsToChatRecommendations(
-                    perfumeRecommendResponse.getRecommendations()
-            );
+            List<Chat.Recommendation> recommendations = productRecommendationResponse.getRecommendations()
+                    .stream().map(aiRecommendation -> {
+                        // ai 추천 정보의 아이디로 제품 엔티티 찾아오기
+                        Product targetProduct = productRepository.findById(aiRecommendation.getId()).orElseThrow(() ->
+                                new EntityNotFoundException("[채팅-서비스-답변]아이디에 해당하는 제품 엔티티를 찾을 수 없습니다."));
+                        // 찾아온 제품 정보로 제품 이미지 엔티티 리스트를 가져온 후 URL 만 추출하여 문자열 리스트로 변환
+                        List<String> productImageUrlList = productImageRepository.findByProduct(targetProduct)
+                                .stream().map(ProductImage::getUrl).toList();
+                        // 채팅에 저장될 추천 DTO 로 변환하여 반환
+                        Chat.Recommendation recommendation = new Chat.Recommendation();
+                        recommendation.setProductNameKr(targetProduct.getNameKr());
+                        recommendation.setProductImageUrls(productImageUrlList);
+                        recommendation.setProductBrand(targetProduct.getBrand());
+                        recommendation.setProductGrade(targetProduct.getGrade());
+                        recommendation.setReason(aiRecommendation.getReason());
+                        recommendation.setSituation(aiRecommendation.getSituation());
+                        return recommendation;
+                    }).toList();
 
             // 유저 텍스트 입력값과 이미지 분석 결과를 LLM 모델로 전송하여 이미지 생성 프롬프트 받기
-            String imageGeneratePrompt = getImageGeneratePromptFromLLM(userInput);
-            System.out.println("[이미지입력향수]LLM 모델이 생성해준 이미지 프롬프트 : " + imageGeneratePrompt);
+            String imageGeneratePrompt = getImageGeneratePromptFromLLM(imageProcessResult, userChatRequest.getContent());
 
             // AI 가 생성한 이미지의 저장경로로 이미지 파일을 가져오고 byte[] 로 형변환하여 반환하는 메소드
             byte[] generatedImageByte = getGeneratedImageByteFromStableDiffusion(imageGeneratePrompt);
-            System.out.println("[이미지입력향수]AI 생성 이미지 byte[] : " + generatedImageByte.length);
 
             // 생성된 byte[] 형식의 이미지를 S3 에 저장하고 S3 URL 받기
             String generatedImageS3Url = s3Service.byteUploadImage(generatedImageByte, "generatedImage");
-            System.out.println("[이미지입력향수]AI 생성 이미지 저장 S3 URL : " + generatedImageS3Url);
 
             // AI API 들에게서 받아온 값으로 AI 채팅 기록 만들어 MongoDB에 저장하기
             Chat aiChat = Chat.builder()
                     .type(ChatType.AI)
-                    .memberId(userRequest.getMemberId())
-                    .content(perfumeRecommendResponse.getContent())
-                    .mode(perfumeRecommendResponse.getMode())
-                    .lineId(perfumeRecommendResponse.getLineId())
+                    .mode(productRecommendationResponse.getMode())
+                    .memberId(userChatRequest.getMemberId())
+                    .content(productRecommendationResponse.getContent())
+                    .lineId(productRecommendationResponse.getLineId())
                     .imageUrl(generatedImageS3Url)
                     .recommendations(recommendations)
                     .build();
             chatRepository.save(aiChat);
 
             // UserResponse 에 생성된 값들 담기
-            UserResponse userResponse = new UserResponse();
-            userResponse.setId(aiChat.getId());
-            userResponse.setMemberId(aiChat.getMemberId());
-            userResponse.setType(aiChat.getType());
-            userResponse.setMode(perfumeRecommendResponse.getMode());
-            userResponse.setContent(perfumeRecommendResponse.getContent());
-            userResponse.setLineId(perfumeRecommendResponse.getLineId());
-            userResponse.setImageUrl(generatedImageS3Url);
-            userResponse.setRecommendations(recommendations);
-            userResponse.setTimeStamp(aiChat.getTimeStamp());
-            System.out.println("[이미지입력향수]사용자에게 보낼 최종 response 값 : " + userResponse.toString());
+            UserChatResponse userChatResponse = new UserChatResponse();
+            userChatResponse.setId(aiChat.getId());
+            userChatResponse.setMemberId(aiChat.getMemberId());
+            userChatResponse.setType(aiChat.getType());
+            userChatResponse.setMode(productRecommendationResponse.getMode());
+            userChatResponse.setContent(productRecommendationResponse.getContent());
+            userChatResponse.setLineId(productRecommendationResponse.getLineId());
+            userChatResponse.setImageUrl(generatedImageS3Url);
+            userChatResponse.setRecommendations(recommendations);
+            userChatResponse.setTimeStamp(aiChat.getTimeStamp());
+
             // 값들 담은 userResponse 반환
-            return userResponse;
+            return userChatResponse;
 
         } else {
             // 이미지 없을 때의 처리
-            System.out.println("이미지 미포함 입력 처리 진입");
-
-            if (userRequest.getContent() != null) { // 이미지는 없지만 텍스트 입력값은 있을 때의 처리
+            if (userChatRequest.getContent() != null) { // 이미지는 없지만 텍스트 입력값은 있을 때의 처리
                 // 유저가 보낸 내용을 MongoDB에 채팅기록으로 저장하기
                 Chat userChat = Chat.builder()
                         .type(ChatType.USER)
-                        .memberId(userRequest.getMemberId())
-                        .content(userRequest.getContent())
+                        .memberId(userChatRequest.getMemberId())
+                        .content(userChatRequest.getContent())
                         .build();
                 chatRepository.save(userChat);
 
                 // 유저 텍스트 입력값을 LLM 모델로 전송하여 향수 추천 받기
-                PerfumeRecommendResponse perfumeRecommendResponse = getPerfumeRecommendFromLLM(
-                        userRequest.getContent()); // 이미지가 없으므로 입력 텍스트값만 LLM 으로 전송
+                ProductRecommendationResponse productRecommendationResponse = getPerfumeRecommendFromLLM(
+                        null, userChatRequest.getContent()); // 이미지가 없으므로 입력 텍스트값만 LLM 으로 전송
 
-
-                if (perfumeRecommendResponse.getMode() == ChatMode.recommendation) {
+                if (productRecommendationResponse.getMode() == ChatMode.recommendation) {
                     // 답변이 추천 모드일 때의 처리
-
                     // 향수 추천 결과의 recommendation -> 채팅기록 저장 엔티티의 recommendation 으로 변환하는 메소드
-                    List<Chat.Recommendation> recommendations = mapAiRecommendationsToChatRecommendations(
-                            perfumeRecommendResponse.getRecommendations());
+                    List<Chat.Recommendation> recommendations = productRecommendationResponse.getRecommendations()
+                            .stream().map(aiRecommendation -> {
+                                // ai 추천 정보의 아이디로 제품 엔티티 찾아오기
+                                Product targetProduct = productRepository.findById(aiRecommendation.getId())
+                                        .orElseThrow(() -> new EntityNotFoundException(
+                                                "[채팅-서비스-답변]아이디에 해당하는 제품 엔티티를 찾을 수 없습니다."));
+                                // 찾아온 제품 정보로 제품 이미지 엔티티 리스트를 가져온 후 URL 만 추출하여 문자열 리스트로 변환
+                                List<String> productImageUrlList = productImageRepository.findByProduct(targetProduct)
+                                        .stream().map(ProductImage::getUrl).toList();
+                                // 채팅에 저장될 추천 DTO 로 변환하여 반환
+                                Chat.Recommendation recommendation = new Chat.Recommendation();
+                                recommendation.setProductNameKr(targetProduct.getNameKr());
+                                recommendation.setProductImageUrls(productImageUrlList);
+                                recommendation.setProductBrand(targetProduct.getBrand());
+                                recommendation.setProductGrade(targetProduct.getGrade());
+                                recommendation.setReason(aiRecommendation.getReason());
+                                recommendation.setSituation(aiRecommendation.getSituation());
+                                return recommendation;
+                            }).toList();
 
                     // 유저 텍스트 입력값을 LLM 모델로 전송하여 이미지 생성 프롬프트 받기
-                    String imageGeneratePrompt = getImageGeneratePromptFromLLM(userRequest.getContent());
+                    String imageGeneratePrompt = getImageGeneratePromptFromLLM(null, userChatRequest.getContent());
 
                     // 이미지 생성 프롬프트를 AI API 로 전송하여 이미지 생성하고 그 이미지를 byte[] 형식으로 받기
                     byte[] generatedImageByte = getGeneratedImageByteFromStableDiffusion(imageGeneratePrompt);
@@ -168,32 +189,31 @@ public class ChatService {
                     String generatedImageS3Url = s3Service.byteUploadImage(
                             generatedImageByte, "generatedImage");
 
-
                     // AI API 들에게서 받아온 값으로 AI 채팅 기록 만들어 MongoDB에 저장하기
                     Chat aiChat = Chat.builder()
                             .type(ChatType.AI)
-                            .mode(perfumeRecommendResponse.getMode())
-                            .memberId(userRequest.getMemberId())
-                            .content(perfumeRecommendResponse.getContent())
-                            .lineId(perfumeRecommendResponse.getLineId())
+                            .mode(productRecommendationResponse.getMode())
+                            .memberId(userChatRequest.getMemberId())
+                            .content(productRecommendationResponse.getContent())
+                            .lineId(productRecommendationResponse.getLineId())
                             .imageUrl(generatedImageS3Url)
                             .recommendations(recommendations)
                             .build();
                     chatRepository.save(aiChat);
 
                     // UserResponse 에 AI 로 생성된 값들 담기
-                    UserResponse userResponse = new UserResponse();
-                    userResponse.setId(aiChat.getId());
-                    userResponse.setType(aiChat.getType());
-                    userResponse.setMemberId(aiChat.getMemberId());
-                    userResponse.setMode(perfumeRecommendResponse.getMode());
-                    userResponse.setContent(perfumeRecommendResponse.getContent());
-                    userResponse.setLineId(perfumeRecommendResponse.getLineId());
-                    userResponse.setImageUrl(generatedImageS3Url);
-                    userResponse.setRecommendations(recommendations);
-                    userResponse.setTimeStamp(aiChat.getTimeStamp());
+                    UserChatResponse userChatResponse = new UserChatResponse();
+                    userChatResponse.setId(aiChat.getId());
+                    userChatResponse.setType(aiChat.getType());
+                    userChatResponse.setMemberId(aiChat.getMemberId());
+                    userChatResponse.setMode(productRecommendationResponse.getMode());
+                    userChatResponse.setContent(productRecommendationResponse.getContent());
+                    userChatResponse.setLineId(productRecommendationResponse.getLineId());
+                    userChatResponse.setImageUrl(generatedImageS3Url);
+                    userChatResponse.setRecommendations(recommendations);
+                    userChatResponse.setTimeStamp(aiChat.getTimeStamp());
                     // 값을 담은 userResponse 반환
-                    return userResponse;
+                    return userChatResponse;
 
                 } else {
                     // 답변이 일반 모드일 때의 처리
@@ -201,22 +221,22 @@ public class ChatService {
 
                     Chat aiChat = Chat.builder()
                             .type(ChatType.AI)
-                            .mode(perfumeRecommendResponse.getMode())
-                            .memberId(userRequest.getMemberId())
-                            .content(userRequest.getContent())
+                            .mode(productRecommendationResponse.getMode())
+                            .memberId(userChatRequest.getMemberId())
+                            .content(productRecommendationResponse.getContent())
                             .build();
                     chatRepository.save(aiChat);
 
                     // UserResponse 에 AI 답변 값들 담기
-                    UserResponse userResponse = new UserResponse();
-                    userResponse.setId(aiChat.getId());
-                    userResponse.setType(aiChat.getType());
-                    userResponse.setMemberId(aiChat.getMemberId());
-                    userResponse.setMode(perfumeRecommendResponse.getMode());
-                    userResponse.setContent(perfumeRecommendResponse.getContent());
-                    userResponse.setTimeStamp(aiChat.getTimeStamp());
+                    UserChatResponse userChatResponse = new UserChatResponse();
+                    userChatResponse.setId(aiChat.getId());
+                    userChatResponse.setType(aiChat.getType());
+                    userChatResponse.setMemberId(aiChat.getMemberId());
+                    userChatResponse.setMode(productRecommendationResponse.getMode());
+                    userChatResponse.setContent(productRecommendationResponse.getContent());
+                    userChatResponse.setTimeStamp(aiChat.getTimeStamp());
                     // 값을 담은 userResponse 반환
-                    return userResponse;
+                    return userChatResponse;
                 }
             } else {
                 throw new IllegalArgumentException("입력한 값이 없습니다.");
@@ -258,11 +278,13 @@ public class ChatService {
     /**
      * webClient 로 LLM API 에 향수 추천 결과 요청하는 메소드
      */
-    private PerfumeRecommendResponse getPerfumeRecommendFromLLM(String userInput) {
+    private ProductRecommendationResponse getPerfumeRecommendFromLLM(
+            String imageProcessResult, String userContent) {
         try {
             // 요청 보낼 리퀘스트 생성
             Map<String, String> request = new LinkedHashMap<>();
-            request.put("user_input", userInput);
+            request.put("image_process_result", imageProcessResult);
+            request.put("user_content", userContent);
 
             return webClient // api 요청에 webClient 사용
                     .post()
@@ -270,7 +292,7 @@ public class ChatService {
                     .contentType(MediaType.APPLICATION_JSON) // Json 형태로 요청 보내기
                     .bodyValue(request) // 요청 body 에 request 담아서 보내기
                     .retrieve()
-                    .bodyToMono(PerfumeRecommendResponse.class)
+                    .bodyToMono(ProductRecommendationResponse.class)
                     .block();
         } catch (Exception e) {
             throw new RuntimeException("LLM 향수 추천 모델 호출 중 에러 발생 : " + e.getMessage());
@@ -280,11 +302,13 @@ public class ChatService {
     /**
      * LLM 에 유저 입력값을 보내서 이미지 생성 프롬프트를 요청하는 메소드
      */
-    private String getImageGeneratePromptFromLLM(String userInput) {
+    private String getImageGeneratePromptFromLLM(
+            String imageProcessResult, String userContent) {
         try {
             // 요청 보낼 리퀘스트 생성
             Map<String, String> request = new LinkedHashMap<>();
-            request.put("user_input", userInput);
+            request.put("user_content", userContent);
+            request.put("image_process_result", imageProcessResult);
 
             Map<String, String> response = webClient // api 요청에 webClient 사용
                     .post()
@@ -338,27 +362,5 @@ public class ChatService {
         } catch (Exception e) {
             throw new RuntimeException("Stable Diffusion 이미지 생성 모델 호출 중 에러 발생 : " + e.getMessage());
         }
-    }
-
-    /**
-     * AI 가 답변해준 추천 중 향수 아이디로 향수 엔티티를 찾아 채팅 기록에 담을 추천 향수 정보로 변환하는 메소드
-     */
-    private List<Chat.Recommendation> mapAiRecommendationsToChatRecommendations(
-            List<PerfumeRecommendResponse.Recommendation> aiRecommendations
-    ) {
-        return aiRecommendations.stream() // stream 으로 AI 의 향수 추천 리스트의 모든 항목에 접근
-                .map(aiRecommendation -> {
-                    // 향수 추천 리스트의 향수 아이디로 향수 엔티티 가져오기
-                    Perfume recommendedPerfumeEntity = perfumeRepository
-                            .findById(Long.valueOf(aiRecommendation.getId()))
-                            .orElseThrow(() -> new RuntimeException(
-                                    "추천된 향수 아이디에 해당하는 향수 정보를 찾을 수 없습니다."));
-
-                    // Mapper 클래스의 향수엔티티 -> 채팅추천정보 변환 매퍼로 정보 담아서 반환
-                    return Mapper.mapPerfumeEntityToChatRecommendation(
-                            recommendedPerfumeEntity
-                            , aiRecommendation.getReason(),
-                            aiRecommendation.getSituation());
-                }).toList(); // 변환한 객체들 리스트로 담아서 반환
     }
 }

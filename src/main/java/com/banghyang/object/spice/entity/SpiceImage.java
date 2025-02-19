@@ -1,6 +1,5 @@
 package com.banghyang.object.spice.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -14,14 +13,13 @@ public class SpiceImage {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long id; // 향료 이미지 아이디
 
-    private String url;
+    private String url; // 향료 이미지 URL
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "spice_id", nullable = false)
-    @JsonIgnore // 순환참조 방지
-    private Spice spice;
+    private Spice spice; // 향료 아이디
 
     @Builder
     public SpiceImage(String url, Spice spice) {

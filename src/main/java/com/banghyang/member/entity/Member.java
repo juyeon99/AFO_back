@@ -1,7 +1,7 @@
 package com.banghyang.member.entity;
 
-import com.banghyang.common.type.MemberRoleType;
 import com.banghyang.auth.kakao.model.dto.OauthId;
+import com.banghyang.common.type.MemberRoleType;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -18,9 +18,7 @@ import java.time.LocalDateTime;
                 columnNames = {
                         "oauth_server_id",
                         "oauth_server"
-                }
-        ),
-})
+                })})
 public class Member {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,7 +32,7 @@ public class Member {
     private String birthyear;           // 촐생연도
     private String gender;              // 성별
     private LocalDateTime createdAt;    // 가입일시
-    private LocalDateTime deletedAt;    // 탈퇴일시
+    private LocalDateTime leavedAt;    // 탈퇴일시
 
     @Enumerated(EnumType.STRING)
     private MemberRoleType role;   // 권한
@@ -55,13 +53,6 @@ public class Member {
 
     /**
      * 회원정보 조회에 필요한 항목들만 포함한 생성자 메소드
-     *
-     * @param name
-     * @param email
-     * @param birthyear
-     * @param gender
-     * @param role
-     * @param createdAt
      */
     @Builder
     public Member(
@@ -78,5 +69,13 @@ public class Member {
         this.gender = gender;
         this.role = role;
         this.createdAt = createdAt;
+    }
+
+    /**
+     * 회원 탈퇴 상태로 바꾸는 메소드
+     */
+    public void setMemberLeave() {
+        this.role = MemberRoleType.LEAVE;
+        this.leavedAt = LocalDateTime.now();
     }
 }

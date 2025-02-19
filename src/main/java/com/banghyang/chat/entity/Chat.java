@@ -21,23 +21,23 @@ public class Chat {
     @Field("type")
     private ChatType type; // 메시지 타입 (USER, AI)
 
+    @Field("mode")
+    private ChatMode mode; // ai 채팅 답변 모드(chat, recommend)
+
     @Field("member_id")
     private Long memberId; // 회원 ID
 
     @Field("content")
     private String content; // 회원 채팅 텍스트 입력값
 
-    @Field("image_url")
-    private String imageUrl; // 회원 채팅 이미지 입력값
-
-    @Field("mode")
-    private ChatMode mode; // ai 채팅 답변 모드(chat, recommend)
+    @Field("recommendations")
+    private List<Recommendation> recommendations; // 향수 추천 내용
 
     @Field("line_id")
     private Long lineId; // 향수 추천 기준 계열 아이디
 
-    @Field("recommendations")
-    private List<Recommendation> recommendations; // 향수 추천 내용
+    @Field("image_url")
+    private String imageUrl; // 회원 채팅 이미지 입력값
 
     @Field("timeStamp")
     @CreatedDate
@@ -45,14 +45,14 @@ public class Chat {
 
     @Data
     public static class Recommendation {
-        @Field("perfume_name")
-        private String perfumeName;
-        @Field("perfume_image_url")
-        private String perfumeImageUrl;
-        @Field("perfume_brand")
-        private String perfumeBrand;
-        @Field("perfume_grade")
-        private String perfumeGrade;
+        @Field("product_name_kr")
+        private String productNameKr;
+        @Field("product_image_url")
+        private List<String> productImageUrls;
+        @Field("product_brand")
+        private String productBrand;
+        @Field("product_grade")
+        private String productGrade;
         @Field("reason")
         private String reason;
         @Field("situation")
