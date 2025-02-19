@@ -21,13 +21,14 @@ public class BookmarkedPerfumeResponse {
 
     /**
      * @param product 북마크된 제품 정보
-     * @param productImageRepository 제품 이미지 리포지토리
      */
-    public BookmarkedPerfumeResponse(Product product, ProductImageRepository productImageRepository) {
+    public BookmarkedPerfumeResponse(Product product, List<String> imageUrls) {
         this.productId = product.getId();
         this.nameKr = product.getNameKr();
         this.brand = product.getBrand();
-        this.imageUrls = extractImageUrls(product, productImageRepository);
+        this.imageUrls = imageUrls.isEmpty()
+                ? List.of("https://sensient-beauty.com/wp-content/uploads/2023/11/Fragrance-Trends-Alcohol-Free.jpg")
+                : imageUrls;
     }
 
     /**

@@ -6,6 +6,7 @@ import com.banghyang.object.bookmark.dto.BookmarkedPerfumeResponse;
 import com.banghyang.object.bookmark.entity.Bookmark;
 import com.banghyang.object.bookmark.repository.BookmarkRepository;
 import com.banghyang.object.product.entity.Product;
+import com.banghyang.object.product.entity.ProductImage;
 import com.banghyang.object.product.repository.ProductImageRepository;
 import com.banghyang.object.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
@@ -36,7 +37,7 @@ public class BookmarkService {
      * @param productId 제품 ID
      * @return 북마크 추가 시 true, 삭제 시 false 반환
      */
-    public boolean toggleBookmark(Long memberId, Long productId) {
+    public boolean toggleBookmark(Long productId ,Long memberId ) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
         Product product = productRepository.findById(productId)
@@ -63,14 +64,23 @@ public class BookmarkService {
      * @return 북마크한 향수 목록 + 유사 향수 추천
      */
     public Map<String, Object> getBookmarkedPerfumes(Long memberId) {
+
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
 
         List<Bookmark> bookmarks = bookmarkRepository.findByMember(member);
 
+
         // 북마크한 향수 리스트
         List<BookmarkedPerfumeResponse> bookmarkedPerfumes = bookmarks.stream()
-                .map(bookmark -> new BookmarkedPerfumeResponse(bookmark.getProduct(), productImageRepository))
+                .map(bookmark -> {
+                    Product product = bookmark.getProduct();
+                    List<String> imageUrls = productImageRepository.findByProduct(product)
+                            .stream()
+                            .map(ProductImage::getUrl)
+                            .toList(); // Java 17+에서는 toList() 사용
+                    return new BookmarkedPerfumeResponse(product, imageUrls);
+                })
                 .toList();
 
         // FastAPI에서 유사 향수 추천 받기
