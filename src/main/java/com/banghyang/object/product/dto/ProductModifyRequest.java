@@ -1,8 +1,7 @@
 package com.banghyang.object.product.dto;
 
 import lombok.Data;
-
-import java.util.Set;
+import java.util.List;
 
 @Data
 public class ProductModifyRequest {
@@ -15,9 +14,9 @@ public class ProductModifyRequest {
     private String sizeOption;
     private String mainAccord;
     private String ingredients;
-    private Set<String> imageUrlSet;
-    private Set<String> singleNoteSet;
-    private Set<String> topNoteSet;
-    private Set<String> middleNoteSet;
-    private Set<String> baseNoteSet;
+    private List<String> topNoteList;
+    private List<String> middleNoteList;
+    private List<String> baseNoteList;
+    private List<String> singleNoteList;
+    private List<String> imageUrlList;
 }

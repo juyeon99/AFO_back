@@ -1,5 +1,6 @@
 package com.banghyang.object.product.dto;
 
+import com.banghyang.object.category.entity.Category;
 import lombok.Data;
 
 import java.util.List;
@@ -19,4 +20,5 @@ public class ProductCreateRequest {
     private List<String> topNoteList;
     private List<String> middleNoteList;
     private List<String> baseNoteList;
+    private Category category;
 }

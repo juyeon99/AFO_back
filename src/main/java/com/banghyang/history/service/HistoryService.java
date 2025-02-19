@@ -65,7 +65,7 @@ public class HistoryService {
 
             // 채팅의 추천 속 향수 정보로 추천 엔티티 생성하기
             targetChatEntity.getRecommendations().forEach(chatRecommendation -> {
-                Product targetProductEntity = productRepository.findByNameKr(chatRecommendation.getProductNameKr());
+                Product targetProductEntity = (Product) productRepository.findByNameKr(chatRecommendation.getProductNameKr());
                 Recommendation newRecommendationEntity = Recommendation.builder()
                         .history(newHistoryEntity)
                         .product(targetProductEntity)
