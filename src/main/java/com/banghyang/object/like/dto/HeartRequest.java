@@ -4,6 +4,6 @@ import lombok.Data;
 
 @Data
 public class HeartRequest {
-    private Long memberId;
+    private Long userId;
     private Long reviewId;
 }
