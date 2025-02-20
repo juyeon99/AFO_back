@@ -10,7 +10,7 @@ import java.util.List;
 public interface ReviewRepository extends CrudRepository<Review, Long> {
     List<Review> findByProduct(Product product);
 
-    List<Review> findByMember(Member member);
+    List<Review> findByMemberId(Long memberId);
 
     List<Review> findByProductId(Long productId);
 }
