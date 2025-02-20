@@ -1,7 +1,7 @@
-package com.banghyang.object.like.controller;
+package com.banghyang.object.heart.controller;
 
-import com.banghyang.object.like.dto.HeartRequest;
-import com.banghyang.object.like.service.HeartService;
+import com.banghyang.object.heart.dto.HeartRequest;
+import com.banghyang.object.heart.service.HeartService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;

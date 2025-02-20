@@ -2,7 +2,7 @@ package com.banghyang.object.review.service;
 
 import com.banghyang.member.entity.Member;
 import com.banghyang.member.repository.MemberRepository;
-import com.banghyang.object.like.repository.HeartRepository;
+import com.banghyang.object.heart.repository.HeartRepository;
 import com.banghyang.object.product.entity.Product;
 import com.banghyang.object.product.repository.ProductRepository;
 import com.banghyang.object.review.dto.MyReviewResponse;

@@ -1,9 +1,9 @@
-package com.banghyang.object.like.service;
+package com.banghyang.object.heart.service;
 
 import com.banghyang.member.entity.Member;
 import com.banghyang.member.repository.MemberRepository;
-import com.banghyang.object.like.entity.Heart;
-import com.banghyang.object.like.repository.HeartRepository;
+import com.banghyang.object.heart.entity.Heart;
+import com.banghyang.object.heart.repository.HeartRepository;
 import com.banghyang.object.review.entity.Review;
 import com.banghyang.object.review.repository.ReviewRepository;
 import jakarta.persistence.EntityNotFoundException;

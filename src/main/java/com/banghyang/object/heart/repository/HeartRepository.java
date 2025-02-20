@@ -1,6 +1,6 @@
-package com.banghyang.object.like.repository;
+package com.banghyang.object.heart.repository;
 
-import com.banghyang.object.like.entity.Heart;
+import com.banghyang.object.heart.entity.Heart;
 import com.banghyang.object.review.entity.Review;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;

@@ -1,4 +1,4 @@
-package com.banghyang.object.like.dto;
+package com.banghyang.object.heart.dto;
 
 import lombok.Data;
 

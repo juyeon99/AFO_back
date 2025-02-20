@@ -1,4 +1,4 @@
-package com.banghyang.object.like.entity;
+package com.banghyang.object.heart.entity;
 
 import com.banghyang.member.entity.Member;
 import com.banghyang.object.review.entity.Review;
