@@ -2,7 +2,8 @@ package com.banghyang.object.review.service;
 
 import com.banghyang.member.entity.Member;
 import com.banghyang.member.repository.MemberRepository;
-import com.banghyang.object.like.repository.HeartRepository;
+import com.banghyang.object.heart.entity.Heart;
+import com.banghyang.object.heart.repository.HeartRepository;
 import com.banghyang.object.product.entity.Product;
 import com.banghyang.object.product.repository.ProductRepository;
 import com.banghyang.object.review.dto.MyReviewResponse;
@@ -81,29 +82,41 @@ public class ReviewService {
      * 특정 향수의 리뷰 목록 조회
      */
     @Cacheable(value = "productReviews", key = "'product_' + #productId")
-    public List<ReviewResponse> getReviewsByProductId(Long productId) {
-        log.info("Fetching reviews for productId: {}", productId);
-
-        // 현재 사용 중인 메소드
+    public List<ReviewResponse> getReviewsByProductId(Long memberId, Long productId) {
+        // 제품에 해당하는 리뷰 찾기
         List<Review> reviews = reviewRepository.findByProductId(productId);
 
-        log.info("Found {} reviews", reviews.size());
+        // 비회원인지 확인
+        boolean isGuest = (memberId == null || memberId <= 0);
 
-        // 2. DTO 변환
-        return reviews.stream().map(review -> new ReviewResponse(
-                review.getId(),
-                review.getMember().getName(),
-                review.getContent(),
-                review.getTimeStamp()
-        )).collect(Collectors.toList());
+        // 현재 사용자 정보 가져오기
+        Member targetMemberEntity = isGuest ? null :
+                memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException(
+                        "[ReviewService-getReviewsByProductId]아이디에 해당하는 멤버 엔티티를 찾을 수 없습니다."));
+
+        // 현재 사용자의 공감 리스트 가져오기
+        List<Heart> memberHeartList = isGuest ? null : heartRepository.findByMember(targetMemberEntity);
+
+        // DTO 로 변환하여 리스트에 담아 반환
+        return reviews.stream().map(review -> {
+            ReviewResponse reviewResponse = new ReviewResponse();
+            reviewResponse.setId(review.getId());
+            reviewResponse.setMemberName(review.getMember().getName());
+            reviewResponse.setContent(review.getContent());
+            // 리뷰에 해당하는 Heart 리스트에 담아 개수 반환
+            reviewResponse.setHeartCount(heartRepository.findByReview(review).size());
+            // 현재 조회할 리뷰가 사용자의 공감리뷰 리스트에 있는지 없는지 비교하여 유무값 담기
+            reviewResponse.setMyHeart(!isGuest && memberHeartList.stream()
+                    .anyMatch(memberHeart -> memberHeart.getReview().getId().equals(review.getId())));
+            reviewResponse.setCreatedAt(review.getTimeStamp());
+            return reviewResponse;
+        }).toList();
     }
 
     /**
      * 특정 회원이 작성한 리뷰 목록 조회
      */
     public List<MyReviewResponse> getReviewsByMemberId(Long memberId) {
-        log.info("Fetching reviews for memberId: {}", memberId);
-
         // 회원 존재 여부 확인
         memberRepository.findById(memberId).orElseThrow(() ->
                 new EntityNotFoundException("[리뷰-서비스-조회]아이디에 해당하는 멤버 엔티티를 찾을 수 없습니다."));

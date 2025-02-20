@@ -1,6 +1,7 @@
 package com.banghyang.object.review.controller;
 
 import com.banghyang.object.review.dto.MyReviewResponse;
+import com.banghyang.object.review.dto.ReviewModifyRequest;
 import com.banghyang.object.review.dto.ReviewRequest;
 import com.banghyang.object.review.dto.ReviewResponse;
 import com.banghyang.object.review.service.ReviewService;
@@ -22,9 +23,10 @@ public class ReviewController {
     /**
      * 특정 향수의 리뷰 목록 조회
      */
-    @GetMapping("/product/{productId}")
-    public ResponseEntity<List<ReviewResponse>> getReviewsByProductId(@PathVariable Long productId) {
-        return ResponseEntity.ok(reviewService.getReviewsByProductId(productId));
+    @GetMapping
+    public ResponseEntity<List<ReviewResponse>> getReviewsByProductId(
+            @RequestParam(required = false) Long memberId, @RequestParam Long productId) {
+        return ResponseEntity.ok(reviewService.getReviewsByProductId(memberId, productId));
     }
 
     /**
@@ -48,8 +50,8 @@ public class ReviewController {
      * 리뷰 수정 메소드
      */
     @PutMapping
-    public ResponseEntity<?> updateReview(@RequestBody ReviewRequest reviewRequest) {
-//        reviewService.modifyReview(reviewRequest);
+    public ResponseEntity<?> updateReview(@RequestBody ReviewModifyRequest request) {
+        reviewService.modifyReview(request);
         return ResponseEntity.ok().build();
     }
 
