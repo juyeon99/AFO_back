@@ -26,7 +26,7 @@ public class BookmarkController {
             @PathVariable Long productId,
             @PathVariable Long memberId 
     ) {
-        boolean isBookmarked = bookmarkService.toggleBookmark(memberId, productId);
+        boolean isBookmarked = bookmarkService.toggleBookmark(productId, memberId);
         return ResponseEntity.ok(Map.of("isBookmarked", isBookmarked));
     }
 
