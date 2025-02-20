@@ -65,7 +65,7 @@ public class ProductService {
                     // 이미지
                     perfumeResponse.setImageUrlList(
                             productImageRepository.findByProduct(perfumeEntity).stream()
-                                    .map(ProductImage::getNoBgUrl)
+                                    .map(ProductImage::getUrl)
                                     .toList()
                     );
 
