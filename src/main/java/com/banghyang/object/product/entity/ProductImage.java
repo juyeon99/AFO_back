@@ -14,8 +14,8 @@ public class ProductImage {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id; // 제품 이미지 아이디
-    private String url; // 제품 이미지 url
-    private String noBgUrl;
+    private String url; // 제품 이미지 URL
+    private String noBgUrl; // 배경 제거 제품 이미지 URL
 
     @ManyToOne
     @JoinColumn(name = "product_id", nullable = false)
@@ -23,14 +23,16 @@ public class ProductImage {
 
     // 빌더
     @Builder
-    public ProductImage(String url, Product product) {
+    public ProductImage(String url, String noBgUrl, Product product) {
         this.product = product;
         this.url = url;
+        this.noBgUrl = noBgUrl;
     }
 
     // 제품 이미지 정보 수정 메소드
     public void modify(ProductImage modifyProductImageEntity) {
         this.product = modifyProductImageEntity.product;
         this.url = modifyProductImageEntity.url;
+        this.noBgUrl = modifyProductImageEntity.noBgUrl;
     }
 }
