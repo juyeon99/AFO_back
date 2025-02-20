@@ -5,6 +5,7 @@ import com.banghyang.member.repository.MemberRepository;
 import com.banghyang.object.like.repository.HeartRepository;
 import com.banghyang.object.product.entity.Product;
 import com.banghyang.object.product.repository.ProductRepository;
+import com.banghyang.object.review.dto.MyReviewResponse;
 import com.banghyang.object.review.dto.ReviewModifyRequest;
 import com.banghyang.object.review.dto.ReviewRequest;
 import com.banghyang.object.review.dto.ReviewResponse;
@@ -92,6 +93,31 @@ public class ReviewService {
         return reviews.stream().map(review -> new ReviewResponse(
                 review.getId(),
                 review.getMember().getName(),
+                review.getContent(),
+                review.getTimeStamp()
+        )).collect(Collectors.toList());
+    }
+
+    /**
+     * 특정 회원이 작성한 리뷰 목록 조회
+     */
+    public List<MyReviewResponse> getReviewsByMemberId(Long memberId) {
+        log.info("Fetching reviews for memberId: {}", memberId);
+
+        // 회원 존재 여부 확인
+        memberRepository.findById(memberId).orElseThrow(() ->
+                new EntityNotFoundException("[리뷰-서비스-조회]아이디에 해당하는 멤버 엔티티를 찾을 수 없습니다."));
+
+        // 특정 회원이 작성한 리뷰 목록 조회
+        List<Review> reviews = reviewRepository.findByMemberId(memberId);
+
+        log.info("Found {} reviews for member", reviews.size());
+
+        // DTO 변환
+        return reviews.stream().map(review -> new MyReviewResponse(
+                review.getId(),
+                review.getMember().getName(),
+                review.getProduct().getId(),
                 review.getContent(),
                 review.getTimeStamp()
         )).collect(Collectors.toList());
