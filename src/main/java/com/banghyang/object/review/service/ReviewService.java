@@ -18,9 +18,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -34,6 +39,7 @@ public class ReviewService {
     private final MemberRepository memberRepository;
     private final ProductRepository productRepository;
     private final HeartRepository heartRepository;
+    private final WebClient webClient;
 
     /**
      * 리뷰 생성 메소드
@@ -136,4 +142,37 @@ public class ReviewService {
         )).collect(Collectors.toList());
     }
 
+    /**
+     * 제품 리뷰 요약 조회
+     */
+    public String getReviewSummary(Long productId) {
+        // 제품 아이디로 제품 찾아오기
+        Product targetProduct = productRepository.findById(productId).orElseThrow(() ->
+                new EntityNotFoundException("[ReviewService-getReviewSummary]아이디에 해당하는 제품을 찾을 수 없습니다."));
+        // 제품에 해당하는 리뷰 찾아오기
+        List<Review> targetReviewList = reviewRepository.findByProduct(targetProduct);
+        // 리뷰가 있을때에만 리뷰 요약 진행
+        if (targetReviewList.isEmpty()) {
+            return "사용자 리뷰가 없습니다.";
+        } else {
+            try {
+                Map<String, String> response = webClient // api 요청에 webClient 사용
+                        .post()
+                        .uri("http://localhost:8000/review/product/" + productId + "/summary") // 요청 보낼 url
+                        .contentType(MediaType.APPLICATION_JSON) // Json 타입으로 요청 보내기
+                        .retrieve()
+                        .bodyToMono(new ParameterizedTypeReference<Map<String, String>>() {
+                        }) // Json 응답을 Map 형식으로 파싱하여 받기
+                        .block(); // 동기 처리
+                if (response != null) {
+                    // Map 으로 파싱해놓은 응답에서 키값으로 밸류만 반환
+                    return response.get("summary");
+                } else {
+                    return null;
+                }
+            } catch (Exception e) {
+                throw new RuntimeException("[ReviewService-getReviewSummary] : " + e.getMessage());
+            }
+        }
+    }
 }
