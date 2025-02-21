@@ -3,6 +3,7 @@ package com.banghyang.chat.service;
 import com.banghyang.chat.dto.ProductRecommendationResponse;
 import com.banghyang.chat.dto.UserChatRequest;
 import com.banghyang.chat.dto.UserChatResponse;
+import com.banghyang.chat.dto.WrappedProductRecommendationResponse;
 import com.banghyang.chat.entity.Chat;
 import com.banghyang.chat.repository.ChatRepository;
 import com.banghyang.common.type.ChatMode;
@@ -14,6 +15,7 @@ import com.banghyang.object.product.repository.ProductRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -28,6 +30,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -50,6 +53,7 @@ public class ChatService {
             userChatResponse.setId(chatEntity.getId());
             userChatResponse.setMemberId(chatEntity.getMemberId());
             userChatResponse.setType(chatEntity.getType());
+            userChatResponse.setRecommendationType(chatEntity.getRecommendationType());
             userChatResponse.setMode(chatEntity.getMode());
             userChatResponse.setContent(chatEntity.getContent());
             userChatResponse.setLineId(chatEntity.getLineId());
@@ -65,6 +69,8 @@ public class ChatService {
      */
     public UserChatResponse answerToUserRequest(UserChatRequest userChatRequest) {
         if (userChatRequest.getImage() != null) {
+            log.info("패션 사진 기반 추천 / 인테리어 사진 기반 추천 모드");
+
             // 유저가 보낸 이미지가 있을 때의 처리
             // 유저가 입력한 이미지를 S3 에 저장하고 S3 URL 받기
             String userInputImageS3Url = s3Service.uploadImage(userChatRequest.getImage());
@@ -82,7 +88,7 @@ public class ChatService {
             chatRepository.save(userChat);
 
             //  이미지 분석 결과와 사용자 채팅 내용을 LLM 모델로 전송하여 향수 추천 받기
-            ProductRecommendationResponse productRecommendationResponse = getPerfumeRecommendFromLLM(
+            ProductRecommendationResponse productRecommendationResponse = getProductRecommendFromLLM(
                     imageProcessResult, userChatRequest.getContent());
 
             // 향수 추천 결과의 recommendation -> 채팅기록 저장 엔티티의 recommendation 으로 변환하는 메소드
@@ -106,10 +112,10 @@ public class ChatService {
                     }).toList();
 
             // 유저 텍스트 입력값과 이미지 분석 결과를 LLM 모델로 전송하여 이미지 생성 프롬프트 받기
-            String imageGeneratePrompt = getImageGeneratePromptFromLLM(imageProcessResult, userChatRequest.getContent());
+//            String imageGeneratePrompt = getImageGeneratePromptFromLLM(imageProcessResult, userChatRequest.getContent());
 
             // AI 가 생성한 이미지의 저장경로로 이미지 파일을 가져오고 byte[] 로 형변환하여 반환하는 메소드
-            byte[] generatedImageByte = getGeneratedImageByteFromStableDiffusion(imageGeneratePrompt);
+            byte[] generatedImageByte = getGeneratedImageByteFromStableDiffusion(productRecommendationResponse.getImage_path());
 
             // 생성된 byte[] 형식의 이미지를 S3 에 저장하고 S3 URL 받기
             String generatedImageS3Url = s3Service.byteUploadImage(generatedImageByte, "generatedImage");
@@ -119,8 +125,9 @@ public class ChatService {
                     .type(ChatType.AI)
                     .mode(productRecommendationResponse.getMode())
                     .memberId(userChatRequest.getMemberId())
+                    .recommendationType(productRecommendationResponse.getRecommendation_type())
                     .content(productRecommendationResponse.getContent())
-                    .lineId(productRecommendationResponse.getLineId())
+                    .lineId(productRecommendationResponse.getLine_id())
                     .imageUrl(generatedImageS3Url)
                     .recommendations(recommendations)
                     .build();
@@ -131,9 +138,10 @@ public class ChatService {
             userChatResponse.setId(aiChat.getId());
             userChatResponse.setMemberId(aiChat.getMemberId());
             userChatResponse.setType(aiChat.getType());
+            userChatResponse.setRecommendationType(productRecommendationResponse.getRecommendation_type());
             userChatResponse.setMode(productRecommendationResponse.getMode());
             userChatResponse.setContent(productRecommendationResponse.getContent());
-            userChatResponse.setLineId(productRecommendationResponse.getLineId());
+            userChatResponse.setLineId(productRecommendationResponse.getLine_id());
             userChatResponse.setImageUrl(generatedImageS3Url);
             userChatResponse.setRecommendations(recommendations);
             userChatResponse.setTimeStamp(aiChat.getTimeStamp());
@@ -153,11 +161,13 @@ public class ChatService {
                 chatRepository.save(userChat);
 
                 // 유저 텍스트 입력값을 LLM 모델로 전송하여 향수 추천 받기
-                ProductRecommendationResponse productRecommendationResponse = getPerfumeRecommendFromLLM(
+                ProductRecommendationResponse productRecommendationResponse = getProductRecommendFromLLM(
                         null, userChatRequest.getContent()); // 이미지가 없으므로 입력 텍스트값만 LLM 으로 전송
 
                 if (productRecommendationResponse.getMode() == ChatMode.recommendation) {
                     // 답변이 추천 모드일 때의 처리
+                    log.info("일반 추천 / 테라피 목적 추천 모드");
+
                     // 향수 추천 결과의 recommendation -> 채팅기록 저장 엔티티의 recommendation 으로 변환하는 메소드
                     List<Chat.Recommendation> recommendations = productRecommendationResponse.getRecommendations()
                             .stream().map(aiRecommendation -> {
@@ -180,10 +190,10 @@ public class ChatService {
                             }).toList();
 
                     // 유저 텍스트 입력값을 LLM 모델로 전송하여 이미지 생성 프롬프트 받기
-                    String imageGeneratePrompt = getImageGeneratePromptFromLLM(null, userChatRequest.getContent());
+//                    String imageGeneratePrompt = getImageGeneratePromptFromLLM(null, userChatRequest.getContent());
 
                     // 이미지 생성 프롬프트를 AI API 로 전송하여 이미지 생성하고 그 이미지를 byte[] 형식으로 받기
-                    byte[] generatedImageByte = getGeneratedImageByteFromStableDiffusion(imageGeneratePrompt);
+                    byte[] generatedImageByte = getGeneratedImageByteFromStableDiffusion(productRecommendationResponse.getImage_path());
 
                     // 생성된 byte[] 형식의 이미지를 S3 에 저장하고 S3 URL 받기
                     String generatedImageS3Url = s3Service.byteUploadImage(
@@ -194,8 +204,9 @@ public class ChatService {
                             .type(ChatType.AI)
                             .mode(productRecommendationResponse.getMode())
                             .memberId(userChatRequest.getMemberId())
+                            .recommendationType(productRecommendationResponse.getRecommendation_type())
                             .content(productRecommendationResponse.getContent())
-                            .lineId(productRecommendationResponse.getLineId())
+                            .lineId(productRecommendationResponse.getLine_id())
                             .imageUrl(generatedImageS3Url)
                             .recommendations(recommendations)
                             .build();
@@ -206,9 +217,10 @@ public class ChatService {
                     userChatResponse.setId(aiChat.getId());
                     userChatResponse.setType(aiChat.getType());
                     userChatResponse.setMemberId(aiChat.getMemberId());
+                    userChatResponse.setRecommendationType(productRecommendationResponse.getRecommendation_type());
                     userChatResponse.setMode(productRecommendationResponse.getMode());
                     userChatResponse.setContent(productRecommendationResponse.getContent());
-                    userChatResponse.setLineId(productRecommendationResponse.getLineId());
+                    userChatResponse.setLineId(productRecommendationResponse.getLine_id());
                     userChatResponse.setImageUrl(generatedImageS3Url);
                     userChatResponse.setRecommendations(recommendations);
                     userChatResponse.setTimeStamp(aiChat.getTimeStamp());
@@ -217,7 +229,7 @@ public class ChatService {
 
                 } else {
                     // 답변이 일반 모드일 때의 처리
-                    System.out.println("일반 답변 모드 진입");
+                    log.info("일반 대화 모드");
 
                     Chat aiChat = Chat.builder()
                             .type(ChatType.AI)
@@ -234,6 +246,7 @@ public class ChatService {
                     userChatResponse.setMemberId(aiChat.getMemberId());
                     userChatResponse.setMode(productRecommendationResponse.getMode());
                     userChatResponse.setContent(productRecommendationResponse.getContent());
+                    userChatResponse.setRecommendationType(productRecommendationResponse.getRecommendation_type());
                     userChatResponse.setTimeStamp(aiChat.getTimeStamp());
                     // 값을 담은 userResponse 반환
                     return userChatResponse;
@@ -245,7 +258,7 @@ public class ChatService {
     }
 
     /**
-     * 이미지에 대한 설명을 반환해주는 BLIP 모델에 API 요청을 보내는 메소드
+     * 이미지에 대한 설명을 반환해주는 Florence 모델에 API 요청을 보내는 메소드
      */
     private String getImageToTextProcessResult(MultipartFile image) {
         try {
@@ -264,6 +277,7 @@ public class ChatService {
                     .bodyToMono(new ParameterizedTypeReference<Map<String, String>>() {
                     }) // Json 응답을 Map 형태로 파싱하여 받기
                     .block(); // 동기적으로 처리
+
             if (response != null) {
                 // Map 에서 키값으로 해당 밸류 반환
                 return response.get("imageProcessResult");
@@ -271,14 +285,14 @@ public class ChatService {
                 throw new IllegalArgumentException("이미지 설명 추출을 실패했습니다.");
             }
         } catch (Exception e) {
-            throw new RuntimeException("BLIP 모델 호출 중 에러 발생 : " + e.getMessage());
+            throw new RuntimeException("이미지 생성 모델 호출 중 에러 발생 : " + e.getMessage());
         }
     }
 
     /**
      * webClient 로 LLM API 에 향수 추천 결과 요청하는 메소드
      */
-    private ProductRecommendationResponse getPerfumeRecommendFromLLM(
+    private ProductRecommendationResponse getProductRecommendFromLLM(
             String imageProcessResult, String userContent) {
         try {
             // 요청 보낼 리퀘스트 생성
@@ -286,14 +300,16 @@ public class ChatService {
             request.put("image_process_result", imageProcessResult);
             request.put("user_content", userContent);
 
-            return webClient // api 요청에 webClient 사용
+            WrappedProductRecommendationResponse wrappedResponse = webClient
                     .post()
-                    .uri("http://localhost:8000/llm/process-input") // 향수 추천 api 요청 url
-                    .contentType(MediaType.APPLICATION_JSON) // Json 형태로 요청 보내기
-                    .bodyValue(request) // 요청 body 에 request 담아서 보내기
+                    .uri("http://localhost:8000/product/recommend")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .bodyValue(request)
                     .retrieve()
-                    .bodyToMono(ProductRecommendationResponse.class)
+                    .bodyToMono(WrappedProductRecommendationResponse.class)
                     .block();
+
+            return wrappedResponse != null ? wrappedResponse.getResponse() : null;
         } catch (Exception e) {
             throw new RuntimeException("LLM 향수 추천 모델 호출 중 에러 발생 : " + e.getMessage());
         }
@@ -331,34 +347,29 @@ public class ChatService {
     }
 
     /**
-     * Stable Diffusion API 에 이미지 생성 프롬프트를 전달하여 이미지를 생성하고 저장하면, 저장한 경로를 받아오는 메소드
+     * 이미지 path를 전달하여 저장한 이미지를 byte array로 받아오는 메소드
      */
-    private byte[] getGeneratedImageByteFromStableDiffusion(String imageGeneratePrompt) {
+//    private byte[] getGeneratedImageByteFromStableDiffusion(String imagePath) {
+    public byte[] getGeneratedImageByteFromStableDiffusion(String imagePath) {
         try {
             // 요청 보낼 리퀘스트 생성
             Map<String, String> request = new LinkedHashMap<>();
-            request.put("imageGeneratePrompt", imageGeneratePrompt);
+            request.put("imagePath", imagePath);
 
-            Map<String, String> response = webClient // api 요청에 webClient 사용
+            byte[] imageBytes = webClient
                     .post()
-                    .uri("http://localhost:8000/image-generation/generate-image") // 요청 보낼 url
+                    .uri("http://localhost:8000/fetch-image-bytes/get-image")  // API URL
                     .contentType(MediaType.APPLICATION_JSON)
-                    .bodyValue(request) // 요청 body 에 이미지 생성 프롬프트 담기
+                    .bodyValue(request)
                     .retrieve()
-                    .bodyToMono(new ParameterizedTypeReference<Map<String, String>>() {
-                    }) // 이미지 경로 String 값으로 받기
+                    .bodyToMono(byte[].class)  // Directly fetch the byte array
                     .block();
 
-            if (response != null) {
-                File file = new File(response.get("path"));
-                if (!file.exists() || !file.isFile()) {
-                    throw new RuntimeException("파일이 존재하지 않거나 올바르지 않은 경로입니다.");
-                } else {
-                    return Files.readAllBytes(file.toPath());
-                }
-            } else {
-                throw new RuntimeException("AI 이미지 파일 경로 획득을 실패했습니다");
+            if (imageBytes == null || imageBytes.length == 0) {
+                throw new RuntimeException("Failed to retrieve image data.");
             }
+
+            return imageBytes;
         } catch (Exception e) {
             throw new RuntimeException("Stable Diffusion 이미지 생성 모델 호출 중 에러 발생 : " + e.getMessage());
         }
