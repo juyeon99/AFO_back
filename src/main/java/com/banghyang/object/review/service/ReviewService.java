@@ -130,7 +130,7 @@ public class ReviewService {
         return reviews.stream().map(review -> new MyReviewResponse(
                 review.getId(),
                 review.getMember().getName(),
-                review.getProduct().getId(),
+                review.getProduct().getNameKr(),
                 review.getContent(),
                 review.getTimeStamp()
         )).collect(Collectors.toList());

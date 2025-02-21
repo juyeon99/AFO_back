@@ -10,7 +10,6 @@ import com.banghyang.object.product.entity.Product;
 import com.banghyang.object.product.entity.ProductImage;
 import com.banghyang.object.product.repository.ProductImageRepository;
 import com.banghyang.object.product.repository.ProductRepository;
-import com.banghyang.object.review.dto.ReviewResponse;
 import com.banghyang.object.review.service.ReviewService;
 import com.banghyang.object.spice.entity.Spice;
 import com.banghyang.object.spice.repository.SpiceRepository;
@@ -65,8 +64,15 @@ public class ProductService {
                     // 이미지
                     perfumeResponse.setImageUrlList(
                             productImageRepository.findByProduct(perfumeEntity).stream()
-                                    .map(ProductImage::getUrl)
-                                    .toList()
+                                    .map(productImage -> {
+                                        if (productImage.getNoBgUrl() != null) {
+                                            // 배경제거 이미지가 있으면 배경 제거 이미지 URL 로 반환
+                                            return productImage.getNoBgUrl();
+                                        } else {
+                                            // 배경제거 이미지가 없으면 기존 이미지로 반환
+                                            return productImage.getUrl();
+                                        }
+                                    }).toList()
                     );
 
                     // 노트
@@ -183,6 +189,7 @@ public class ProductService {
      */
     private void processNoteForSingle(String spiceNameKr, Product newProductEntity) {
         Spice targetSpice = spiceRepository.findByNameKr(spiceNameKr);
+
         if (targetSpice != null) {
             createAndSaveNote(newProductEntity, targetSpice, NoteType.SINGLE);
         } else {
@@ -195,9 +202,14 @@ public class ProductService {
      * 탑, 미들, 베이스 노트를 처리하는 메소드
      */
     private void processOtherNotes(ProductCreateRequest productCreateRequest, Product newProductEntity) {
-        productCreateRequest.getTopNoteList().forEach(spiceNameKr -> processNote(spiceNameKr, newProductEntity, NoteType.TOP));
-        productCreateRequest.getMiddleNoteList().forEach(spiceNameKr -> processNote(spiceNameKr, newProductEntity, NoteType.MIDDLE));
-        productCreateRequest.getBaseNoteList().forEach(spiceNameKr -> processNote(spiceNameKr, newProductEntity, NoteType.BASE));
+        productCreateRequest.getTopNoteList().forEach(spiceNameKr ->
+                processNote(spiceNameKr, newProductEntity, NoteType.TOP));
+
+        productCreateRequest.getMiddleNoteList().forEach(spiceNameKr ->
+                processNote(spiceNameKr, newProductEntity, NoteType.MIDDLE));
+
+        productCreateRequest.getBaseNoteList().forEach(spiceNameKr ->
+                processNote(spiceNameKr, newProductEntity, NoteType.BASE));
     }
 
     /**
