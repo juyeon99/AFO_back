@@ -16,6 +16,7 @@ public class UserChatResponse {
     private ChatType type;
     private String content;
     private Long lineId;
+    private Long recommendationType; // 1: 일반추천, 2: 패션, 3: 인테리어, 4: 테라피, 0: 일반대화
     private String imageUrl;
     private List<Chat.Recommendation> recommendations;
     private LocalDateTime timeStamp;

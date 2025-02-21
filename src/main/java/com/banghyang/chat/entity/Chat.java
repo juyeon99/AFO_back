@@ -36,6 +36,9 @@ public class Chat {
     @Field("line_id")
     private Long lineId; // 향수 추천 기준 계열 아이디
 
+    @Field("recommendation_type")
+    private Long recommendationType; // 향수 추천 타입 (1: 일반추천, 2: 패션, 3: 인테리어, 4: 테라피, 0: 일반대화)
+
     @Field("image_url")
     private String imageUrl; // 회원 채팅 이미지 입력값
 
@@ -67,11 +70,13 @@ public class Chat {
             String imageUrl,
             ChatMode mode,
             Long lineId,
+            Long recommendationType,
             List<Recommendation> recommendations
     ) {
         this.type = type;
         this.memberId = memberId;
         this.content = content;
+        this.recommendationType = recommendationType;
         this.imageUrl = imageUrl;
         this.mode = mode;
         this.lineId = lineId;
