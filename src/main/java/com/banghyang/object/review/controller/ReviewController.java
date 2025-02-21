@@ -29,6 +29,12 @@ public class ReviewController {
         return ResponseEntity.ok(reviewService.getReviewsByProductId(memberId, productId));
     }
 
+    // 제품 리뷰 요약 조회
+    @GetMapping("/summary/{productId}")
+    public ResponseEntity<String> getReviewSummary(@PathVariable Long productId) {
+        return ResponseEntity.ok(reviewService.getReviewSummary(productId));
+    }
+
     /**
      * 특정 회원이 작성한 리뷰 목록 조회
      */
