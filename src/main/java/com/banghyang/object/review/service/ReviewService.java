@@ -87,7 +87,6 @@ public class ReviewService {
     /**
      * 특정 향수의 리뷰 목록 조회
      */
-    @Cacheable(value = "productReviews", key = "'product_' + #productId")
     public List<ReviewResponse> getReviewsByProductId(Long memberId, Long productId) {
         // 제품에 해당하는 리뷰 찾기
         List<Review> reviews = reviewRepository.findByProductId(productId);
