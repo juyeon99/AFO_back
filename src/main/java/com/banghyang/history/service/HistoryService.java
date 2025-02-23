@@ -63,19 +63,26 @@ public class HistoryService {
                     .build();
             historyRepository.save(newHistoryEntity);
 
+// 채팅의 추천 속 향수 정보로 추천 엔티티 생성하기
             // 채팅의 추천 속 향수 정보로 추천 엔티티 생성하기
             targetChatEntity.getRecommendations().forEach(chatRecommendation -> {
-                Product targetProductEntity = (Product) productRepository.findByNameKr(chatRecommendation.getProductNameKr());
+                // findByNameKrSafe를 사용하여 Optional 처리
+                Product targetProductEntity = productRepository.findByNameKrSafe(chatRecommendation.getProductNameKr())
+                        .orElseThrow(() -> new EntityNotFoundException(
+                                String.format("[히스토리-서비스-생성]제품명(%s)에 해당하는 제품을 찾을 수 없습니다.",
+                                        chatRecommendation.getProductNameKr())
+                        ));
+
                 Recommendation newRecommendationEntity = Recommendation.builder()
                         .history(newHistoryEntity)
                         .product(targetProductEntity)
                         .reason(chatRecommendation.getReason())
                         .situation(chatRecommendation.getSituation())
                         .build();
+
                 recommendationRepository.save(newRecommendationEntity);
             });
-        } else {
-            throw new EntityNotFoundException("[히스토리-서비스-생성]아이디에 해당하는 채팅 엔티티를 찾을 수 없습니다.");
+
         }
     }
 
