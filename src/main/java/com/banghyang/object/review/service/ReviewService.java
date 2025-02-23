@@ -156,9 +156,8 @@ public class ReviewService {
         } else {
             try {
                 Map<String, String> response = webClient // api 요청에 webClient 사용
-                        .post()
+                        .get()
                         .uri("http://localhost:8000/review/product/" + productId + "/summary") // 요청 보낼 url
-                        .contentType(MediaType.APPLICATION_JSON) // Json 타입으로 요청 보내기
                         .retrieve()
                         .bodyToMono(new ParameterizedTypeReference<Map<String, String>>() {
                         }) // Json 응답을 Map 형식으로 파싱하여 받기
