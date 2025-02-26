@@ -26,7 +26,7 @@ public class History {
     @JoinColumn(name = "member_id")
     private Member member; // 히스토리 생성 사용자 아이디
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "line_id", referencedColumnName = "id", nullable = false)
     @JsonBackReference
     private Line line; // 히스토리 생성한 추천의 계열 아이디
