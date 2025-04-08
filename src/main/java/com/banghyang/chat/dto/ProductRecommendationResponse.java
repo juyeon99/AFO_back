@@ -18,7 +18,8 @@ public class ProductRecommendationResponse {
     @Data
     public static class Recommendation {
         private Long id;
-        private String name;
+        private String name_kr;
+        private String name_en;
         private String brand;
         private String reason;
         private String situation;

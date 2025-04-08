@@ -50,6 +50,8 @@ public class Chat {
     public static class Recommendation {
         @Field("product_name_kr")
         private String productNameKr;
+        @Field("product_name_en")
+        private String productNameEn;
         @Field("product_image_url")
         private List<String> productImageUrls;
         @Field("product_brand")

@@ -71,7 +71,7 @@ public class ChatService {
         if (userChatRequest.getImage() != null) {
             // 유저가 보낸 이미지가 있을 때의 처리
             // 유저가 입력한 이미지를 S3 에 저장하고 S3 URL 받기
-            String userInputImageS3Url = s3Service.uploadImage(userChatRequest.getImage());
+//            String userInputImageS3Url = s3Service.uploadImage(userChatRequest.getImage());
 
             // image to text model 로 전송하여 이미지 분석 결과 받기
             String imageProcessResult = getImageToTextProcessResult(userChatRequest.getImage());
@@ -81,13 +81,13 @@ public class ChatService {
                     .type(ChatType.USER)
                     .memberId(userChatRequest.getMemberId())
                     .content(userChatRequest.getContent())
-                    .imageUrl(userInputImageS3Url)
+//                    .imageUrl(userInputImageS3Url)
                     .build();
             chatRepository.save(userChat);
 
             //  이미지 분석 결과와 사용자 채팅 내용을 LLM 모델로 전송하여 향수 추천 받기
             ProductRecommendationResponse productRecommendationResponse = getProductRecommendFromLLM(
-                    imageProcessResult, userChatRequest.getContent());
+                    imageProcessResult, userChatRequest.getContent(), userChatRequest.getLanguage());
 
             if (productRecommendationResponse.getMode() == ChatMode.recommendation) {
                 log.info("이미지 ⭕, 추천모드 ⭕");
@@ -104,6 +104,7 @@ public class ChatService {
                             // 채팅에 저장될 추천 DTO 로 변환하여 반환
                             Chat.Recommendation recommendation = new Chat.Recommendation();
                             recommendation.setProductNameKr(targetProduct.getNameKr());
+                            recommendation.setProductNameEn(targetProduct.getNameEn());
                             recommendation.setProductImageUrls(productImageUrlList);
                             recommendation.setProductBrand(targetProduct.getBrand());
                             recommendation.setProductGrade(targetProduct.getGrade());
@@ -193,7 +194,7 @@ public class ChatService {
 
                 // 유저 텍스트 입력값을 LLM 모델로 전송하여 향수 추천 받기
                 ProductRecommendationResponse productRecommendationResponse = getProductRecommendFromLLM(
-                        null, userChatRequest.getContent()); // 이미지가 없으므로 입력 텍스트값만 LLM 으로 전송
+                        null, userChatRequest.getContent(), userChatRequest.getLanguage()); // 이미지가 없으므로 입력 텍스트값만 LLM 으로 전송
 
                 if (productRecommendationResponse.getMode() == ChatMode.recommendation) {
                     log.info("이미지 ❌, 추천모드 ⭕");
@@ -205,17 +206,20 @@ public class ChatService {
                                 Product targetProduct = productRepository.findById(aiRecommendation.getId())
                                         .orElseThrow(() -> new EntityNotFoundException(
                                                 "[채팅-서비스-답변]아이디에 해당하는 제품 엔티티를 찾을 수 없습니다."));
+
                                 // 찾아온 제품 정보로 제품 이미지 엔티티 리스트를 가져온 후 URL 만 추출하여 문자열 리스트로 변환
                                 List<String> productImageUrlList = productImageRepository.findByProduct(targetProduct)
                                         .stream().map(ProductImage::getUrl).toList();
                                 // 채팅에 저장될 추천 DTO 로 변환하여 반환
                                 Chat.Recommendation recommendation = new Chat.Recommendation();
                                 recommendation.setProductNameKr(targetProduct.getNameKr());
+                                recommendation.setProductNameEn(targetProduct.getNameEn());
                                 recommendation.setProductImageUrls(productImageUrlList);
                                 recommendation.setProductBrand(targetProduct.getBrand());
                                 recommendation.setProductGrade(targetProduct.getGrade());
                                 recommendation.setReason(aiRecommendation.getReason());
                                 recommendation.setSituation(aiRecommendation.getSituation());
+
                                 return recommendation;
                             }).toList();
 
@@ -261,6 +265,7 @@ public class ChatService {
                     userChatResponse.setImageUrl(generatedImageS3Url);
                     userChatResponse.setRecommendations(recommendations);
                     userChatResponse.setTimeStamp(aiChat.getTimeStamp());
+
                     // 값을 담은 userResponse 반환
                     return userChatResponse;
 
@@ -330,12 +335,13 @@ public class ChatService {
      * webClient 로 LLM API 에 향수 추천 결과 요청하는 메소드
      */
     private ProductRecommendationResponse getProductRecommendFromLLM(
-            String imageProcessResult, String userContent) {
+            String imageProcessResult, String userContent, String language) {
         try {
             // 요청 보낼 리퀘스트 생성
             Map<String, String> request = new LinkedHashMap<>();
             request.put("image_process_result", imageProcessResult);
             request.put("user_content", userContent);
+            request.put("language", language);
 
             WrappedProductRecommendationResponse wrappedResponse = webClient
                     .post()
@@ -349,37 +355,6 @@ public class ChatService {
             return wrappedResponse != null ? wrappedResponse.getResponse() : null;
         } catch (Exception e) {
             throw new RuntimeException("LLM 향수 추천 모델 호출 중 에러 발생 : " + e.getMessage());
-        }
-    }
-
-    /**
-     * LLM 에 유저 입력값을 보내서 이미지 생성 프롬프트를 요청하는 메소드
-     */
-    private String getImageGeneratePromptFromLLM(
-            String imageProcessResult, String userContent) {
-        try {
-            // 요청 보낼 리퀘스트 생성
-            Map<String, String> request = new LinkedHashMap<>();
-            request.put("user_content", userContent);
-            request.put("image_process_result", imageProcessResult);
-
-            Map<String, String> response = webClient // api 요청에 webClient 사용
-                    .post()
-                    .uri("http://localhost:8000/llm/generate-image-description") // 요청 보낼 url
-                    .contentType(MediaType.APPLICATION_JSON) // Json 타입으로 요청 보내기
-                    .bodyValue(request) // 요청 body 에 userInput 담기
-                    .retrieve()
-                    .bodyToMono(new ParameterizedTypeReference<Map<String, String>>() {
-                    }) // Json 응답을 Map 형식으로 파싱하여 받기
-                    .block(); // 동기 처리
-            if (response != null) {
-                // Map 으로 파싱해놓은 응답에서 키값으로 밸류만 반환
-                return response.get("imageGeneratePrompt");
-            } else {
-                throw new IllegalArgumentException("이미지 프롬프트 생성을 실패했습니다.");
-            }
-        } catch (Exception e) {
-            throw new RuntimeException("LLM 이미지 프롬프트 생성 모델 호출 중 에러 발생 : " + e.getMessage());
         }
     }
 

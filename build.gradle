@@ -29,6 +29,7 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok:1.18.28' // lombok
     compileOnly 'org.projectlombok:lombok' // lombok
     runtimeOnly 'com.mysql:mysql-connector-j' // mysql
+    implementation 'io.netty:netty-resolver-dns-native-macos:4.1.107.Final:osx-aarch_64' // MacOS Silicon 라이브러리 누락 문제
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher' // 필수
     testImplementation 'org.springframework.boot:spring-boot-starter-test' // Spring boot test
 }

@@ -8,4 +8,5 @@ public class UserChatRequest {
     private Long memberId;
     private String content;
     private MultipartFile image;
+    private String language;
 }
