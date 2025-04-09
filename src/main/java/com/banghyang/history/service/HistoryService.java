@@ -110,6 +110,8 @@ public class HistoryService {
                                                 new HistoryResponse.RecommendationDto();
                                         // 추천 제품 한글명 담기
                                         recommendationDto.setProductNameKr(recommendationEntity.getProduct().getNameKr());
+                                        // 추천 제품 영문명 담기
+                                        recommendationDto.setProductNameEn(recommendationEntity.getProduct().getNameEn());
                                         // 추천 제품 브랜드 담기
                                         recommendationDto.setProductBrand(recommendationEntity.getProduct().getBrand());
                                         // 추천 제품 부향률 담기

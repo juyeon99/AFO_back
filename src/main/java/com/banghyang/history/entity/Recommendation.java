@@ -18,8 +18,8 @@ public class Recommendation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id; // 추천 정보 아이디
 
-    private String reason; // 추천하는 이유
-    private String situation; // 추천하는 상황
+    private String reason; // 추천하는 이유 (TEXT 타입)
+    private String situation; // 추천하는 상황 (TEXT 타입)
     private LocalDateTime timeStamp; // 추천정보 생성일시
 
     @ManyToOne

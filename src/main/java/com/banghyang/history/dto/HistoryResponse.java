@@ -17,6 +17,7 @@ public class HistoryResponse {
     @Data
     public static class RecommendationDto {
         private String productNameKr;
+        private String productNameEn;
         private String productBrand;
         private String productGrade;
         private List<String> productImageUrls;
