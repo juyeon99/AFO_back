@@ -5,10 +5,12 @@ import com.banghyang.scentlens.dto.WrappedProductResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.List;
@@ -20,15 +22,20 @@ import java.util.List;
 public class ScentlensService {
     private final WebClient webClient;
 
-    public List<ProductResponse> getImageSearchResult(MultipartFile file) {
+    @Value("${api.base-url}")
+    private String baseUrl;
+
+    public List<ProductResponse> getImageSearchResult(MultipartFile file, String language) {
         try {
             MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
             bodyBuilder.part("file", file.getResource());
+            bodyBuilder.part("language", language)
+                    .contentType(MediaType.TEXT_PLAIN);
 
             WrappedProductResponse wrappedResponse = webClient.post()
-                    .uri("http://localhost:8000/scentlens/get_image_search_result")
+                    .uri(baseUrl + "/scentlens/get_image_search_result")
                     .contentType(MediaType.MULTIPART_FORM_DATA)
-                    .bodyValue(bodyBuilder.build())
+                    .body(BodyInserters.fromMultipartData(bodyBuilder.build()))
                     .retrieve()
                     .bodyToMono(WrappedProductResponse.class)
                     .block();

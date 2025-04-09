@@ -23,8 +23,9 @@ public class ScentlensController {
     private final ScentlensService scentlensService;
 
     @PostMapping("/get_image_search_result")
-    public ResponseEntity<Map<String, List<ProductResponse>>> getImageSearchResult(@RequestParam("file") MultipartFile file) {
-        List<ProductResponse> products = scentlensService.getImageSearchResult(file);
+    public ResponseEntity<Map<String, List<ProductResponse>>> getImageSearchResult(@RequestParam("file") MultipartFile file,
+                                                                                   @RequestParam("language") String language) {
+        List<ProductResponse> products = scentlensService.getImageSearchResult(file, language);
 
         Map<String, List<ProductResponse>> response = new HashMap<>();
         response.put("products", products);
