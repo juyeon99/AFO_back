@@ -5,7 +5,9 @@ import lombok.Data;
 
 @Data
 public class DiffuserKeywordRequest {
+    @JsonProperty("language")
+    private String language;
 
-    @JsonProperty("user_input")
-    private String userInput;
+    @JsonProperty("category_index")
+    private String categoryIndex;
 }

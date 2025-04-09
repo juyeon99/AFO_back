@@ -24,7 +24,7 @@ public class DiffuserKeywordController {
      */
     @PostMapping
     public ResponseEntity<DiffuserKeywordResponse> recommendDiffusers(@RequestBody DiffuserKeywordRequest request) {
-        log.info("Received diffuser recommendation request: {}", request.getUserInput());
+        log.info("Received diffuser recommendation request: {}", request.getCategoryIndex());
         return ResponseEntity.ok(diffuserKeywordService.recommendDiffusers(request));
     }
 }
